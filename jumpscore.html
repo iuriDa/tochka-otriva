@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>JumpScore · Реалтайм судейство</title>
+<meta name="description" content="Система реалтайм судейства соревнований по спортивной скакалке. Точка Отрыва.">
+<meta name="author" content="Данильченко Юрий Леонидович">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Mulish:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --accent: #FF6B2B;
+  --accent-d: #D4521A;
+  --accent-s: rgba(255,107,43,.14);
+  --blue: #3B82F6;
+  --blue-s: rgba(59,130,246,.12);
+  --green: #22C55E;
+  --red: #EF4444;
+  --amber: #F59E0B;
+  --purple: #A855F7;
+  --font: 'Mulish', system-ui, sans-serif;
+  --head: 'Russo One', sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+  --r: 10px; --r-lg: 16px; --r-xl: 22px; --r-pill: 999px;
+}
+[data-theme="dark"] {
+  --bg: #0B0C10; --sur: #14161E; --sur2: #1A1D28; --sur3: #20243A;
+  --bor: #252A3D; --bor2: #2E344F;
+  --tx: #E8ECFF; --tx2: #7880A0; --tx3: #3D4460;
+  --sh: 0 2px 8px rgba(0,0,0,.4); --sh2: 0 6px 24px rgba(0,0,0,.55); --sh3: 0 14px 48px rgba(0,0,0,.7);
+  --score-bg: linear-gradient(145deg,#1a1d28,#0d1020);
+}
+[data-theme="light"] {
+  --bg: #F0F2FA; --sur: #FFFFFF; --sur2: #F4F6FF; --sur3: #ECEFFE;
+  --bor: #DDE1F0; --bor2: #C8CEEA;
+  --tx: #0D1026; --tx2: #5E6685; --tx3: #A0A8C0;
+  --sh: 0 2px 8px rgba(0,0,0,.06); --sh2: 0 6px 24px rgba(0,0,0,.08); --sh3: 0 14px 48px rgba(0,0,0,.12);
+  --score-bg: linear-gradient(145deg,#e8eeff,#d8e4ff);
+}
+*,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html { font-size: 16px; }
+body { height: 100dvh; overflow: hidden; background: var(--bg); color: var(--tx); font-family: var(--font); line-height: 1.5; transition: background .2s, color .2s; }
+.screen { display: none; flex-direction: column; height: 100dvh; overflow: hidden; }
+.screen.active { display: flex; }
+.scroll { overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.row { display: flex; align-items: center; }
+.row-b { display: flex; align-items: center; justify-content: space-between; }
+.col { display: flex; flex-direction: column; }
+.center { display: flex; align-items: center; justify-content: center; }
+.f1 { flex: 1; } .w100 { width: 100%; } .gap2 { gap: 6px; } .gap3 { gap: 10px; }
+.hidden { display: none !important; }
+.mono { font-family: var(--mono); }
+
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 0 14px; height: 40px; border-radius: var(--r); border: none; cursor: pointer; font-family: var(--font); font-size: .84rem; font-weight: 700; transition: all .14s; user-select: none; white-space: nowrap; }
+.btn:active { transform: scale(.96); }
+.btn:disabled { opacity: .4; cursor: not-allowed; transform: none !important; }
+.btn-a { background: var(--accent); color: #fff; box-shadow: 0 2px 12px rgba(255,107,43,.28); }
+.btn-a:hover:not(:disabled) { background: var(--accent-d); }
+.btn-b { background: var(--blue); color: #fff; }
+.btn-b:hover:not(:disabled) { background: #2563EB; }
+.btn-d { background: var(--red); color: #fff; }
+.btn-d:hover:not(:disabled) { background: #DC2626; }
+.btn-g { background: transparent; color: var(--tx); border: 1.5px solid var(--bor); }
+.btn-g:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+.btn-s { background: var(--sur2); color: var(--tx2); border: 1px solid var(--bor); }
+.btn-s:hover:not(:disabled) { color: var(--tx); }
+.btn-sm { height: 32px; padding: 0 11px; font-size: .73rem; border-radius: 7px; }
+.btn-lg { height: 50px; font-size: .97rem; border-radius: var(--r-lg); padding: 0 22px; }
+.btn-full { width: 100%; }
+.btn-icon { width: 38px; height: 38px; padding: 0; border-radius: var(--r); flex-shrink: 0; }
+
+.field { display: flex; flex-direction: column; gap: 5px; }
+.lbl { font-size: .68rem; font-weight: 800; color: var(--tx2); text-transform: uppercase; letter-spacing: .08em; }
+.inp { width: 100%; padding: 0 13px; height: 46px; background: var(--sur2); border: 1.5px solid var(--bor); border-radius: var(--r); color: var(--tx); font-family: var(--font); font-size: .94rem; outline: none; transition: border-color .2s, box-shadow .2s; -webkit-appearance: none; }
+.inp:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-s); }
+.inp::placeholder { color: var(--tx3); }
+select.inp { cursor: pointer; }
+
+.pill { display: flex; align-items: center; background: var(--sur2); border: 1px solid var(--bor); border-radius: var(--r-pill); padding: 3px; gap: 2px; }
+.pill button { border: none; background: transparent; cursor: pointer; font-size: .68rem; font-weight: 800; color: var(--tx2); padding: 3px 9px; border-radius: var(--r-pill); transition: all .15s; font-family: var(--font); }
+.pill button.on { background: var(--accent); color: #fff; }
+
+.modal-ov { position: fixed; inset: 0; background: rgba(0,0,0,.72); backdrop-filter: blur(8px); z-index: 900; display: none; align-items: center; justify-content: center; padding: 18px; }
+.modal-ov.open { display: flex; }
+.modal { background: var(--sur); border: 1px solid var(--bor2); border-radius: var(--r-xl); padding: 22px; max-width: 360px; width: 100%; box-shadow: var(--sh3); animation: up .2s ease; }
+.modal-ico { font-size: 1.5rem; margin-bottom: 7px; }
+.modal-ttl { font-family: var(--head); font-size: .95rem; margin-bottom: 6px; }
+.modal-txt { font-size: .83rem; color: var(--tx2); line-height: 1.6; margin-bottom: 16px; }
+.modal-act { display: flex; gap: 8px; justify-content: flex-end; }
+
+#toast { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%) translateY(70px); background: var(--sur2); border: 1px solid var(--bor2); color: var(--tx); border-radius: var(--r-pill); padding: 9px 20px; font-size: .81rem; font-weight: 600; z-index: 800; transition: transform .26s cubic-bezier(.34,1.56,.64,1); pointer-events: none; white-space: nowrap; box-shadow: var(--sh2); }
+#toast.show { transform: translateX(-50%) translateY(0); }
+
+@keyframes up { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .5; } }
+::-webkit-scrollbar { width: 3px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: var(--bor2); border-radius: 2px; }
+
+.topbar { display: flex; align-items: center; justify-content: space-between; padding: 0 13px; height: 52px; flex-shrink: 0; background: var(--sur); border-bottom: 1px solid var(--bor); }
+.tb-l { display: flex; flex-direction: column; gap: 1px; }
+.tb-title { font-family: var(--head); font-size: .88rem; letter-spacing: .01em; }
+.tb-sub { font-size: .65rem; color: var(--tx2); }
+.tb-r { display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
+
+.sec-hd { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.sec-ttl { font-size: .67rem; font-weight: 800; text-transform: uppercase; letter-spacing: .09em; color: var(--tx2); }
+
+.badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: var(--r-pill); font-size: .63rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
+.bg { background: rgba(34,197,94,.1); color: var(--green); border: 1px solid rgba(34,197,94,.22); }
+.br { background: rgba(239,68,68,.1); color: var(--red); border: 1px solid rgba(239,68,68,.22); }
+.ba { background: rgba(255,107,43,.1); color: var(--accent); border: 1px solid rgba(255,107,43,.22); }
+.bb { background: rgba(59,130,246,.1); color: var(--blue); border: 1px solid rgba(59,130,246,.22); }
+.bam { background: rgba(245,158,11,.1); color: var(--amber); border: 1px solid rgba(245,158,11,.22); }
+.bgy { background: var(--sur2); color: var(--tx2); border: 1px solid var(--bor); }
+
+/* LOADING */
+#screen-loading { background: var(--bg); }
+.loading-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; }
+.loading-logo { font-family: var(--head); font-size: .82rem; width: 56px; height: 56px; border-radius: 16px; background: var(--accent); display: flex; align-items: center; justify-content: center; color: #fff; line-height: 1.2; text-align: center; box-shadow: 0 6px 22px rgba(255,107,43,.35); animation: pulse 1.4s ease-in-out infinite; }
+.loading-txt { font-size: .8rem; color: var(--tx2); }
+
+/* DASHBOARD */
+.dash-body { flex: 1; overflow-y: auto; padding: 12px 13px; display: flex; flex-direction: column; gap: 13px; }
+.profile-strip { background: var(--sur); border: 1px solid var(--bor); border-radius: var(--r-lg); padding: 13px 15px; display: flex; align-items: center; gap: 11px; }
+.ps-ava { width: 40px; height: 40px; border-radius: 11px; background: var(--accent); display: flex; align-items: center; justify-content: center; font-family: var(--head); font-size: .72rem; color: #fff; flex-shrink: 0; }
+.ps-info { flex: 1; min-width: 0; }
+.ps-name { font-weight: 800; font-size: .9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ps-role { font-size: .7rem; color: var(--tx2); margin-top: 1px; }
+
+.enter-code-card { background: linear-gradient(135deg, var(--sur) 0%, var(--sur2) 100%); border: 1.5px solid var(--accent); border-radius: var(--r-xl); padding: 20px 16px; position: relative; overflow: hidden; box-shadow: 0 4px 20px rgba(255,107,43,.1); }
+.enter-code-card::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 80% -10%, rgba(255,107,43,.08), transparent 60%); pointer-events: none; }
+.ec-title { font-family: var(--head); font-size: .82rem; color: var(--tx2); margin-bottom: 4px; position: relative; z-index: 1; }
+.ec-hint { font-size: .76rem; color: var(--tx2); margin-bottom: 14px; position: relative; z-index: 1; line-height: 1.5; }
+.code-inp-big { width: 100%; text-align: center; font-family: var(--mono); font-size: 2rem; font-weight: 700; letter-spacing: .18em; height: 64px; background: var(--sur2); border: 2px solid var(--bor); border-radius: var(--r-lg); color: var(--tx); outline: none; padding: 0 16px; transition: border-color .2s, box-shadow .2s; position: relative; z-index: 1; }
+.code-inp-big:focus { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-s); }
+.code-hints { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; position: relative; z-index: 1; }
+.code-hint-row { display: flex; align-items: center; gap: 9px; padding: 8px 12px; background: var(--sur); border: 1px solid var(--bor); border-radius: var(--r); font-size: .78rem; color: var(--tx2); transition: all .15s; }
+.code-hint-row.active { border-color: var(--accent); color: var(--tx); background: var(--accent-s); }
+.chb { font-family: var(--mono); font-size: .72rem; font-weight: 700; padding: 2px 8px; border-radius: var(--r-pill); background: var(--sur2); color: var(--tx2); flex-shrink: 0; }
+.chb-hj { background: rgba(168,85,247,.12); color: var(--purple); }
+.chb-fj { background: rgba(34,197,94,.12); color: var(--green); }
+
+.ev-list { display: flex; flex-direction: column; gap: 7px; }
+.ev-card { background: var(--sur); border: 1px solid var(--bor); border-radius: var(--r-lg); padding: 11px 13px; display: flex; align-items: center; gap: 11px; cursor: pointer; transition: all .18s; box-shadow: var(--sh); }
+.ev-card:hover { box-shadow: var(--sh2); border-color: var(--bor2); }
+.ev-card.closed { opacity: .6; cursor: default; }
+.ev-card.closed:hover { box-shadow: var(--sh); border-color: var(--bor); }
+.ev-ico { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+.ev-ico-hj { background: rgba(168,85,247,.12); }
+.ev-ico-fj { background: rgba(34,197,94,.12); }
+.ev-info { flex: 1; min-width: 0; }
+.ev-name { font-weight: 700; font-size: .88rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ev-meta { font-size: .7rem; color: var(--tx2); margin-top: 1px; }
+.empty-state { text-align: center; color: var(--tx2); padding: 18px 12px; font-size: .82rem; }
+
+/* HJ SETUP */
+.setup-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+.setup-box { width: 100%; max-width: 380px; display: flex; flex-direction: column; gap: 16px; }
+.setup-brand { text-align: center; margin-bottom: 4px; }
+.setup-icon { display: inline-flex; align-items: center; justify-content: center; width: 56px; height: 56px; border-radius: 16px; background: var(--purple); font-size: 1.5rem; margin-bottom: 10px; box-shadow: 0 6px 22px rgba(168,85,247,.35); }
+.setup-title { font-family: var(--head); font-size: 1.1rem; }
+.setup-sub { font-size: .78rem; color: var(--tx2); margin-top: 3px; }
+.setup-form { background: var(--sur); border: 1px solid var(--bor); border-radius: var(--r-xl); padding: 18px; display: flex; flex-direction: column; gap: 12px; box-shadow: var(--sh2); }
+
+/* HJ DASHBOARD */
+.hj-body { flex: 1; overflow-y: auto; padding: 11px 12px; }
+.hj-topbar-fc { display: flex; align-items: center; gap: 4px; background: var(--sur2); border: 1px solid var(--bor); border-radius: var(--r); padding: 4px 11px; }
+.hj-fc-lbl { font-size: .6rem; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: var(--tx2); }
+.hj-fc-val { font-family: var(--mono); font-size: 1.1rem; font-weight: 700; color: var(--accent); letter-spacing: .12em; margin-left: 6px; }
+
+.st-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 10px; }
+@media (max-width: 480px) { .st-grid { grid-template-columns: 1fr; } }
+
+.st-card { background: var(--sur); border: 1px solid var(--bor); border-radius: var(--r-xl); overflow: hidden; position: relative; min-height: 178px; display: flex; flex-direction: column; box-shadow: var(--sh); transition: box-shadow .2s; }
+.st-card:hover { box-shadow: var(--sh2); }
+.st-flag-bg { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: .18; transition: opacity .3s; }
+.st-hd { position: absolute; top: 0; left: 0; right: 0; padding: 9px 11px; display: flex; align-items: center; justify-content: space-between; z-index: 2; }
+.st-num-badge { background: rgba(0,0,0,.35); backdrop-filter: blur(4px); color: #fff; border-radius: 6px; font-size: .63rem; font-weight: 800; padding: 3px 8px; letter-spacing: .04em; font-family: var(--head); }
+[data-theme="light"] .st-num-badge { background: rgba(255,255,255,.6); color: var(--tx); }
+.st-rdy { background: var(--green); color: #fff; border-radius: 6px; font-size: .62rem; font-weight: 800; padding: 3px 8px; text-transform: uppercase; letter-spacing: .04em; }
+.st-body { position: relative; z-index: 2; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px 12px 10px; gap: 1px; }
+.st-ath { font-size: .94rem; font-weight: 700; color: var(--tx); text-align: center; min-height: 20px; }
+.st-score { font-family: var(--mono); font-size: 3.4rem; font-weight: 800; line-height: 1; color: var(--tx); }
+.st-judge { font-size: .67rem; color: var(--tx2); margin-top: 2px; }
+.st-vacant { font-size: .78rem; color: var(--tx3); font-style: italic; }
+.st-ft { position: relative; z-index: 2; padding: 6px 9px; display: flex; justify-content: flex-end; gap: 5px; border-top: 1px solid var(--bor); }
+
+/* FJ STATION SELECT */
+.st-sel-body { flex: 1; overflow-y: auto; padding: 12px 13px; }
+.st-sel-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; }
+.stn-tile { background: var(--sur); border: 1.5px solid var(--bor); border-radius: var(--r-xl); padding: 16px 10px; text-align: center; cursor: pointer; transition: all .18s; display: flex; flex-direction: column; align-items: center; gap: 2px; box-shadow: var(--sh); }
+.stn-tile:not(.occ):hover { border-color: var(--accent); background: var(--sur2); transform: translateY(-2px); box-shadow: var(--sh2); }
+.stn-tile:not(.occ):active { transform: scale(.96); }
+.stn-tile.occ { opacity: .45; cursor: not-allowed; }
+.stn-num { font-family: var(--mono); font-size: 1.9rem; font-weight: 700; color: var(--accent); }
+.stn-lbl { font-size: .67rem; color: var(--tx2); font-weight: 600; }
+.stn-judge { font-size: .63rem; color: var(--tx3); margin-top: 1px; }
+
+/* FJ SCORING */
+.fj-body { flex: 1; overflow-y: auto; display: flex; flex-direction: column; padding: 11px 13px; gap: 10px; }
+.ath-row { display: flex; gap: 8px; align-items: flex-end; }
+.flag-btn { height: 46px; min-width: 58px; border-radius: var(--r); background: var(--sur2); border: 1.5px solid var(--bor); font-size: 1.25rem; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: border-color .2s; flex-shrink: 0; }
+.flag-btn:hover { border-color: var(--accent); }
+.flag-search-box { background: var(--sur); border: 1px solid var(--bor2); border-radius: var(--r-lg); padding: 10px; box-shadow: var(--sh3); position: relative; z-index: 10; animation: up .18s ease; }
+.flag-list { max-height: 160px; overflow-y: auto; display: flex; flex-direction: column; gap: 1px; margin-top: 6px; }
+.flag-item { display: flex; align-items: center; gap: 8px; padding: 7px 9px; border-radius: 7px; cursor: pointer; font-size: .82rem; transition: background .1s; }
+.flag-item:hover { background: var(--sur2); }
+.fi-em { font-size: 1.15rem; flex-shrink: 0; }
+
+.score-area { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; min-height: 220px; }
+.score-ring { width: min(248px, 65vw); height: min(248px, 65vw); border-radius: 50%; background: var(--score-bg); border: 3px solid var(--accent); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; user-select: none; box-shadow: 0 0 0 8px var(--accent-s), var(--sh2); transition: transform .08s, box-shadow .08s; position: relative; overflow: hidden; }
+.score-ring::after { content: ''; position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(circle at 35% 35%, rgba(255,255,255,.07), transparent 55%); pointer-events: none; }
+.score-ring:active { transform: scale(.92); box-shadow: 0 0 0 16px rgba(255,107,43,.1), var(--sh3); }
+.score-num { font-family: var(--mono); font-size: clamp(3.6rem, 16vw, 6.5rem); font-weight: 800; color: var(--tx); line-height: 1; }
+.score-hint { font-size: .57rem; color: var(--tx3); text-transform: uppercase; letter-spacing: .1em; margin-top: 3px; }
+.fj-bottom { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+/* TV MODE */
+#screen-tv { background: #060709; padding: 0; }
+.tv-grid { flex: 1; display: grid; gap: 2px; overflow: hidden; }
+.tv-cell { background: #090b12; position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.tv-fbg { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: .12; }
+.tv-sn { position: absolute; top: 12px; left: 14px; font-family: var(--head); font-size: .8rem; font-weight: 700; color: rgba(255,255,255,.2); }
+.tv-rdy { position: absolute; top: 12px; right: 14px; background: var(--green); color: #fff; font-size: .66rem; font-weight: 800; padding: 3px 9px; border-radius: 6px; text-transform: uppercase; letter-spacing: .04em; }
+.tv-ath { font-family: var(--head); font-size: clamp(1rem, 3vw, 2.2rem); font-weight: 700; color: rgba(255,255,255,.78); letter-spacing: .04em; margin-bottom: 4px; text-align: center; padding: 0 18px; }
+.tv-sc { font-family: var(--mono); font-size: clamp(4.5rem, 14vw, 11rem); font-weight: 800; color: #fff; line-height: .9; }
+.tv-jn { position: absolute; bottom: 12px; font-size: .68rem; color: rgba(255,255,255,.28); font-family: var(--head); }
+.tv-exit { position: fixed; bottom: 14px; right: 14px; z-index: 10; }
+.tv-empty { color: rgba(255,255,255,.08); font-family: var(--head); font-size: 1.4rem; margin: auto; }
+</style>
+</head>
+<body>
+
+<!-- ЗАГРУЗКА -->
+<div id="screen-loading" class="screen active">
+  <div class="loading-wrap">
+    <div class="loading-logo">ТОЧКА<br>ОТРЫВА</div>
+    <div class="loading-txt">JumpScore · Загрузка...</div>
+  </div>
+</div>
+
+<!-- ДАШБОРД -->
+<div id="screen-dash" class="screen">
+  <div class="topbar">
+    <div class="tb-l">
+      <div class="tb-title">JumpScore</div>
+      <div class="tb-sub">Реалтайм судейство</div>
+    </div>
+    <div class="tb-r">
+      <div class="pill" id="tp-dash"><button onclick="setTheme('dark')">🌙</button><button onclick="setTheme('light')">☀️</button></div>
+      <button class="btn btn-g btn-sm" onclick="goHome()">← Кабинет</button>
+      <button class="btn btn-s btn-sm" onclick="confirmLogout()">Выход</button>
+    </div>
+  </div>
+  <div class="dash-body scroll">
+    <div class="profile-strip">
+      <div class="ps-ava" id="ps-ava">ЮД</div>
+      <div class="ps-info">
+        <div class="ps-name" id="ps-name">—</div>
+        <div class="ps-role" id="ps-role">Судья</div>
+      </div>
+      <span class="badge" id="ps-plan-badge">Free</span>
+    </div>
+
+    <div class="enter-code-card">
+      <div class="ec-title">Ввести код события</div>
+      <div class="ec-hint">6 цифр — Главный судья&ensp;·&ensp;4 цифры — Боковой судья</div>
+      <input id="code-inp" class="code-inp-big" type="number" placeholder="— — — —" maxlength="6"
+        oninput="onCodeInput()" onkeydown="if(event.key==='Enter')submitCode()">
+      <div class="code-hints">
+        <div class="code-hint-row" id="hint-hj">
+          <span class="chb chb-hj">6 цифр</span>
+          Главный судья — создаёт событие
+        </div>
+        <div class="code-hint-row" id="hint-fj">
+          <span class="chb chb-fj">4 цифры</span>
+          Боковой судья — присоединяется к событию
+        </div>
+      </div>
+      <button id="code-submit-btn" class="btn btn-a btn-full" style="margin-top:12px;position:relative;z-index:1" onclick="submitCode()" disabled>Продолжить →</button>
+    </div>
+
+    <div>
+      <div class="sec-hd">
+        <div class="sec-ttl">👁️ Как главный судья</div>
+        <button class="btn btn-s btn-sm" onclick="loadDash()">↺</button>
+      </div>
+      <div id="hj-ev-list" class="ev-list"><div class="empty-state">Загрузка...</div></div>
+    </div>
+    <div>
+      <div class="sec-hd"><div class="sec-ttl">✋ Как боковой судья</div></div>
+      <div id="fj-ev-list" class="ev-list"><div class="empty-state">Загрузка...</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- HJ SETUP -->
+<div id="screen-hj-setup" class="screen">
+  <div class="topbar">
+    <div class="tb-l"><div class="tb-title">Новое событие</div></div>
+    <div class="tb-r"><button class="btn btn-g btn-sm" onclick="goDash()">← Назад</button></div>
+  </div>
+  <div class="setup-wrap">
+    <div class="setup-box">
+      <div class="setup-brand">
+        <div class="setup-icon">👁️</div>
+        <div class="setup-title">Создать событие</div>
+        <div class="setup-sub">Настройте параметры соревнования</div>
+      </div>
+      <div class="setup-form">
+        <div class="field">
+          <label class="lbl">Название события</label>
+          <input id="ev-name" class="inp" type="text" placeholder="Региональный чемпионат 2025">
+        </div>
+        <div class="field">
+          <label class="lbl">Количество станций (1–8)</label>
+          <select id="ev-st-cnt" class="inp">
+            <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+            <option value="4" selected>4</option><option value="5">5</option>
+            <option value="6">6</option><option value="7">7</option><option value="8">8</option>
+          </select>
+        </div>
+        <button class="btn btn-a btn-full btn-lg" onclick="hjCreate()">Создать событие →</button>
+      </div>
+      <div class="row" style="justify-content:center;gap:5px;font-size:.81rem;color:var(--tx2);cursor:pointer" onclick="goDash()">
+        ← <span>Вернуться назад</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- HJ DASHBOARD -->
+<div id="screen-hj" class="screen">
+  <div class="topbar">
+    <div class="tb-l">
+      <div class="tb-title" id="hj-title">Событие</div>
+      <div class="tb-sub">Главный судья</div>
+    </div>
+    <div class="tb-r">
+      <div class="hj-topbar-fc">
+        <div class="hj-fc-lbl">Код</div>
+        <div class="hj-fc-val" id="hj-fc">——</div>
+      </div>
+      <button class="btn btn-s btn-icon" onclick="toggleTV()" title="TV режим">📺</button>
+      <button class="btn btn-s btn-icon" onclick="confirmResetAll()">↺</button>
+      <div class="pill" id="tp-hj"><button onclick="setTheme('dark')">🌙</button><button onclick="setTheme('light')">☀️</button></div>
+      <button class="btn btn-g btn-sm" onclick="hjExit()">Выход</button>
+    </div>
+  </div>
+  <div class="hj-body scroll">
+    <div id="hj-grid" class="st-grid"></div>
+  </div>
+</div>
+
+<!-- TV -->
+<div id="screen-tv" class="screen">
+  <div id="tv-grid" class="tv-grid"></div>
+  <button class="btn btn-g btn-sm tv-exit" onclick="toggleTV()">← Выйти из TV</button>
+</div>
+
+<!-- FJ STATION SELECT -->
+<div id="screen-fj-st" class="screen">
+  <div class="topbar">
+    <div class="tb-l">
+      <div class="tb-title">Выберите станцию</div>
+      <div class="tb-sub" id="fj-sel-ev-name"></div>
+    </div>
+    <div class="tb-r">
+      <div class="pill" id="tp-fjs"><button onclick="setTheme('dark')">🌙</button><button onclick="setTheme('light')">☀️</button></div>
+      <button class="btn btn-g btn-sm" onclick="fjExit()">← Выход</button>
+    </div>
+  </div>
+  <div class="st-sel-body scroll">
+    <div id="fj-sel-grid" class="st-sel-grid"></div>
+  </div>
+</div>
+
+<!-- FJ SCORING -->
+<div id="screen-fj" class="screen">
+  <div class="topbar">
+    <div class="tb-l">
+      <div class="tb-title" id="fj-st-lbl">Станция 1</div>
+      <div class="tb-sub" id="fj-judge-lbl"></div>
+    </div>
+    <div class="tb-r">
+      <div class="pill" id="tp-fj"><button onclick="setTheme('dark')">🌙</button><button onclick="setTheme('light')">☀️</button></div>
+      <button class="btn btn-g btn-sm" onclick="confirmFjExit()">Выход</button>
+    </div>
+  </div>
+  <div class="fj-body scroll">
+    <div class="ath-row">
+      <div class="field f1">
+        <label class="lbl">Имя спортсмена</label>
+        <input id="fj-ath" class="inp" type="text" placeholder="Имя спортсмена..." oninput="pushAthlete()">
+      </div>
+      <div class="col gap2">
+        <label class="lbl">Флаг</label>
+        <div class="flag-btn" id="fj-flag-btn" onclick="toggleFlags()">🏳️</div>
+      </div>
+    </div>
+    <div id="flag-search-box" class="flag-search-box hidden">
+      <input id="flag-search" class="inp" type="text" placeholder="Поиск страны..." oninput="filterFlags(this.value)" style="height:38px;font-size:.84rem">
+      <div id="flag-list" class="flag-list"></div>
+    </div>
+    <div class="score-area">
+      <div class="score-ring" id="score-ring" onclick="addScore()" ontouchstart="onScoreTouch(event)">
+        <span class="score-num" id="fj-score">0</span>
+        <span class="score-hint">нажмите для счёта</span>
+      </div>
+      <button class="btn btn-s btn-sm" onclick="subScore()" style="min-width:64px">−1</button>
+    </div>
+    <div class="fj-bottom">
+      <button class="btn btn-s" onclick="confirmFjReset()">↺ Сбросить счёт</button>
+      <button class="btn btn-s" onclick="fjClear()">✕ Очистить</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div id="modal" class="modal-ov">
+  <div class="modal">
+    <div class="modal-ico" id="m-ico">⚠️</div>
+    <div class="modal-ttl" id="m-ttl"></div>
+    <div class="modal-txt" id="m-txt"></div>
+    <div class="modal-act">
+      <button class="btn btn-g btn-sm" onclick="closeModal()">Отмена</button>
+      <button class="btn btn-sm" id="m-ok"></button>
+    </div>
+  </div>
+</div>
+<div id="toast"></div>
+
+<script>
+/*
+ * JumpScore · Реалтайм судейство соревнований · jumpscore.html
+ * Версия: 2.0.0
+ * Дата: 2025
+ *
+ * Автор: Данильченко Юрий Леонидович
+ * Дата рождения: 21.07.1988
+ * Организация: Спортивно-цирковая студия «Точка Отрыва»
+ * Крым
+ * Telegram: @iuriletics
+ * Телефон: +7 916 837 42 59
+ *
+ * Все права защищены. Несанкционированное копирование,
+ * распространение и использование данного программного
+ * обеспечения запрещено без письменного разрешения автора.
+ */
+
+const SB_URL = 'https://anuapnxrwqcsucisehrr.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFudWFwbnhyd3Fjc3VjaXNlaHJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE3ODQzMjEsImV4cCI6MjA4NzM2MDMyMX0.U1TKmw6KtHmNnhnzwRfbfVERPl6ybSsayUWkM6Whqn4';
+
+let _sb, _user = null, _profile = null;
+let _theme = localStorage.getItem('to_theme') || 'dark';
+let _hjEvId = null, _fjEvId = null, _fjSt = null;
+let _tvMode = false, _subs = [];
+let _selFlag = null;
+
+/* UTILS */
+function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+function setTheme(t) { _theme = t; localStorage.setItem('to_theme', t); document.documentElement.setAttribute('data-theme', t); document.querySelectorAll('[id^="tp-"]').forEach(p => { p.querySelectorAll('button').forEach((b, i) => b.classList.toggle('on', i === (t === 'dark' ? 0 : 1))); }); }
+function toast(msg) { const el = document.getElementById('toast'); el.textContent = msg; el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 2600); }
+function modal(ico, ttl, txt, okLabel, onOk, danger = true) {
+  document.getElementById('m-ico').textContent = ico;
+  document.getElementById('m-ttl').textContent = ttl;
+  document.getElementById('m-txt').textContent = txt;
+  const btn = document.getElementById('m-ok');
+  btn.textContent = okLabel;
+  btn.className = 'btn btn-sm ' + (danger ? 'btn-d' : 'btn-a');
+  btn.onclick = () => { closeModal(); onOk(); };
+  document.getElementById('modal').classList.add('open');
+}
+function closeModal() { document.getElementById('modal').classList.remove('open'); }
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function fmtDate(d) { return new Date(d).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' }); }
+function initials(n) { return (n || '?').split(' ').slice(0,2).map(w => w[0]||'').join('').toUpperCase() || '?'; }
+function haptic(ms) { if (navigator.vibrate) navigator.vibrate(ms || 8); }
+function clearSubs() { _subs.forEach(s => { try { _sb.removeChannel(s); } catch(e) {} }); _subs = []; }
+function addSub(ch) { _subs.push(ch); }
+function saveSess(role, evId, stNum) { localStorage.setItem('js_sess', JSON.stringify({ role, evId, stNum: stNum || null })); }
+function clearSess() { localStorage.removeItem('js_sess'); }
+function flagEmoji(c) { if (!c) return '🏳️'; return c.toUpperCase().replace(/./g, x => String.fromCodePoint(0x1F1E0 + x.charCodeAt(0) - 65)); }
+
+/* INIT */
+window.onerror = function(msg) { console.error('[JumpScore]', msg); return false; };
+
+document.addEventListener('DOMContentLoaded', async () => {
+  setTheme(_theme);
+  _sb = window.supabase.createClient(SB_URL, SB_KEY);
+  const { data: { session } } = await _sb.auth.getSession();
+  if (!session) { window.location.href = './index.html'; return; }
+  _user = session.user;
+  const { data, error } = await _sb.from('profiles').select('*').eq('id', _user.id).single();
+  if (error || !data) {
+    const name = _user.user_metadata?.full_name || _user.email.split('@')[0];
+    await _sb.from('profiles').upsert({ id: _user.id, full_name: name });
+    const { data: fresh } = await _sb.from('profiles').select('*').eq('id', _user.id).single();
+    _profile = fresh;
+  } else {
+    _profile = data;
+  }
+  if (_profile?.is_blocked) { toast('🔒 Аккаунт заблокирован'); setTimeout(() => window.location.href = './index.html', 2000); return; }
+  await restoreSession();
+  _sb.auth.onAuthStateChange((ev) => { if (ev === 'SIGNED_OUT') window.location.href = './index.html'; });
+});
+
+async function restoreSession() {
+  const raw = localStorage.getItem('js_sess');
+  if (raw) {
+    try {
+      const s = JSON.parse(raw);
+      const { data: ev } = await _sb.from('events').select('*').eq('id', s.evId).eq('closed', false).single();
+      if (ev) {
+        if (s.role === 'hj') { _hjEvId = s.evId; await openHJ(); return; }
+        if (s.role === 'fj') {
+          _fjEvId = s.evId;
+          if (s.stNum) {
+            const { data: st } = await _sb.from('stations').select('*').eq('event_id', s.evId).eq('station_num', s.stNum).eq('judge_id', _user.id).single();
+            if (st) { _fjSt = s.stNum; await openFJScoring(st); return; }
+          }
+          await showFJStations(); return;
+        }
+      }
+    } catch(e) {}
+    clearSess();
+  }
+  await goDash();
+}
+
+function goHome() { window.location.href = './index.html'; }
+function confirmLogout() { modal('🚪', 'Выйти из аккаунта?', 'Вам нужно будет войти снова.', 'Выйти', () => _sb.auth.signOut(), false); }
+
+/* DASHBOARD */
+async function goDash() {
+  clearSubs(); clearSess(); _hjEvId = null; _fjEvId = null; _fjSt = null;
+  showScreen('screen-dash');
+  const name = _profile?.full_name || _user.email;
+  const isPro = _profile?.is_pro;
+  document.getElementById('ps-ava').textContent = initials(name);
+  document.getElementById('ps-name').textContent = name;
+  document.getElementById('ps-role').textContent = isPro ? 'Pro аккаунт' : 'Free аккаунт';
+  const pb = document.getElementById('ps-plan-badge');
+  pb.textContent = isPro ? 'Pro' : 'Free';
+  pb.className = 'badge ' + (isPro ? 'ba' : 'bgy');
+  await loadDash();
+}
+window.goDash = goDash;
+
+async function loadDash() {
+  const hjList = document.getElementById('hj-ev-list');
+  const fjList = document.getElementById('fj-ev-list');
+  hjList.innerHTML = '<div class="empty-state">Загрузка...</div>';
+  fjList.innerHTML = '<div class="empty-state">Загрузка...</div>';
+
+  const { data: hjEvs } = await _sb.from('events').select('*').eq('created_by', _user.id).order('created_at', { ascending: false });
+  hjList.innerHTML = (hjEvs || []).length
+    ? (hjEvs || []).map(ev => `
+        <div class="ev-card ${ev.closed ? 'closed' : ''}" onclick="${!ev.closed ? `resumeHJ('${ev.id}')` : ''}">
+          <div class="ev-ico ev-ico-hj">👁️</div>
+          <div class="ev-info">
+            <div class="ev-name">${esc(ev.name)}</div>
+            <div class="ev-meta">${ev.station_count} ст. · Код: <span class="mono">${ev.floor_code}</span> · ${fmtDate(ev.created_at)}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+            <span class="badge ${ev.closed ? 'br' : 'bg'}">${ev.closed ? 'Закрыто' : 'Активно'}</span>
+            ${!ev.closed ? '<span style="color:var(--accent);font-size:1rem">›</span>' : ''}
+          </div>
+        </div>`).join('')
+    : '<div class="empty-state">Вы ещё не проводили событий как главный судья</div>';
+
+  const { data: parts } = await _sb.from('event_participations').select('*, events(*)').eq('user_id', _user.id).eq('role', 'floor_judge').order('joined_at', { ascending: false });
+  const seen = new Set(), uniq = [];
+  (parts || []).forEach(p => { if (!seen.has(p.event_id)) { seen.add(p.event_id); uniq.push(p); } });
+  fjList.innerHTML = uniq.length
+    ? uniq.map(p => {
+        const ev = p.events; if (!ev) return '';
+        return `<div class="ev-card ${ev.closed ? 'closed' : ''}" onclick="${!ev.closed ? `resumeFJ('${ev.id}')` : ''}">
+          <div class="ev-ico ev-ico-fj">✋</div>
+          <div class="ev-info">
+            <div class="ev-name">${esc(ev.name)}</div>
+            <div class="ev-meta">${ev.station_count} ст. · ${fmtDate(ev.created_at)}</div>
+          </div>
+          <span class="badge ${ev.closed ? 'br' : 'bg'}" style="flex-shrink:0">${ev.closed ? 'Закрыто' : 'Активно'}</span>
+        </div>`;
+      }).join('')
+    : '<div class="empty-state">Вы ещё не участвовали как боковой судья</div>';
+}
+window.loadDash = loadDash;
+
+/* CODE INPUT */
+window.onCodeInput = function() {
+  const val = document.getElementById('code-inp').value.trim();
+  const len = val.length;
+  document.getElementById('code-submit-btn').disabled = (len !== 4 && len !== 6);
+  document.getElementById('hint-hj').classList.toggle('active', len === 6);
+  document.getElementById('hint-fj').classList.toggle('active', len === 4);
+};
+
+let _submitting = false;
+window.submitCode = async function() {
+  if (_submitting) return;
+  _submitting = true;
+  const btn = document.getElementById('code-submit-btn');
+  if (btn) { btn.disabled = true; btn.textContent = '...'; }
+  try {
+    const val = document.getElementById('code-inp').value.trim();
+    if (val.length === 6) {
+      const code = await getDailyCode();
+      if (val !== code) { toast('❌ Неверный код'); return; }
+      if (!_profile?.is_pro) { modal('⭐', 'Требуется Pro', 'Создание событий как главный судья доступно только для Pro аккаунта. Обратитесь к администратору.', 'Понятно', () => {}, false); return; }
+      document.getElementById('code-inp').value = '';
+      showScreen('screen-hj-setup');
+    } else if (val.length === 4) {
+      const { data: ev, error } = await _sb.from('events').select('*').eq('floor_code', val).eq('closed', false).maybeSingle();
+      if (error || !ev) { toast('❌ Неверный код или событие закрыто'); return; }
+      _fjEvId = ev.id;
+      document.getElementById('code-inp').value = '';
+      await _sb.from('event_participations').upsert(
+        { event_id: _fjEvId, user_id: _user.id, role: 'floor_judge' },
+        { onConflict: 'event_id,user_id,role', ignoreDuplicates: true }
+      );
+      await showFJStations();
+    }
+  } finally {
+    _submitting = false;
+    if (btn) { btn.disabled = false; btn.textContent = 'Продолжить →'; }
+  }
+};
+
+/* RESUME */
+window.resumeHJ = async function(evId) { _hjEvId = evId; await openHJ(); };
+window.resumeFJ = async function(evId) {
+  _fjEvId = evId;
+  const { data: st } = await _sb.from('stations').select('*').eq('event_id', evId).eq('judge_id', _user.id).single();
+  if (st) { _fjSt = st.station_num; await openFJScoring(st); }
+  else await showFJStations();
+};
+
+/* DAILY CODE */
+async function getDailyCode() {
+  const today = new Date().toISOString().slice(0, 10);
+  const { data } = await _sb.from('daily_codes').select('code').eq('date', today).single();
+  if (data) return data.code;
+  const code = String(Math.floor(100000 + Math.random() * 900000));
+  await _sb.from('daily_codes').upsert({ date: today, code });
+  return code;
+}
+
+/* HEAD JUDGE */
+window.hjCreate = async function() {
+  const name = document.getElementById('ev-name').value.trim();
+  if (!name) { toast('Введите название события'); return; }
+  const cnt = parseInt(document.getElementById('ev-st-cnt').value);
+  const fc = String(Math.floor(1000 + Math.random() * 9000));
+  const { data: ev, error } = await _sb.from('events').insert({ name, station_count: cnt, floor_code: fc, closed: false, created_by: _user.id }).select().single();
+  if (error) { toast('Ошибка создания события'); return; }
+  const stns = Array.from({ length: cnt }, (_, i) => ({ event_id: ev.id, station_num: i + 1, score: 0, judge_id: null, judge_name: null, athlete_name: null, flag_code: null, ready: false }));
+  await _sb.from('stations').insert(stns);
+  _hjEvId = ev.id;
+  await openHJ();
+};
+
+async function openHJ() {
+  const { data: ev } = await _sb.from('events').select('*').eq('id', _hjEvId).single();
+  document.getElementById('hj-title').textContent = ev.name;
+  document.getElementById('hj-fc').textContent = ev.floor_code;
+  saveSess('hj', _hjEvId);
+  clearSubs();
+  showScreen('screen-hj');
+  await renderHJ();
+  const ch = _sb.channel('hj-' + _hjEvId)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'stations', filter: `event_id=eq.${_hjEvId}` }, () => { renderHJ(); if (_tvMode) renderTV(); })
+    .subscribe();
+  addSub(ch);
+}
+
+async function renderHJ() {
+  const { data: stns } = await _sb.from('stations').select('*').eq('event_id', _hjEvId).order('station_num');
+  const grid = document.getElementById('hj-grid');
+  if (!stns) return;
+  grid.innerHTML = stns.map(st => {
+    const has = !!st.judge_name;
+    const fbg = st.flag_code ? `style="background-image:url('https://flagcdn.com/w160/${st.flag_code}.png')"` : '';
+    return `<div class="st-card">
+      ${st.flag_code ? `<div class="st-flag-bg" ${fbg}></div>` : ''}
+      <div class="st-hd">
+        <div class="st-num-badge">Ст. ${st.station_num}</div>
+        ${st.ready ? `<div class="st-rdy">✓ Готово</div>` : (st.flag_code ? `<span style="font-size:1.3rem;position:relative;z-index:2">${flagEmoji(st.flag_code)}</span>` : '')}
+      </div>
+      <div class="st-body">
+        <div class="st-ath">${esc(st.athlete_name || '')}</div>
+        <div class="st-score">${has ? st.score : '—'}</div>
+        <div class="${has ? 'st-judge' : 'st-vacant'}">${has ? esc(st.judge_name) : 'Свободно'}</div>
+      </div>
+      ${has ? `<div class="st-ft">
+        <button class="btn btn-s btn-sm" onclick="hjEject(${st.station_num},'${esc(st.judge_name)}','${st.judge_id}')" title="Выгнать">↩</button>
+        <button class="btn btn-d btn-sm" onclick="hjRemove(${st.station_num},'${esc(st.judge_name)}','${st.judge_id}')" title="Удалить">✕</button>
+      </div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+window.hjEject = function(num, name, jid) {
+  modal('↩', 'Выгнать со станции?', `«${name}» вернётся к выбору станции.`, 'Выгнать', async () => {
+    await _sb.from('stations').update({ judge_id: null, judge_name: null, score: 0, athlete_name: null, flag_code: null, ready: false }).eq('event_id', _hjEvId).eq('station_num', num);
+    await _sb.from('judge_events').insert({ judge_id: jid, action: 'eject_station', event_id: _hjEvId });
+  });
+};
+
+window.hjRemove = function(num, name, jid) {
+  modal('🚫', 'Удалить судью?', `«${name}» будет удалён из события.`, 'Удалить', async () => {
+    await _sb.from('stations').update({ judge_id: null, judge_name: null, score: 0, athlete_name: null, flag_code: null, ready: false }).eq('event_id', _hjEvId).eq('station_num', num);
+    await _sb.from('judge_events').insert({ judge_id: jid, action: 'remove', event_id: _hjEvId });
+  });
+};
+
+window.confirmResetAll = function() {
+  modal('↺', 'Сбросить все станции?', 'Счёт, имена и флаги всех станций будут очищены.', 'Сбросить', async () => {
+    await _sb.from('stations').update({ score: 0, athlete_name: null, flag_code: null, ready: false }).eq('event_id', _hjEvId);
+    toast('↺ Сброшено');
+  });
+};
+
+window.hjExit = function() {
+  modal('🚪', 'Выйти из события?', 'Событие останется активным. Вернуться можно через кабинет.', 'Выйти', () => goDash(), false);
+};
+
+/* TV */
+window.toggleTV = async function() {
+  _tvMode = !_tvMode;
+  if (_tvMode) { showScreen('screen-tv'); await renderTV(); }
+  else showScreen('screen-hj');
+};
+
+async function renderTV() {
+  const { data: stns } = await _sb.from('stations').select('*').eq('event_id', _hjEvId).order('station_num');
+  const active = (stns || []).filter(s => !!s.judge_name);
+  const grid = document.getElementById('tv-grid');
+  const n = active.length;
+  const cols = n <= 1 ? 1 : n <= 2 ? 2 : n <= 4 ? 2 : n <= 6 ? 3 : 4;
+  grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+  grid.innerHTML = active.map(st => `
+    <div class="tv-cell">
+      ${st.flag_code ? `<div class="tv-fbg" style="background-image:url('https://flagcdn.com/w320/${st.flag_code}.png')"></div>` : ''}
+      <div class="tv-sn">С${st.station_num}</div>
+      ${st.ready ? `<div class="tv-rdy">✓ Готово</div>` : ''}
+      <div class="tv-ath">${esc(st.athlete_name || '')}</div>
+      <div class="tv-sc">${st.score}</div>
+      <div class="tv-jn">${esc(st.judge_name)}</div>
+    </div>`).join('') || '<div class="tv-empty">Ожидание судей...</div>';
+}
+
+/* FLOOR JUDGE */
+async function showFJStations() {
+  const { data: ev } = await _sb.from('events').select('name').eq('id', _fjEvId).single();
+  document.getElementById('fj-sel-ev-name').textContent = ev?.name || '';
+  saveSess('fj', _fjEvId, null);
+  clearSubs();
+  showScreen('screen-fj-st');
+  await renderStGrid();
+  const ch = _sb.channel('fjs-' + _fjEvId)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'stations', filter: `event_id=eq.${_fjEvId}` }, async () => { await renderStGrid(); })
+    .subscribe();
+  addSub(ch);
+  listenJE();
+}
+
+async function renderStGrid() {
+  const { data: stns } = await _sb.from('stations').select('*').eq('event_id', _fjEvId).order('station_num');
+  document.getElementById('fj-sel-grid').innerHTML = (stns || []).map(st => {
+    const occ = !!st.judge_name;
+    return `<div class="stn-tile ${occ ? 'occ' : ''}" ${!occ ? `onclick="selStation(${st.station_num})"` : ''}>
+      <div class="stn-num">${st.station_num}</div>
+      <div class="stn-lbl">${occ ? 'Занято' : 'Свободно'}</div>
+      <div class="stn-j">${occ ? esc(st.judge_name) : ''}</div>
+    </div>`;
+  }).join('');
+}
+
+let _selectingStation = false;
+window.selStation = async function(num) {
+  if (_selectingStation) return;
+  _selectingStation = true;
+  try {
+    const { data: st, error } = await _sb.from('stations')
+      .update({ judge_id: _user.id, judge_name: _profile?.full_name || _user.email })
+      .eq('event_id', _fjEvId).eq('station_num', num).is('judge_id', null)
+      .select().single();
+    if (error || !st) { toast('Станция уже занята, выберите другую'); return; }
+    _fjSt = num;
+    clearSubs();
+    await openFJScoring(st);
+  } finally {
+    _selectingStation = false;
+  }
+};
+
+async function openFJScoring(st) {
+  document.getElementById('fj-st-lbl').textContent = 'Станция ' + _fjSt;
+  document.getElementById('fj-judge-lbl').textContent = _profile?.full_name || _user.email;
+  document.getElementById('fj-score').textContent = st.score || 0;
+  document.getElementById('fj-ath').value = st.athlete_name || '';
+  _selFlag = st.flag_code || null;
+  document.getElementById('fj-flag-btn').textContent = _selFlag ? flagEmoji(_selFlag) : '🏳️';
+  saveSess('fj', _fjEvId, _fjSt);
+  showScreen('screen-fj');
+  const ch = _sb.channel('fjsc-' + _fjEvId + '-' + _fjSt)
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'stations', filter: `event_id=eq.${_fjEvId}` }, payload => {
+      if (payload.new.station_num === _fjSt) {
+        document.getElementById('fj-score').textContent = payload.new.score;
+        if (!payload.new.athlete_name) document.getElementById('fj-ath').value = '';
+        if (!payload.new.flag_code) { _selFlag = null; document.getElementById('fj-flag-btn').textContent = '🏳️'; }
+      }
+    }).subscribe();
+  addSub(ch);
+  listenJE();
+}
+
+function listenJE() {
+  if (!_user) return;
+  const ch = _sb.channel('je-' + _user.id)
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'judge_events', filter: `judge_id=eq.${_user.id}` }, payload => {
+      clearSubs(); clearSess();
+      if (payload.new.action === 'remove') { toast('Вас удалили из события'); setTimeout(goDash, 1800); }
+      else if (payload.new.action === 'eject_station') { toast('Вас выгнали со станции'); _fjSt = null; setTimeout(showFJStations, 1800); }
+    }).subscribe();
+  addSub(ch);
+}
+
+window.fjExit = function() {
+  modal('🚪', 'Выйти из события?', 'Вы вернётесь в кабинет.', 'Выйти', async () => {
+    if (_fjSt) await _sb.from('stations').update({ judge_id: null, judge_name: null, score: 0, athlete_name: null, flag_code: null, ready: false }).eq('event_id', _fjEvId).eq('station_num', _fjSt);
+    _fjSt = null; clearSubs(); clearSess(); goDash();
+  }, false);
+};
+
+window.confirmFjExit = function() {
+  modal('🚪', 'Покинуть станцию?', 'Станция станет доступна другим судьям.', 'Покинуть', async () => {
+    await _sb.from('stations').update({ judge_id: null, judge_name: null, score: 0, athlete_name: null, flag_code: null, ready: false }).eq('event_id', _fjEvId).eq('station_num', _fjSt);
+    _fjSt = null; clearSubs(); saveSess('fj', _fjEvId, null); showFJStations();
+  }, false);
+};
+
+window.addScore = function() { haptic(8); const el = document.getElementById('fj-score'); const n = (parseInt(el.textContent) || 0) + 1; el.textContent = n; pushScore(n); };
+window.onScoreTouch = function(e) { e.preventDefault(); addScore(); };
+window.subScore = function() { const el = document.getElementById('fj-score'); const c = parseInt(el.textContent) || 0; if (c <= 0) return; const n = c - 1; el.textContent = n; pushScore(n); haptic(12); };
+
+let _scoreTimer;
+function pushScore(v) { clearTimeout(_scoreTimer); _scoreTimer = setTimeout(async () => { await _sb.from('stations').update({ score: v }).eq('event_id', _fjEvId).eq('station_num', _fjSt); }, 120); }
+window.pushAthlete = async function() { await _sb.from('stations').update({ athlete_name: document.getElementById('fj-ath').value || null }).eq('event_id', _fjEvId).eq('station_num', _fjSt); };
+window.confirmFjReset = function() { modal('↺', 'Сбросить счёт?', 'Счёт на этой станции обнулится.', 'Сбросить', async () => { document.getElementById('fj-score').textContent = '0'; await _sb.from('stations').update({ score: 0 }).eq('event_id', _fjEvId).eq('station_num', _fjSt); }); };
+window.fjClear = async function() { document.getElementById('fj-ath').value = ''; _selFlag = null; document.getElementById('fj-flag-btn').textContent = '🏳️'; await _sb.from('stations').update({ athlete_name: null, flag_code: null }).eq('event_id', _fjEvId).eq('station_num', _fjSt); };
+
+/* FLAGS */
+const COUNTRIES = [
+  {n:'Россия',e:'Russia',c:'ru'},{n:'США',e:'United States',c:'us'},{n:'Китай',e:'China',c:'cn'},{n:'Германия',e:'Germany',c:'de'},{n:'Франция',e:'France',c:'fr'},{n:'Великобритания',e:'United Kingdom',c:'gb'},{n:'Испания',e:'Spain',c:'es'},{n:'Италия',e:'Italy',c:'it'},{n:'Япония',e:'Japan',c:'jp'},{n:'Южная Корея',e:'South Korea',c:'kr'},{n:'Австралия',e:'Australia',c:'au'},{n:'Канада',e:'Canada',c:'ca'},{n:'Бразилия',e:'Brazil',c:'br'},{n:'Аргентина',e:'Argentina',c:'ar'},{n:'Нидерланды',e:'Netherlands',c:'nl'},{n:'Польша',e:'Poland',c:'pl'},{n:'Украина',e:'Ukraine',c:'ua'},{n:'Беларусь',e:'Belarus',c:'by'},{n:'Казахстан',e:'Kazakhstan',c:'kz'},{n:'Узбекистан',e:'Uzbekistan',c:'uz'},{n:'Азербайджан',e:'Azerbaijan',c:'az'},{n:'Армения',e:'Armenia',c:'am'},{n:'Грузия',e:'Georgia',c:'ge'},{n:'Швеция',e:'Sweden',c:'se'},{n:'Норвегия',e:'Norway',c:'no'},{n:'Финляндия',e:'Finland',c:'fi'},{n:'Дания',e:'Denmark',c:'dk'},{n:'Швейцария',e:'Switzerland',c:'ch'},{n:'Австрия',e:'Austria',c:'at'},{n:'Бельгия',e:'Belgium',c:'be'},{n:'Португалия',e:'Portugal',c:'pt'},{n:'Греция',e:'Greece',c:'gr'},{n:'Турция',e:'Turkey',c:'tr'},{n:'Израиль',e:'Israel',c:'il'},{n:'ОАЭ',e:'UAE',c:'ae'},{n:'Индия',e:'India',c:'in'},{n:'Индонезия',e:'Indonesia',c:'id'},{n:'Таиланд',e:'Thailand',c:'th'},{n:'Вьетнам',e:'Vietnam',c:'vn'},{n:'Сингапур',e:'Singapore',c:'sg'},{n:'Египет',e:'Egypt',c:'eg'},{n:'ЮАР',e:'South Africa',c:'za'},{n:'Чехия',e:'Czech Republic',c:'cz'},{n:'Румыния',e:'Romania',c:'ro'},{n:'Венгрия',e:'Hungary',c:'hu'},{n:'Сербия',e:'Serbia',c:'rs'},{n:'Хорватия',e:'Croatia',c:'hr'},{n:'Болгария',e:'Bulgaria',c:'bg'},{n:'Словакия',e:'Slovakia',c:'sk'},{n:'Литва',e:'Lithuania',c:'lt'},{n:'Латвия',e:'Latvia',c:'lv'},{n:'Молдова',e:'Moldova',c:'md'},{n:'Кыргызстан',e:'Kyrgyzstan',c:'kg'},{n:'Монголия',e:'Mongolia',c:'mn'},{n:'Иран',e:'Iran',c:'ir'},{n:'Ирландия',e:'Ireland',c:'ie'},{n:'Колумбия',e:'Colombia',c:'co'},{n:'Чили',e:'Chile',c:'cl'},{n:'Перу',e:'Peru',c:'pe'},{n:'Ямайка',e:'Jamaica',c:'jm'},{n:'Куба',e:'Cuba',c:'cu'},{n:'Новая Зеландия',e:'New Zealand',c:'nz'},{n:'Тайвань',e:'Taiwan',c:'tw'},{n:'Непал',e:'Nepal',c:'np'},{n:'Черногория',e:'Montenegro',c:'me'},{n:'Маврикий',e:'Mauritius',c:'mu'},
+];
+
+window.toggleFlags = function() {
+  const box = document.getElementById('flag-search-box');
+  box.classList.toggle('hidden');
+  if (!box.classList.contains('hidden')) { document.getElementById('flag-search').value = ''; filterFlags(''); setTimeout(() => document.getElementById('flag-search').focus(), 80); }
+};
+
+window.filterFlags = function(q) {
+  const lo = q.toLowerCase();
+  const filtered = q ? COUNTRIES.filter(c => c.n.toLowerCase().includes(lo) || c.e.toLowerCase().includes(lo)) : COUNTRIES;
+  document.getElementById('flag-list').innerHTML = filtered.slice(0, 60).map(c =>
+    `<div class="flag-item" onclick="selectFlag('${c.c}')"><span class="fi-em">${flagEmoji(c.c)}</span><span>${c.n}</span></div>`
+  ).join('');
+};
+
+window.selectFlag = async function(code) {
+  _selFlag = code;
+  document.getElementById('fj-flag-btn').textContent = flagEmoji(code);
+  document.getElementById('flag-search-box').classList.add('hidden');
+  if (_fjSt) await _sb.from('stations').update({ flag_code: code }).eq('event_id', _fjEvId).eq('station_num', _fjSt);
+};
+
+document.addEventListener('click', e => {
+  const box = document.getElementById('flag-search-box');
+  if (!box || box.classList.contains('hidden')) return;
+  if (!e.target.closest('#flag-search-box') && !e.target.closest('#fj-flag-btn')) box.classList.add('hidden');
+});
+</script>
+</body>
+</html>

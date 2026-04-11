@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Точка Подсчёта · Судейский Калькулятор</title>
+<meta name="description" content="Профессиональный судейский калькулятор вольных выступлений по спортивной скакалке. IJRU.">
+<meta name="author" content="Данильченко Юрий Леонидович">
+<meta name="theme-color" content="#0B0C10" id="meta-theme">
+<link rel="manifest" href="./manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Точка Подсчёта">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Mulish:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --accent: #FF6B2B;
+  --accent-d: #D4521A;
+  --accent-s: rgba(255,107,43,.14);
+  --green: #22C55E;
+  --red: #EF4444;
+  --amber: #F59E0B;
+  --yellow: #EAB308;
+  --purple: #A855F7;
+  --blue: #3B82F6;
+  --font: 'Mulish', system-ui, sans-serif;
+  --head: 'Russo One', sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+  --r: 10px;
+  --r-lg: 16px;
+  --r-xl: 22px;
+  --r-pill: 999px;
+}
+[data-theme="dark"] {
+  --bg: #0B0C10;
+  --sur: #14161E;
+  --sur2: #1A1D28;
+  --sur3: #20243A;
+  --bor: #252A3D;
+  --bor2: #2E344F;
+  --tx: #E8ECFF;
+  --tx2: #7880A0;
+  --tx3: #3D4460;
+  --sh: 0 2px 8px rgba(0,0,0,.4);
+  --sh2: 0 6px 24px rgba(0,0,0,.55);
+  --sh3: 0 14px 48px rgba(0,0,0,.7);
+  --lv1: #22C55E; --lv2: #84CC16; --lv3: #EAB308;
+  --lv4: #F97316; --lv5: #EF4444; --lv6: #A855F7;
+}
+[data-theme="light"] {
+  --bg: #F0F2FA;
+  --sur: #FFFFFF;
+  --sur2: #F4F6FF;
+  --sur3: #ECEFFE;
+  --bor: #DDE1F0;
+  --bor2: #C8CEEA;
+  --tx: #0D1026;
+  --tx2: #5E6685;
+  --tx3: #A0A8C0;
+  --sh: 0 2px 8px rgba(0,0,0,.06);
+  --sh2: 0 6px 24px rgba(0,0,0,.08);
+  --sh3: 0 14px 48px rgba(0,0,0,.12);
+  --lv1: #16A34A; --lv2: #65A30D; --lv3: #CA8A04;
+  --lv4: #EA580C; --lv5: #DC2626; --lv6: #9333EA;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html { font-size: 16px; }
+body { height: 100dvh; overflow: hidden; background: var(--bg); color: var(--tx); font-family: var(--font); line-height: 1.5; transition: background .2s, color .2s; }
+.screen { display: none; flex-direction: column; height: 100dvh; overflow: hidden; }
+.screen.active { display: flex; }
+.scroll { overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.row { display: flex; align-items: center; }
+.row-b { display: flex; align-items: center; justify-content: space-between; }
+.f1 { flex: 1; }
+.hidden { display: none !important; }
+.mono { font-family: var(--mono); }
+
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 0 14px; height: 40px; border-radius: var(--r); border: none; cursor: pointer; font-family: var(--font); font-size: .84rem; font-weight: 700; transition: all .14s; user-select: none; white-space: nowrap; }
+.btn:active { transform: scale(.96); }
+.btn:disabled { opacity: .4; cursor: not-allowed; transform: none !important; }
+.btn-a { background: var(--accent); color: #fff; box-shadow: 0 2px 12px rgba(255,107,43,.28); }
+.btn-a:hover:not(:disabled) { background: var(--accent-d); }
+.btn-d { background: var(--red); color: #fff; }
+.btn-d:hover:not(:disabled) { background: #DC2626; }
+.btn-g { background: transparent; color: var(--tx); border: 1.5px solid var(--bor); }
+.btn-g:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+.btn-s { background: var(--sur2); color: var(--tx2); border: 1px solid var(--bor); }
+.btn-s:hover:not(:disabled) { color: var(--tx); }
+.btn-sm { height: 32px; padding: 0 11px; font-size: .73rem; border-radius: 7px; }
+.btn-full { width: 100%; }
+.btn-lg { height: 50px; font-size: .97rem; border-radius: var(--r-lg); }
+
+.inp { width: 100%; padding: 0 13px; height: 46px; background: var(--sur2); border: 1.5px solid var(--bor); border-radius: var(--r); color: var(--tx); font-family: var(--font); font-size: .94rem; outline: none; transition: border-color .2s, box-shadow .2s; -webkit-appearance: none; }
+.inp:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-s); }
+.inp::placeholder { color: var(--tx3); }
+
+.pill { display: flex; align-items: center; background: var(--sur2); border: 1px solid var(--bor); border-radius: var(--r-pill); padding: 3px; gap: 2px; }
+.pill button { border: none; background: transparent; cursor: pointer; font-size: .68rem; font-weight: 800; color: var(--tx2); padding: 3px 9px; border-radius: var(--r-pill); transition: all .15s; font-family: var(--font); }
+.pill button.on { background: var(--accent); color: #fff; }
+
+.modal-ov { position: fixed; inset: 0; background: rgba(0,0,0,.72); backdrop-filter: blur(8px); z-index: 900; display: none; align-items: center; justify-content: center; padding: 18px; }
+.modal-ov.open { display: flex; }
+.modal { background: var(--sur); border: 1px solid var(--bor2); border-radius: var(--r-xl); padding: 22px; max-width: 340px; width: 100%; box-shadow: var(--sh3); animation: up .2s ease; }
+.modal-ico { font-size: 1.5rem; margin-bottom: 7px; }
+.modal-ttl { font-family: var(--head); font-size: .95rem; margin-bottom: 6px; }
+.modal-txt { font-size: .83rem; color: var(--tx2); line-height: 1.6; margin-bottom: 16px; }
+.modal-act { display: flex; gap: 8px; justify-content: flex-end; }
+
+#toast { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%) translateY(70px); background: var(--sur2); border: 1px solid var(--bor2); color: var(--tx); border-radius: var(--r-pill); padding: 9px 20px; font-size: .81rem; font-weight: 600; z-index: 800; transition: transform .26s cubic-bezier(.34,1.56,.64,1); pointer-events: none; white-space: nowrap; box-shadow: var(--sh2); }
+#toast.show { transform: translateX(-50%) translateY(0); }
+
+@keyframes up { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+::-webkit-scrollbar { width: 3px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: var(--bor2); border-radius: 2px; }
+
+/* TOPBAR */
+.topbar { display: flex; align-items: center; justify-content: space-between; padding: 0 13px; height: 52px; flex-shrink: 0; background: var(--sur); border-bottom: 1px solid var(--bor); }
+.tb-l { display: flex; flex-direction: column; gap: 1px; }
+.tb-title { font-family: var(--head); font-size: .88rem; letter-spacing: .01em; }
+.tb-sub { font-size: .65rem; color: var(--tx2); }
+.tb-r { display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
+
+/* DISPLAY BAR */
+.disp-bar { background: var(--sur); border-bottom: 1px solid var(--bor); padding: 0 13px; height: 52px; display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.disp-score { font-family: var(--mono); font-size: 1.7rem; font-weight: 700; min-width: 54px; transition: color .2s; }
+.disp-detail { flex: 1; display: flex; flex-direction: column; gap: 0px; }
+.disp-row { display: flex; align-items: center; gap: 5px; font-size: .69rem; color: var(--tx2); line-height: 1.6; }
+.disp-val { font-family: var(--mono); font-weight: 700; color: var(--tx); font-size: .72rem; }
+.disp-pen { color: var(--red) !important; }
+
+/* TAB BAR */
+.calc-tabs { display: flex; background: var(--sur); border-bottom: 1px solid var(--bor); flex-shrink: 0; }
+.ctab { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 8px 4px 7px; border: none; background: transparent; cursor: pointer; font-family: var(--font); transition: all .14s; border-bottom: 2px solid transparent; gap: 2px; }
+.ctab-ico { font-size: 1rem; }
+.ctab-lbl { font-size: .59rem; font-weight: 800; color: var(--tx2); text-transform: uppercase; letter-spacing: .04em; }
+.ctab.on { border-bottom-color: var(--accent); }
+.ctab.on .ctab-lbl { color: var(--accent); }
+
+/* BODY */
+.calc-body { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.panel { display: none; padding: 11px 13px; flex-direction: column; gap: 10px; }
+.panel.on { display: flex; }
+
+/* COMPLEXITY */
+.lvl-zero { width: 100%; height: 50px; border-radius: var(--r); border: 1.5px dashed var(--bor2); background: transparent; cursor: pointer; font-family: var(--font); font-size: .86rem; font-weight: 700; color: var(--tx2); display: flex; align-items: center; justify-content: center; gap: 8px; transition: all .14s; }
+.lvl-zero:hover { border-color: var(--red); color: var(--red); }
+.lvl-zero:active { transform: scale(.97); }
+
+.lvl-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
+.lvl-btn { height: 62px; border-radius: var(--r-lg); border: 2px solid var(--bor); background: var(--sur); cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; transition: all .14s; position: relative; overflow: hidden; }
+.lvl-btn::before { content: ''; position: absolute; inset: 0; opacity: 0; transition: opacity .14s; }
+.lvl-btn:active { transform: scale(.91); }
+.lvl-num { font-family: var(--head); font-size: 1.45rem; position: relative; z-index: 1; transition: transform .1s; }
+.lvl-label { font-size: .57rem; font-weight: 800; color: var(--tx2); text-transform: uppercase; letter-spacing: .03em; position: relative; z-index: 1; }
+.lvl-btn[data-lv="1"] { border-color: rgba(34,197,94,.28); } .lvl-btn[data-lv="1"]::before { background: rgba(34,197,94,.06); } .lvl-btn[data-lv="1"] .lvl-num { color: var(--lv1); }
+.lvl-btn[data-lv="2"] { border-color: rgba(132,204,22,.28); } .lvl-btn[data-lv="2"]::before { background: rgba(132,204,22,.06); } .lvl-btn[data-lv="2"] .lvl-num { color: var(--lv2); }
+.lvl-btn[data-lv="3"] { border-color: rgba(234,179,8,.28); }  .lvl-btn[data-lv="3"]::before { background: rgba(234,179,8,.06); }  .lvl-btn[data-lv="3"] .lvl-num { color: var(--lv3); }
+.lvl-btn[data-lv="4"] { border-color: rgba(249,115,22,.28); } .lvl-btn[data-lv="4"]::before { background: rgba(249,115,22,.06); } .lvl-btn[data-lv="4"] .lvl-num { color: var(--lv4); }
+.lvl-btn[data-lv="5"] { border-color: rgba(239,68,68,.28); }  .lvl-btn[data-lv="5"]::before { background: rgba(239,68,68,.06); }  .lvl-btn[data-lv="5"] .lvl-num { color: var(--lv5); }
+.lvl-btn[data-lv="6"] { border-color: rgba(168,85,247,.28); } .lvl-btn[data-lv="6"]::before { background: rgba(168,85,247,.07); } .lvl-btn[data-lv="6"] .lvl-num { color: var(--lv6); }
+.lvl-btn:hover::before { opacity: 1; }
+
+.seq-card { background: var(--sur); border: 1px solid var(--bor); border-radius: var(--r); padding: 10px 12px; }
+.seq-lbl { font-size: .64rem; font-weight: 800; color: var(--tx2); text-transform: uppercase; letter-spacing: .07em; margin-bottom: 6px; }
+.seq-chips { display: flex; flex-wrap: wrap; gap: 4px; min-height: 22px; }
+.chip { font-family: var(--mono); font-size: .72rem; font-weight: 700; padding: 2px 7px; border-radius: 5px; }
+.chip-0 { background: rgba(148,163,184,.12); color: #94a3b8; border: 1px solid rgba(148,163,184,.2); }
+.chip-1 { background: rgba(34,197,94,.1); color: var(--lv1); border: 1px solid rgba(34,197,94,.18); }
+.chip-2 { background: rgba(132,204,22,.1); color: var(--lv2); border: 1px solid rgba(132,204,22,.18); }
+.chip-3 { background: rgba(234,179,8,.1); color: var(--lv3); border: 1px solid rgba(234,179,8,.18); }
+.chip-4 { background: rgba(249,115,22,.1); color: var(--lv4); border: 1px solid rgba(249,115,22,.18); }
+.chip-5 { background: rgba(239,68,68,.1); color: var(--lv5); border: 1px solid rgba(239,68,68,.18); }
+.chip-6 { background: rgba(168,85,247,.1); color: var(--lv6); border: 1px solid rgba(168,85,247,.18); }
+
+.stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
+.stat-box { background: var(--sur); border: 1px solid var(--bor); border-radius: var(--r); padding: 10px; text-align: center; }
+.stat-v { font-family: var(--mono); font-size: 1.35rem; font-weight: 700; color: var(--accent); }
+.stat-l { font-size: .6rem; font-weight: 800; color: var(--tx2); text-transform: uppercase; letter-spacing: .04em; margin-top: 2px; }
+
+.act-row { display: flex; gap: 7px; }
+
+.counts-card { background: var(--sur); border: 1px solid var(--bor); border-radius: var(--r); padding: 10px 12px; }
+.counts-lbl { font-size: .64rem; font-weight: 800; color: var(--tx2); text-transform: uppercase; letter-spacing: .07em; margin-bottom: 7px; }
+.counts-list { list-style: none; display: flex; flex-direction: column; gap: 5px; }
+.counts-list li { display: flex; align-items: center; gap: 7px; font-size: .78rem; }
+.lv-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+/* PRESENTATION */
+.pres-section { background: var(--sur); border: 1px solid var(--bor); border-radius: var(--r-lg); overflow: hidden; }
+.pres-section-hd { display: flex; align-items: center; justify-content: space-between; padding: 11px 13px; border-bottom: 1px solid var(--bor); }
+.pres-section-name { font-family: var(--head); font-size: .74rem; display: flex; align-items: center; gap: 7px; }
+.pres-section-max { font-size: .68rem; color: var(--tx2); }
+.pres-section-score { font-family: var(--mono); font-size: .88rem; font-weight: 700; color: var(--accent); }
+.crit-list { padding: 8px 11px; display: flex; flex-direction: column; gap: 6px; }
+.crit-item { display: flex; align-items: center; gap: 8px; }
+.crit-name { flex: 1; font-size: .8rem; line-height: 1.35; color: var(--tx); }
+.pm-wrap { display: flex; gap: 3px; flex-shrink: 0; }
+.pm-btn { width: 34px; height: 34px; border-radius: 7px; border: 1.5px solid var(--bor); background: var(--sur2); cursor: pointer; font-size: .82rem; font-weight: 800; font-family: var(--font); color: var(--tx2); transition: all .13s; display: flex; align-items: center; justify-content: center; }
+.pm-btn:active { transform: scale(.88); }
+.pm-btn.minus { background: rgba(239,68,68,.1); border-color: var(--red); color: var(--red); }
+.pm-btn.check { background: rgba(34,197,94,.1); border-color: var(--green); color: var(--green); }
+.pm-btn.plus  { background: rgba(255,107,43,.1); border-color: var(--accent); color: var(--accent); }
+
+.pres-total { background: var(--sur2); border: 1px solid var(--bor); border-radius: var(--r); padding: 10px 13px; display: flex; align-items: center; justify-content: space-between; }
+.pres-total-lbl { font-size: .74rem; font-weight: 700; color: var(--tx2); }
+.pres-total-val { font-family: var(--mono); font-size: 1.05rem; font-weight: 700; color: var(--accent); }
+.pres-range { font-size: .68rem; color: var(--tx2); font-family: var(--mono); }
+
+/* TECHNICAL */
+.disc-tabs { display: flex; gap: 4px; background: var(--sur2); border: 1px solid var(--bor); border-radius: var(--r); padding: 3px; }
+.disc-tab { flex: 1; height: 32px; border: none; background: transparent; cursor: pointer; font-family: var(--font); font-size: .72rem; font-weight: 800; color: var(--tx2); border-radius: 7px; transition: all .14s; }
+.disc-tab.on { background: var(--accent); color: #fff; }
+
+.disc-panel { display: none; flex-direction: column; gap: 8px; }
+.disc-panel.on { display: flex; }
+
+.req-card { background: var(--sur); border: 1px solid var(--bor); border-radius: var(--r); padding: 11px 12px; }
+.req-name { font-size: .8rem; font-weight: 700; color: var(--tx); margin-bottom: 8px; line-height: 1.35; }
+.tri-row { display: flex; gap: 4px; margin-bottom: 5px; }
+.tri-btn { flex: 1; height: 34px; border: 1.5px solid var(--bor); background: var(--sur2); border-radius: 7px; cursor: pointer; font-family: var(--mono); font-size: .8rem; font-weight: 700; color: var(--tx2); transition: all .13s; }
+.tri-btn:active { transform: scale(.93); }
+.tri-btn.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+.req-hint { font-size: .68rem; color: var(--tx3); line-height: 1.4; min-height: 18px; }
+
+.pen-card { background: var(--sur); border: 1px solid var(--bor); border-radius: var(--r); padding: 11px 12px; }
+.pen-card-lbl { font-size: .64rem; font-weight: 800; color: var(--tx2); text-transform: uppercase; letter-spacing: .07em; margin-bottom: 7px; }
+.pen-list { display: flex; flex-direction: column; gap: 5px; }
+.pen-btn { width: 100%; min-height: 38px; border: 1.5px solid var(--bor); background: var(--sur2); border-radius: var(--r); cursor: pointer; font-family: var(--font); font-size: .76rem; font-weight: 700; color: var(--tx2); display: flex; align-items: center; padding: 0 11px; gap: 8px; transition: all .13s; text-align: left; }
+.pen-btn:active { transform: scale(.97); }
+.pen-btn.pen-active { background: rgba(239,68,68,.09); border-color: var(--red); color: var(--red); }
+.pen-btn.repeatable.pen-active { background: rgba(245,158,11,.09); border-color: var(--amber); color: var(--amber); }
+.pen-cnt { font-family: var(--mono); font-size: .72rem; font-weight: 700; background: var(--red); color: #fff; border-radius: var(--r-pill); width: 19px; height: 19px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-left: auto; }
+.pen-cnt.am { background: var(--amber); }
+
+.tech-total { background: var(--sur2); border: 1px solid var(--bor); border-radius: var(--r); padding: 10px 13px; display: flex; align-items: center; justify-content: space-between; }
+.tech-total-lbl { font-size: .74rem; font-weight: 700; color: var(--tx2); }
+.tech-total-nums { display: flex; gap: 12px; align-items: center; }
+.tech-req-val { font-family: var(--mono); font-size: 1rem; font-weight: 700; color: var(--green); }
+.tech-pen-val { font-family: var(--mono); font-size: 1rem; font-weight: 700; color: var(--red); }
+
+/* ABOUT */
+.about-wrap { padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+.about-hero-card { background: linear-gradient(135deg, var(--sur) 0%, var(--sur2) 100%); border: 1.5px solid var(--accent); border-radius: var(--r-xl); padding: 22px 18px; text-align: center; position: relative; overflow: hidden; }
+.about-hero-card::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 50% -10%, rgba(255,107,43,.08), transparent 60%); pointer-events: none; }
+.about-logo { display: inline-flex; align-items: center; justify-content: center; width: 54px; height: 54px; border-radius: 15px; background: var(--accent); font-family: var(--head); font-size: .72rem; color: #fff; margin-bottom: 10px; box-shadow: 0 6px 22px rgba(255,107,43,.35); line-height: 1.2; text-align: center; position: relative; z-index: 1; }
+.about-app-name { font-family: var(--head); font-size: 1.1rem; position: relative; z-index: 1; }
+.about-version { font-size: .74rem; color: var(--tx2); margin-top: 3px; position: relative; z-index: 1; }
+.about-card { background: var(--sur); border: 1px solid var(--bor); border-radius: var(--r-lg); padding: 14px 16px; }
+.about-card-ttl { font-family: var(--head); font-size: .8rem; margin-bottom: 8px; display: flex; align-items: center; gap: 7px; }
+.about-author-row { display: flex; align-items: center; gap: 12px; }
+.about-ava { width: 46px; height: 46px; border-radius: 13px; background: var(--accent); display: flex; align-items: center; justify-content: center; font-family: var(--head); font-size: .76rem; color: #fff; flex-shrink: 0; }
+.about-author-name { font-weight: 800; font-size: .9rem; }
+.about-author-role { font-size: .72rem; color: var(--tx2); margin-top: 1px; }
+.about-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 9px; }
+.about-tag { background: var(--sur2); border: 1px solid var(--bor); border-radius: var(--r-pill); padding: 3px 10px; font-size: .68rem; font-weight: 700; color: var(--tx2); }
+.about-contacts { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+.about-contact-row { display: flex; align-items: center; gap: 8px; font-size: .8rem; color: var(--tx2); }
+.about-contact-row a { color: var(--accent); font-weight: 700; text-decoration: none; }
+.about-desc-text { font-size: .8rem; color: var(--tx2); line-height: 1.65; }
+.about-desc-text + .about-desc-text { margin-top: 7px; }
+.about-feat-list { margin-top: 7px; display: flex; flex-direction: column; gap: 5px; }
+.about-feat-item { display: flex; gap: 8px; font-size: .78rem; color: var(--tx2); line-height: 1.4; }
+.about-feat-item b { color: var(--tx); }
+.about-footer { text-align: center; font-size: .72rem; color: var(--tx3); padding: 4px 0 8px; }
+
+/* BLOCKED SCREEN */
+#screen-blocked { background: var(--bg); }
+.blocked-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; text-align: center; gap: 14px; }
+.blocked-ico { font-size: 3rem; }
+.blocked-ttl { font-family: var(--head); font-size: 1.1rem; }
+.blocked-txt { font-size: .84rem; color: var(--tx2); line-height: 1.6; max-width: 300px; }
+
+/* LOADING */
+#screen-loading { background: var(--bg); }
+.loading-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; }
+.loading-logo { font-family: var(--head); font-size: .82rem; width: 56px; height: 56px; border-radius: 16px; background: var(--accent); display: flex; align-items: center; justify-content: center; color: #fff; line-height: 1.2; text-align: center; box-shadow: 0 6px 22px rgba(255,107,43,.35); animation: pulse 1.4s ease-in-out infinite; }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .6; } }
+.loading-txt { font-size: .8rem; color: var(--tx2); }
+</style>
+</head>
+<body>
+
+<!-- ЗАГРУЗКА -->
+<div id="screen-loading" class="screen active">
+  <div class="loading-wrap">
+    <div class="loading-logo">ТОЧКА<br>ОТРЫВА</div>
+    <div class="loading-txt">Загрузка...</div>
+  </div>
+</div>
+
+<!-- ЗАБЛОКИРОВАН -->
+<div id="screen-blocked" class="screen">
+  <div class="topbar">
+    <div class="tb-l"><div class="tb-title">Точка Подсчёта</div></div>
+    <div class="tb-r">
+      <div class="pill" id="tp-bl"><button onclick="setTheme('dark')">🌙</button><button onclick="setTheme('light')">☀️</button></div>
+    </div>
+  </div>
+  <div class="blocked-wrap">
+    <div class="blocked-ico">🔒</div>
+    <div class="blocked-ttl">Аккаунт заблокирован</div>
+    <div class="blocked-txt">Ваш аккаунт заблокирован администратором. Для восстановления доступа свяжитесь с администратором.</div>
+    <a href="https://t.me/iuriletics" target="_blank" class="btn btn-a" style="margin-top:8px">✈ Написать администратору</a>
+    <button class="btn btn-g" onclick="doLogout()">Выйти из аккаунта</button>
+  </div>
+</div>
+
+<!-- КАЛЬКУЛЯТОР -->
+<div id="screen-calc" class="screen">
+  <div class="topbar">
+    <div class="tb-l">
+      <div class="tb-title">Точка Подсчёта</div>
+      <div class="tb-sub" id="calc-user-lbl">Судейский калькулятор</div>
+    </div>
+    <div class="tb-r">
+      <div class="pill" id="tp-calc"><button onclick="setTheme('dark')">🌙</button><button onclick="setTheme('light')">☀️</button></div>
+      <button class="btn btn-g btn-sm" onclick="goBack()">← Кабинет</button>
+    </div>
+  </div>
+
+  <!-- Итоговый дисплей -->
+  <div class="disp-bar">
+    <div class="disp-score" id="main-score">—</div>
+    <div class="disp-detail">
+      <div class="disp-row">⬡ Сложность: <span class="disp-val" id="d-comp">—</span></div>
+      <div class="disp-row">◈ Презент.: <span class="disp-val" id="d-pres">—</span>&nbsp;|&nbsp;⚠ Техн.: <span class="disp-val" id="d-tech">—</span>&nbsp;<span class="disp-pen" id="d-pen"></span></div>
+    </div>
+    <button class="btn btn-s btn-sm" onclick="confirmResetAll()">↺</button>
+  </div>
+
+  <!-- Вкладки -->
+  <div class="calc-tabs">
+    <button class="ctab on" onclick="switchTab('complexity', this)">
+      <span class="ctab-ico">⬡</span><span class="ctab-lbl">Сложность</span>
+    </button>
+    <button class="ctab" onclick="switchTab('presentation', this)">
+      <span class="ctab-ico">◈</span><span class="ctab-lbl">Презентация</span>
+    </button>
+    <button class="ctab" onclick="switchTab('technical', this)">
+      <span class="ctab-ico">⚠</span><span class="ctab-lbl">Технический</span>
+    </button>
+    <button class="ctab" onclick="switchTab('about', this)">
+      <span class="ctab-ico">◉</span><span class="ctab-lbl">О нас</span>
+    </button>
+  </div>
+
+  <div class="calc-body scroll">
+
+    <!-- СЛОЖНОСТЬ -->
+    <div id="panel-complexity" class="panel on">
+      <button class="lvl-zero" onclick="addLvl(0)">✕&ensp;0 — Пропуск / Остановка</button>
+      <div class="lvl-grid">
+        <button class="lvl-btn" data-lv="1" onclick="addLvl(1)"><span class="lvl-num">1</span><span class="lvl-label">Базовый</span></button>
+        <button class="lvl-btn" data-lv="2" onclick="addLvl(2)"><span class="lvl-num">2</span><span class="lvl-label">Лёгкий</span></button>
+        <button class="lvl-btn" data-lv="3" onclick="addLvl(3)"><span class="lvl-num">3</span><span class="lvl-label">Средний</span></button>
+        <button class="lvl-btn" data-lv="4" onclick="addLvl(4)"><span class="lvl-num">4</span><span class="lvl-label">Сложный</span></button>
+        <button class="lvl-btn" data-lv="5" onclick="addLvl(5)"><span class="lvl-num">5</span><span class="lvl-label">Мастер</span></button>
+        <button class="lvl-btn" data-lv="6" onclick="addLvl(6)"><span class="lvl-num">6</span><span class="lvl-label">Элита</span></button>
+      </div>
+      <div class="seq-card">
+        <div class="seq-lbl">Последовательность навыков</div>
+        <div class="seq-chips" id="seq-chips"><span style="font-size:.72rem;color:var(--tx3)">Нажимайте на уровни навыков</span></div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-box"><div class="stat-v" id="st-avg">—</div><div class="stat-l">Коэф.</div></div>
+        <div class="stat-box"><div class="stat-v" id="st-sum">0</div><div class="stat-l">Сумма</div></div>
+        <div class="stat-box"><div class="stat-v" id="st-cnt">0</div><div class="stat-l">Элементов</div></div>
+      </div>
+      <div id="counts-card" class="counts-card hidden">
+        <div class="counts-lbl">По уровням</div>
+        <ul class="counts-list" id="counts-list"></ul>
+      </div>
+      <div class="act-row">
+        <button class="btn btn-s f1" onclick="eraseLast()">⌫ Стереть</button>
+        <button class="btn btn-s f1" onclick="toggleCounts()" id="btn-stats">≡ Детали</button>
+        <button class="btn btn-d f1" id="btn-reset-comp" onclick="confirmReset('comp')">Сбросить</button>
+      </div>
+    </div>
+
+    <!-- ПРЕЗЕНТАЦИЯ -->
+    <div id="panel-presentation" class="panel">
+      <!-- Презентация: 6 критериев -->
+      <div class="pres-section">
+        <div class="pres-section-hd">
+          <div class="pres-section-name">◈ Презентация</div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div class="pres-section-max">макс. 2.0</div>
+            <div class="pres-section-score" id="pres-score-p">0.00</div>
+          </div>
+        </div>
+        <div class="crit-list" id="pres-list"></div>
+      </div>
+      <!-- Креативность: 4 критерия -->
+      <div class="pres-section">
+        <div class="pres-section-hd">
+          <div class="pres-section-name">✦ Креативность</div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div class="pres-section-max">макс. 1.0</div>
+            <div class="pres-section-score" id="pres-score-c">0.00</div>
+          </div>
+        </div>
+        <div class="crit-list" id="creat-list"></div>
+      </div>
+      <div class="pres-total">
+        <div class="pres-total-lbl">Итого Презентация + Креативность</div>
+        <div>
+          <div class="pres-total-val" id="pres-total">0.00</div>
+          <div class="pres-range" id="pres-range">0.0 – 0.0</div>
+        </div>
+      </div>
+      <button class="btn btn-d btn-full" id="btn-reset-pres" onclick="confirmReset('pres')">Сбросить презентацию</button>
+    </div>
+
+    <!-- ТЕХНИЧЕСКИЙ -->
+    <div id="panel-technical" class="panel">
+      <div class="disc-tabs">
+        <button class="disc-tab on" onclick="switchDisc('single', this)">Одиночка</button>
+        <button class="disc-tab" onclick="switchDisc('double', this)">Две скакалки</button>
+        <button class="disc-tab" onclick="switchDisc('team', this)">Команда</button>
+      </div>
+      <div id="disc-single" class="disc-panel on"></div>
+      <div id="disc-double" class="disc-panel"></div>
+      <div id="disc-team"   class="disc-panel"></div>
+    </div>
+
+    <!-- О НАС -->
+    <div id="panel-about" class="panel" style="padding:0">
+      <div class="about-wrap">
+        <div class="about-hero-card">
+          <div class="about-logo">ТОЧКА<br>ОТРЫВА</div>
+          <div class="about-app-name">Точка Подсчёта</div>
+          <div class="about-version">Версия 2.0 · 2025</div>
+        </div>
+        <div class="about-card">
+          <div class="about-card-ttl">👤 Автор</div>
+          <div class="about-author-row">
+            <div class="about-ava">ЮД</div>
+            <div>
+              <div class="about-author-name">Данильченко Юрий Леонидович</div>
+              <div class="about-author-role">Идея, дизайн, разработка · 21.07.1988</div>
+            </div>
+          </div>
+          <div class="about-tags">
+            <div class="about-tag">Цирковой артист</div>
+            <div class="about-tag">Тренер по акробатике</div>
+            <div class="about-tag">Тренер по спортивной скакалке</div>
+            <div class="about-tag">Судья 2-й категории</div>
+            <div class="about-tag">Глава направления Double Dutch ФРСР</div>
+          </div>
+          <div class="about-contacts">
+            <div class="about-contact-row">✈ Telegram: <a href="https://t.me/iuriletics" target="_blank">@iuriletics</a></div>
+            <div class="about-contact-row">📞 Телефон: <a href="tel:+79168374259">+7 916 837 42 59</a></div>
+            <div class="about-contact-row">📍 Крым · Спортивно-цирковая студия «Точка Отрыва»</div>
+          </div>
+        </div>
+        <div class="about-card">
+          <div class="about-card-ttl">📋 О приложении</div>
+          <div class="about-desc-text">
+            <b>Точка Подсчёта</b> — профессиональный судейский калькулятор для вольных выступлений по спортивной скакалке. Создан практикующим судьёй для практикующих судей.
+          </div>
+          <div class="about-feat-list">
+            <div class="about-feat-item"><span>⬡</span><span><b>Сложность</b> — ввод уровней навыков 0–6, подсчёт суммы и коэффициента по методике IJRU</span></div>
+            <div class="about-feat-item"><span>◈</span><span><b>Презентация</b> — оценка по критериям (+/✓/−) с диапазоном итогового балла</span></div>
+            <div class="about-feat-item"><span>⚠</span><span><b>Технический раздел</b> — обязательные навыки (0/0.1/0.2) и штрафные баллы по дисциплинам</span></div>
+          </div>
+        </div>
+        <div class="about-card">
+          <div class="about-card-ttl">⚖️ Права</div>
+          <div class="about-desc-text">© 2025 Данильченко Юрий Леонидович · Точка Отрыва · Крым.<br>Все права защищены. Несанкционированное копирование и распространение запрещено.</div>
+        </div>
+        <div class="about-footer">Точка Отрыва · Экосистема профессионального судьи</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- МОДАЛКА -->
+<div id="modal" class="modal-ov">
+  <div class="modal">
+    <div class="modal-ico" id="m-ico">⚠️</div>
+    <div class="modal-ttl" id="m-ttl"></div>
+    <div class="modal-txt" id="m-txt"></div>
+    <div class="modal-act">
+      <button class="btn btn-g btn-sm" onclick="closeModal()">Отмена</button>
+      <button class="btn btn-sm" id="m-ok"></button>
+    </div>
+  </div>
+</div>
+<div id="toast"></div>
+
+<script>
+/*
+ * Точка Подсчёта · Судейский калькулятор · tochka.html
+ * Версия: 2.0.0
+ * Дата: 2025
+ *
+ * Автор: Данильченко Юрий Леонидович
+ * Дата рождения: 21.07.1988
+ * Организация: Спортивно-цирковая студия «Точка Отрыва»
+ * Крым
+ * Telegram: @iuriletics
+ * Телефон: +7 916 837 42 59
+ *
+ * Все права защищены. Несанкционированное копирование,
+ * распространение и использование данного программного
+ * обеспечения запрещено без письменного разрешения автора.
+ */
+
+const SB_URL = 'https://anuapnxrwqcsucisehrr.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFudWFwbnhyd3Fjc3VjaXNlaHJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE3ODQzMjEsImV4cCI6MjA4NzM2MDMyMX0.U1TKmw6KtHmNnhnzwRfbfVERPl6ybSsayUWkM6Whqn4';
+
+let _sb, _user = null, _profile = null;
+let _theme = localStorage.getItem('to_theme') || 'dark';
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function setTheme(t) {
+  _theme = t;
+  localStorage.setItem('to_theme', t);
+  document.documentElement.setAttribute('data-theme', t);
+  const mt = document.getElementById('meta-theme');
+  if (mt) mt.setAttribute('content', t === 'dark' ? '#0B0C10' : '#F0F2FA');
+  document.querySelectorAll('[id^="tp-"]').forEach(p => {
+    p.querySelectorAll('button').forEach((b, i) => b.classList.toggle('on', i === (t === 'dark' ? 0 : 1)));
+  });
+}
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2600);
+}
+function modal(ico, ttl, txt, okLabel, onOk, danger = true) {
+  document.getElementById('m-ico').textContent = ico;
+  document.getElementById('m-ttl').textContent = ttl;
+  document.getElementById('m-txt').textContent = txt;
+  const btn = document.getElementById('m-ok');
+  btn.textContent = okLabel;
+  btn.className = 'btn btn-sm ' + (danger ? 'btn-d' : 'btn-a');
+  btn.onclick = () => { closeModal(); onOk(); };
+  document.getElementById('modal').classList.add('open');
+}
+function closeModal() { document.getElementById('modal').classList.remove('open'); }
+function goBack() { window.location.href = './index.html'; }
+function doLogout() { _sb.auth.signOut().then(() => { window.location.href = './index.html'; }); }
+
+/* ИНИЦИАЛИЗАЦИЯ */
+window.onerror = function(msg) { console.error('[ТочкаПодсчёта]', msg); return false; };
+
+document.addEventListener('DOMContentLoaded', async () => {
+  setTheme(_theme);
+  _sb = window.supabase.createClient(SB_URL, SB_KEY);
+
+  const { data: { session } } = await _sb.auth.getSession();
+  if (!session) { window.location.href = './index.html'; return; }
+
+  _user = session.user;
+  const { data, error } = await _sb.from('profiles').select('*').eq('id', _user.id).single();
+  if (error || !data) {
+    const name = _user.user_metadata?.full_name || _user.email.split('@')[0];
+    await _sb.from('profiles').upsert({ id: _user.id, full_name: name });
+    const { data: fresh } = await _sb.from('profiles').select('*').eq('id', _user.id).single();
+    _profile = fresh;
+  } else {
+    _profile = data;
+  }
+
+  if (_profile?.is_blocked) { showScreen('screen-blocked'); return; }
+
+  const name = _profile?.full_name || _user.email;
+  document.getElementById('calc-user-lbl').textContent = name;
+
+  buildPresentation();
+  buildTechnical();
+  loadState();
+  showScreen('screen-calc');
+});
+
+/* ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК */
+let _activeTab = 'complexity';
+function switchTab(id, btn) {
+  _activeTab = id;
+  document.querySelectorAll('.ctab').forEach(b => b.classList.remove('on'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('on'));
+  btn.classList.add('on');
+  document.getElementById('panel-' + id).classList.add('on');
+  document.querySelector('.calc-body').scrollTo({ top: 0, behavior: 'smooth' });
+  updateDisplay();
+}
+
+/* ЗВУК */
+let _actx = null;
+function getActx() { if (!_actx) _actx = new (window.AudioContext || window.webkitAudioContext)(); return _actx; }
+function playTick(type) {
+  try {
+    const ctx = getActx(), osc = ctx.createOscillator(), g = ctx.createGain();
+    osc.connect(g); g.connect(ctx.destination);
+    if (type === 'key') {
+      osc.type = 'sine'; osc.frequency.setValueAtTime(1050, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(800, ctx.currentTime + .04);
+      g.gain.setValueAtTime(.16, ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(.0001, ctx.currentTime + .06);
+      osc.start(ctx.currentTime); osc.stop(ctx.currentTime + .06);
+    } else {
+      osc.type = 'sine'; osc.frequency.setValueAtTime(700, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(500, ctx.currentTime + .07);
+      g.gain.setValueAtTime(.12, ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(.0001, ctx.currentTime + .09);
+      osc.start(ctx.currentTime); osc.stop(ctx.currentTime + .09);
+    }
+  } catch(e) {}
+}
+function haptic(ms) { if (navigator.vibrate) navigator.vibrate(ms || 7); }
+
+/* СЛОЖНОСТЬ */
+const LV_COLORS = { 0:'#94a3b8',1:'#22c55e',2:'#84cc16',3:'#eab308',4:'#f97316',5:'#ef4444',6:'#a855f7' };
+const LV_NAMES  = { 0:'Пропуск',1:'Базовый',2:'Лёгкий',3:'Средний',4:'Сложный',5:'Мастер',6:'Элита' };
+let _seq = [];
+let _showCounts = false;
+
+function addLvl(v) {
+  _seq.push(v);
+  playTick('key'); haptic(6);
+  updateComplexity(); updateDisplay(); saveState();
+}
+function eraseLast() {
+  if (!_seq.length) return;
+  _seq.pop();
+  playTick('erase'); haptic(12);
+  updateComplexity(); updateDisplay(); saveState();
+}
+function toggleCounts() {
+  _showCounts = !_showCounts;
+  document.getElementById('counts-card').classList.toggle('hidden', !_showCounts);
+  document.getElementById('btn-stats').textContent = _showCounts ? '≡ Скрыть' : '≡ Детали';
+  if (_showCounts) updateComplexity();
+}
+
+function updateComplexity() {
+  const total = _seq.reduce((a, b) => a + b, 0);
+  const avg = _seq.length ? (total / _seq.length) : 0;
+  const avgColor = _seq.length ? LV_COLORS[Math.round(avg)] : 'var(--accent)';
+
+  document.getElementById('st-avg').textContent = _seq.length ? avg.toFixed(2) : '—';
+  document.getElementById('st-avg').style.color = avgColor;
+  document.getElementById('st-sum').textContent = total;
+  document.getElementById('st-cnt').textContent = _seq.length;
+
+  const chips = document.getElementById('seq-chips');
+  if (_seq.length) {
+    chips.innerHTML = _seq.map(v => `<span class="chip chip-${v}">${v}</span>`).join('');
+  } else {
+    chips.innerHTML = '<span style="font-size:.72rem;color:var(--tx3)">Нажимайте на уровни навыков</span>';
+  }
+
+  if (_showCounts) {
+    const ul = document.getElementById('counts-list');
+    ul.innerHTML = Array.from({ length: 7 }, (_, i) => ({ n: i, c: _seq.filter(v => v === i).length }))
+      .filter(x => x.c > 0)
+      .map(x => `<li>
+        <div class="lv-dot" style="background:${LV_COLORS[x.n]}"></div>
+        <span style="color:var(--tx2);font-size:.76rem">${LV_NAMES[x.n]}</span>
+        <span class="mono" style="margin-left:auto;font-weight:700;font-size:.8rem">${x.c}</span>
+      </li>`).join('') || '<li style="color:var(--tx3);font-size:.75rem">Нет данных</li>';
+  }
+}
+
+/* ПРЕЗЕНТАЦИЯ */
+const PRES_ITEMS = [
+  'Техника и контроль тела',
+  'Выразительность и артистизм',
+  'Взаимодействие с музыкой',
+  'Разнообразие движений',
+  'Энергетика и динамика',
+  'Пространственное использование',
+];
+const CREAT_ITEMS = [
+  'Оригинальность и новизна',
+  'Хореографический дизайн',
+  'Целостность выступления',
+  'Общее впечатление',
+];
+
+let _presVals = {};
+let _creatVals = {};
+
+function buildPresentation() {
+  buildCritGroup('pres-list', PRES_ITEMS, 'p');
+  buildCritGroup('creat-list', CREAT_ITEMS, 'c');
+}
+
+function buildCritGroup(containerId, items, prefix) {
+  const el = document.getElementById(containerId);
+  items.forEach((name, i) => {
+    const key = prefix + i;
+    const row = document.createElement('div');
+    row.className = 'crit-item';
+    row.innerHTML = `
+      <div class="crit-name">${name}</div>
+      <div class="pm-wrap">
+        <button class="pm-btn" data-key="${key}" data-val="-1" onclick="setCrit('${key}',-1,this.parentElement)">−</button>
+        <button class="pm-btn" data-key="${key}" data-val="0"  onclick="setCrit('${key}',0,this.parentElement)">✓</button>
+        <button class="pm-btn" data-key="${key}" data-val="1"  onclick="setCrit('${key}',1,this.parentElement)">+</button>
+      </div>`;
+    el.appendChild(row);
+  });
+}
+
+function setCrit(key, val, wrap) {
+  if (key.startsWith('p')) _presVals[key] = val;
+  else _creatVals[key] = val;
+  wrap.querySelectorAll('.pm-btn').forEach(b => b.classList.remove('minus','check','plus'));
+  const active = wrap.querySelector(`[data-val="${val}"]`);
+  if (active) active.classList.add(val === -1 ? 'minus' : val === 0 ? 'check' : 'plus');
+  haptic(7);
+  updatePresentation(); updateDisplay(); saveState();
+}
+
+function updatePresentation() {
+  const pCount = PRES_ITEMS.length;
+  const cCount = CREAT_ITEMS.length;
+
+  const pSum = Array.from({ length: pCount }, (_, i) => _presVals['p' + i] ?? -1).reduce((a, v) => a + (v === 1 ? 1 : v === 0 ? .5 : 0), 0);
+  const cSum = Array.from({ length: cCount }, (_, i) => _creatVals['c' + i] ?? -1).reduce((a, v) => a + (v === 1 ? 1 : v === 0 ? .5 : 0), 0);
+
+  const pScore = (pSum / pCount) * 2;
+  const cScore = (cSum / cCount) * 1;
+  const total = pScore + cScore;
+
+  const pCounts = { plus: 0, check: 0, minus: 0 };
+  Array.from({ length: pCount }, (_, i) => _presVals['p' + i] ?? -1).forEach(v => { if (v === 1) pCounts.plus++; else if (v === 0) pCounts.check++; else pCounts.minus++; });
+  const cCounts = { plus: 0, check: 0, minus: 0 };
+  Array.from({ length: cCount }, (_, i) => _creatVals['c' + i] ?? -1).forEach(v => { if (v === 1) cCounts.plus++; else if (v === 0) cCounts.check++; else cCounts.minus++; });
+
+  const [pLo, pHi] = rangeP(pCounts);
+  const [cLo, cHi] = rangeC(cCounts);
+
+  document.getElementById('pres-score-p').textContent = pScore.toFixed(2);
+  document.getElementById('pres-score-c').textContent = cScore.toFixed(2);
+  document.getElementById('pres-total').textContent = total.toFixed(2);
+  document.getElementById('pres-range').textContent = (pLo + cLo).toFixed(1) + ' – ' + (pHi + cHi).toFixed(1);
+}
+
+/* Оригинальные формулы диапазонов из v1.0 */
+function rangeP(c) {
+  if (c.plus === 6)                           return [1.7, 2.0];
+  if (c.plus === 3 && c.check === 3)          return [1.3, 1.6];
+  if (c.plus === 1 && c.check === 4 && c.minus === 1) return [0.9, 1.2];
+  if (c.check === 3 && c.minus === 3)         return [0.5, 0.8];
+  if (c.check <= 1 && c.minus >= 4)           return [0.0, 0.4];
+  const s = Math.max(0, Math.min(2, ((c.plus + c.check * .5) / 6) * 2));
+  return [+Math.max(0, s - .2).toFixed(1), +Math.min(2, s + .2).toFixed(1)];
+}
+function rangeC(c) {
+  if (c.plus === 4)                           return [0.9, 1.0];
+  if (c.plus === 2 && c.check === 2)          return [0.7, 0.8];
+  if (c.plus === 1 && c.check === 2 && c.minus === 1) return [0.5, 0.6];
+  if (c.check === 2 && c.minus === 2)         return [0.3, 0.4];
+  if (c.check <= 1 && c.minus >= 3)           return [0.0, 0.2];
+  const s = Math.max(0, Math.min(1, (c.plus + c.check * .5) / 4));
+  return [+Math.max(0, s - .1).toFixed(1), +Math.min(1, s + .1).toFixed(1)];
+}
+
+/* ТЕХНИЧЕСКИЙ */
+const TECH = {
+  single: {
+    reqs: [
+      { key: 'single_cross', name: '1. Кресты / Намотки / Релизы', hints: ['Не выполнено', 'Один крест / намотка / релиз', 'Два креста / намотки / релиза'] },
+    ],
+    pens: [
+      { key: 's_p_time',  val: .4, once: true,  lbl: '−0.4  Превышение / недостаток времени' },
+      { key: 's_p_music', val: .2, once: true,  lbl: '−0.2  Тихая или громкая музыка' },
+      { key: 's_p_space', val: .2, once: false, lbl: '−0.2  Нарушение пространства' },
+      { key: 's_p_acc',   val: 3,  once: false, lbl: '−3.0  Потеря аксессуара' },
+      { key: 's_p_d1',    val: .2, once: true,  lbl: '−0.2  Задержка (выступление)' },
+      { key: 's_p_d2',    val: .4, once: true,  lbl: '−0.4  Задержка (не выход на площадку)' },
+    ]
+  },
+  double: {
+    reqs: [
+      { key: 'd_entry',   name: '1. Вступление и завершение',    hints: ['Не выполнено','Только начало или только конец','И начало, и конец выступления'] },
+      { key: 'd_roles',   name: '2. Смены ролей',                hints: ['Не выполнено','Более одной смены, но не все роли','Каждый — и крутящий, и прыгающий'] },
+      { key: 'd_manip',   name: '3. Манипуляции со скакалкой',   hints: ['Не выполнено','Одна изоляция или один выброс','Два выброса / две изоляции'] },
+      { key: 'd_dir',     name: '4. Изменение направления',      hints: ['Не выполнено','Одна смена направления','Две смены направления'] },
+      { key: 'd_special', name: '5. Специальные навыки',         hints: ['Не выполнено','Один силовой / акроб. прыжок','Два силовых / акроб. прыжка'] },
+    ],
+    pens: [
+      { key: 'd_p_time',  val: .4, once: true,  lbl: '−0.4  Превышение / недостаток времени' },
+      { key: 'd_p_music', val: .2, once: true,  lbl: '−0.2  Тихая или громкая музыка' },
+      { key: 'd_p_space', val: .2, once: false, lbl: '−0.2  Нарушение пространства' },
+      { key: 'd_p_acc',   val: 3,  once: false, lbl: '−3.0  Потеря аксессуара' },
+      { key: 'd_p_d1',    val: .2, once: true,  lbl: '−0.2  Задержка (выступление)' },
+      { key: 'd_p_d2',    val: .4, once: true,  lbl: '−0.4  Задержка (не выход на площадку)' },
+    ]
+  },
+  team: {
+    reqs: [
+      { key: 't_group',   name: '1. Групповое выполнение',          hints: ['Не выполнено','2–3 спортсмена','Минимум 4 спортсмена'] },
+      { key: 't_double',  name: '2. Навыки на двух скакалках',       hints: ['Не выполнено','2–3 спортсмена c изменением направления','Мин. 4 спортсмена c изменением направления'] },
+      { key: 't_wheel',   name: '3. Колесо',                         hints: ['Не выполнено','2–3 спортсмена демонстрируют навык','4 спортсмена демонстрируют навык'] },
+      { key: 't_long',    name: '4. Длинная скакалка (7 м)',          hints: ['Не выполнено','2–3 спортсмена демонстрируют навык','4 спортсмена демонстрируют навык'] },
+      { key: 't_travel',  name: '5. Путешественник / Взаимодействие', hints: ['Не выполнено','2–3 спортсмена — «черпак» или «совок»','4 спортсмена — «черпак» или «совок»'] },
+    ],
+    pens: [
+      { key: 't_p_time',  val: .4, once: true,  lbl: '−0.4  Превышение / недостаток времени' },
+      { key: 't_p_music', val: .2, once: true,  lbl: '−0.2  Тихая или громкая музыка' },
+      { key: 't_p_space', val: .2, once: false, lbl: '−0.2  Нарушение пространства' },
+      { key: 't_p_acc',   val: 3,  once: false, lbl: '−3.0  Потеря аксессуара' },
+      { key: 't_p_d1',    val: .2, once: true,  lbl: '−0.2  Задержка (выступление)' },
+      { key: 't_p_d2',    val: .4, once: true,  lbl: '−0.4  Задержка (не выход на площадку)' },
+    ]
+  }
+};
+
+let _reqVals = {};
+let _penVals = {};
+let _currentDisc = 'single';
+
+function buildTechnical() {
+  ['single', 'double', 'team'].forEach(disc => {
+    const container = document.getElementById('disc-' + disc);
+    const data = TECH[disc];
+
+    data.reqs.forEach(req => {
+      const card = document.createElement('div');
+      card.className = 'req-card';
+      card.innerHTML = `
+        <div class="req-name">${req.name}</div>
+        <div class="tri-row">
+          <button class="tri-btn on" onclick="setReq('${req.key}',0,this.parentElement,'${disc}')">0</button>
+          <button class="tri-btn"   onclick="setReq('${req.key}',.1,this.parentElement,'${disc}')">0.1</button>
+          <button class="tri-btn"   onclick="setReq('${req.key}',.2,this.parentElement,'${disc}')">0.2</button>
+        </div>
+        <div class="req-hint" id="hint-${req.key}">${req.hints[0]}</div>`;
+      container.appendChild(card);
+      _reqVals[req.key] = 0;
+    });
+
+    const penCard = document.createElement('div');
+    penCard.className = 'pen-card';
+    penCard.innerHTML = `<div class="pen-card-lbl">Штрафы</div><div class="pen-list" id="pen-${disc}"></div>`;
+    container.appendChild(penCard);
+    const penList = penCard.querySelector('#pen-' + disc);
+
+    data.pens.forEach(pen => {
+      const btn = document.createElement('button');
+      btn.className = 'pen-btn' + (pen.once ? '' : ' repeatable');
+      btn.id = 'penb-' + pen.key;
+      btn.setAttribute('data-base', pen.lbl);
+      btn.innerHTML = `<span class="f1">${pen.lbl}</span>`;
+      _penVals[pen.key] = { val: pen.val, once: pen.once, count: 0 };
+
+      btn.addEventListener('click', () => clickPen(pen.key, btn));
+
+      if (!pen.once) {
+        let hold;
+        const startHold = () => { hold = setTimeout(() => { decrementPen(pen.key, btn); haptic(40); }, 600); };
+        const cancelHold = () => clearTimeout(hold);
+        btn.addEventListener('touchstart', startHold, { passive: true });
+        btn.addEventListener('touchend', cancelHold);
+        btn.addEventListener('touchcancel', cancelHold);
+        btn.addEventListener('mousedown', startHold);
+        btn.addEventListener('mouseup', cancelHold);
+        btn.addEventListener('mouseleave', cancelHold);
+      }
+      btn.addEventListener('contextmenu', e => { e.preventDefault(); decrementPen(pen.key, btn); });
+
+      penList.appendChild(btn);
+    });
+
+    const resetBtn = document.createElement('button');
+    resetBtn.className = 'btn btn-d btn-full';
+    resetBtn.textContent = 'Сбросить ' + (disc === 'single' ? 'одиночку' : disc === 'double' ? 'две скакалки' : 'команду');
+    resetBtn.onclick = () => confirmResetDisc(disc, resetBtn);
+    container.appendChild(resetBtn);
+  });
+}
+
+function setReq(key, val, row, disc) {
+  _reqVals[key] = val;
+  row.querySelectorAll('.tri-btn').forEach((b, i) => b.classList.toggle('on', [0, .1, .2][i] === val));
+  const hintEl = document.getElementById('hint-' + key);
+  const req = TECH[disc].reqs.find(r => r.key === key);
+  if (hintEl && req) hintEl.textContent = req.hints[[0, .1, .2].indexOf(val)];
+  haptic(7);
+  updateTechTotal(disc); updateDisplay(); saveState();
+}
+
+function clickPen(key, btn) {
+  const st = _penVals[key];
+  if (st.once) { st.count = st.count > 0 ? 0 : 1; }
+  else { st.count++; }
+  refreshPenBtn(btn, key);
+  haptic(8);
+  updateTechTotal(_currentDisc); updateDisplay(); saveState();
+}
+
+function decrementPen(key, btn) {
+  const st = _penVals[key];
+  if (st.count > 0) { st.count--; }
+  refreshPenBtn(btn, key);
+  updateTechTotal(_currentDisc); updateDisplay(); saveState();
+}
+
+function refreshPenBtn(btn, key) {
+  const st = _penVals[key];
+  const active = st.count > 0;
+  btn.classList.toggle('pen-active', active);
+  const isRep = !st.once;
+  let cnt = btn.querySelector('.pen-cnt');
+  if (active && st.count > 1) {
+    if (!cnt) { cnt = document.createElement('span'); cnt.className = 'pen-cnt' + (isRep ? ' am' : ''); btn.appendChild(cnt); }
+    cnt.textContent = st.count;
+  } else {
+    if (cnt) cnt.remove();
+  }
+}
+
+function updateTechTotal(disc) {
+  const reqs = TECH[disc].reqs;
+  const reqSum = reqs.reduce((a, r) => a + (_reqVals[r.key] || 0), 0);
+  const pens = TECH[disc].pens;
+  const penSum = pens.reduce((a, p) => a + (_penVals[p.key]?.val || 0) * (_penVals[p.key]?.count || 0), 0);
+  return { reqSum: +reqSum.toFixed(1), penSum: +penSum.toFixed(1) };
+}
+
+function switchDisc(disc, btn) {
+  _currentDisc = disc;
+  document.querySelectorAll('.disc-tab').forEach(b => b.classList.remove('on'));
+  document.querySelectorAll('.disc-panel').forEach(p => p.classList.remove('on'));
+  btn.classList.add('on');
+  document.getElementById('disc-' + disc).classList.add('on');
+  updateDisplay();
+}
+
+/* ГЛАВНЫЙ ДИСПЛЕЙ */
+function updateDisplay() {
+  const total = _seq.reduce((a, b) => a + b, 0);
+  const avg = _seq.length ? (total / _seq.length) : 0;
+  const compScore = avg;
+  const avgColor = _seq.length ? LV_COLORS[Math.round(avg)] : 'var(--tx2)';
+
+  const pSum = Array.from({ length: PRES_ITEMS.length }, (_, i) => _presVals['p' + i] ?? -1).reduce((a, v) => a + (v === 1 ? 1 : v === 0 ? .5 : 0), 0);
+  const cSum = Array.from({ length: CREAT_ITEMS.length }, (_, i) => _creatVals['c' + i] ?? -1).reduce((a, v) => a + (v === 1 ? 1 : v === 0 ? .5 : 0), 0);
+  const presScore = (pSum / PRES_ITEMS.length) * 2 + (cSum / CREAT_ITEMS.length);
+
+  const tech = updateTechTotal(_currentDisc);
+  const netTech = tech.reqSum - tech.penSum;
+  const grand = +(compScore + presScore + netTech).toFixed(2);
+
+  document.getElementById('main-score').textContent = _seq.length ? grand.toFixed(2) : '—';
+  document.getElementById('main-score').style.color = _seq.length
+    ? (grand > 3 ? 'var(--green)' : grand > 1.5 ? 'var(--amber)' : 'var(--tx)')
+    : 'var(--tx2)';
+  document.getElementById('d-comp').textContent = _seq.length ? avg.toFixed(2) : '—';
+  document.getElementById('d-comp').style.color = avgColor;
+  document.getElementById('d-pres').textContent = presScore.toFixed(2);
+  document.getElementById('d-tech').textContent = tech.reqSum.toFixed(1);
+  document.getElementById('d-pen').textContent = tech.penSum > 0 ? '−' + tech.penSum.toFixed(1) : '';
+}
+
+/* СБРОСЫ */
+function confirmReset(type) {
+  const map = {
+    comp: ['↺', 'Сбросить сложность?', 'Все введённые уровни навыков будут удалены.', 'Сбросить', resetComp],
+    pres: ['↺', 'Сбросить презентацию?', 'Все оценки будут сброшены в исходное состояние.', 'Сбросить', resetPres],
+  };
+  const [ico, ttl, txt, lbl, fn] = map[type];
+  modal(ico, ttl, txt, lbl, fn);
+}
+
+function confirmResetDisc(disc, btn) {
+  if (!btn._pending) {
+    btn._pending = true; const orig = btn.textContent; btn._orig = orig;
+    btn.textContent = 'Точно?';
+    btn._t = setTimeout(() => { btn._pending = false; btn.textContent = btn._orig; }, 3000);
+  } else {
+    clearTimeout(btn._t); btn._pending = false; btn.textContent = btn._orig;
+    resetDisc(disc);
+  }
+}
+
+function confirmResetAll() {
+  modal('↺', 'Сбросить всё?', 'Сложность, презентация и технический раздел будут очищены.', 'Сбросить', () => {
+    resetComp(); resetPres();
+    ['single','double','team'].forEach(d => resetDisc(d));
+    toast('↺ Всё сброшено');
+  });
+}
+
+function resetComp() {
+  _seq = [];
+  updateComplexity(); updateDisplay(); saveState();
+}
+
+function resetPres() {
+  _presVals = {}; _creatVals = {};
+  document.querySelectorAll('.pm-btn').forEach(b => b.classList.remove('minus','check','plus'));
+  updatePresentation(); updateDisplay(); saveState();
+}
+
+function resetDisc(disc) {
+  TECH[disc].reqs.forEach(r => {
+    _reqVals[r.key] = 0;
+    const card = document.querySelector(`#disc-${disc} .tri-row`);
+  });
+  document.querySelectorAll('#disc-' + disc + ' .tri-btn').forEach((b, i) => b.classList.toggle('on', i % 3 === 0));
+  document.querySelectorAll('#disc-' + disc + ' .req-hint').forEach((h, i) => {
+    h.textContent = TECH[disc].reqs[i]?.hints[0] || '';
+  });
+  TECH[disc].pens.forEach(p => {
+    _penVals[p.key].count = 0;
+    const btn = document.getElementById('penb-' + p.key);
+    if (btn) { btn.classList.remove('pen-active'); const cnt = btn.querySelector('.pen-cnt'); if (cnt) cnt.remove(); }
+  });
+  updateTechTotal(disc); updateDisplay(); saveState();
+}
+
+/* СОХРАНЕНИЕ СОСТОЯНИЯ */
+let _saveTimer;
+function saveState() {
+  clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(() => {
+    try {
+      localStorage.setItem('to_calc', JSON.stringify({
+        seq: _seq,
+        pres: _presVals,
+        creat: _creatVals,
+        req: _reqVals,
+        pen: Object.fromEntries(Object.entries(_penVals).map(([k, v]) => [k, v.count]))
+      }));
+    } catch(e) {}
+  }, 400);
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem('to_calc');
+    if (!raw) { updateComplexity(); updatePresentation(); updateDisplay(); return; }
+    const s = JSON.parse(raw);
+
+    if (s.seq) { _seq = s.seq; }
+
+    if (s.pres) {
+      _presVals = s.pres;
+      Object.entries(_presVals).forEach(([key, val]) => {
+        const wrap = document.querySelector(`[data-key="${key}"]`)?.parentElement;
+        if (!wrap) return;
+        wrap.querySelectorAll('.pm-btn').forEach(b => b.classList.remove('minus','check','plus'));
+        const active = wrap.querySelector(`[data-val="${val}"]`);
+        if (active) active.classList.add(val === -1 ? 'minus' : val === 0 ? 'check' : 'plus');
+      });
+    }
+    if (s.creat) {
+      _creatVals = s.creat;
+      Object.entries(_creatVals).forEach(([key, val]) => {
+        const wrap = document.querySelector(`[data-key="${key}"]`)?.parentElement;
+        if (!wrap) return;
+        wrap.querySelectorAll('.pm-btn').forEach(b => b.classList.remove('minus','check','plus'));
+        const active = wrap.querySelector(`[data-val="${val}"]`);
+        if (active) active.classList.add(val === -1 ? 'minus' : val === 0 ? 'check' : 'plus');
+      });
+    }
+    if (s.req) {
+      Object.entries(s.req).forEach(([key, val]) => {
+        _reqVals[key] = val;
+        ['single','double','team'].forEach(disc => {
+          const req = TECH[disc].reqs.find(r => r.key === key);
+          if (!req) return;
+          const hintEl = document.getElementById('hint-' + key);
+          const idx = [0, .1, .2].indexOf(val);
+          const card = hintEl?.closest('.req-card');
+          if (card) card.querySelectorAll('.tri-btn').forEach((b, i) => b.classList.toggle('on', i === idx));
+          if (hintEl && idx >= 0) hintEl.textContent = req.hints[idx];
+        });
+      });
+    }
+    if (s.pen) {
+      Object.entries(s.pen).forEach(([key, count]) => {
+        if (!_penVals[key]) return;
+        _penVals[key].count = count;
+        const btn = document.getElementById('penb-' + key);
+        if (btn && count > 0) refreshPenBtn(btn, key);
+      });
+    }
+
+    updateComplexity(); updatePresentation(); updateDisplay();
+  } catch(e) { updateComplexity(); updatePresentation(); updateDisplay(); }
+}
+
+/* Предотвращение двойного тапа на iOS */
+let _lastTouch = 0;
+window.addEventListener('touchend', e => {
+  const now = Date.now();
+  const safe = e.target.closest('.lvl-grid,.lvl-zero,.crit-list,.tri-row,.pen-list,.disc-tabs,.act-row');
+  if (safe) { _lastTouch = now; return; }
+  if (now - _lastTouch <= 300) e.preventDefault();
+  _lastTouch = now;
+}, { passive: false });
+</script>
+
+<!--
+  tochka.html требует тех же таблиц Supabase что и index.html.
+  Дополнительных SQL-миграций не нужно.
+
+  Для работы офлайн (PWA) создайте manifest.json и sw.js в той же папке.
+-->
+</body>
+</html>
