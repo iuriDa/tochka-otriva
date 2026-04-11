@@ -411,8 +411,49 @@ select.inp { cursor: pointer; }
         </div>
         <div id="li-err" class="auth-err"></div>
         <button class="btn btn-a btn-full btn-lg" onclick="doLogin()">Войти →</button>
+        <div style="display:flex;justify-content:center">
+          <div class="auth-switch" onclick="showResetForm()" style="font-size:.78rem">
+            Забыли пароль? <em>Сбросить</em>
+          </div>
+        </div>
         <div class="auth-switch" onclick="toggleForm()">
           Нет аккаунта? <em>Зарегистрироваться</em>
+        </div>
+      </div>
+
+      <!-- НОВЫЙ ПАРОЛЬ (после перехода по ссылке из письма) -->
+      <div id="form-newpwd" class="auth-form hidden">
+        <div class="auth-form-ttl">Новый пароль</div>
+        <div style="font-size:.78rem;color:var(--tx2);line-height:1.55;margin-bottom:2px">
+          Придумайте новый пароль для вашего аккаунта.
+        </div>
+        <div class="field">
+          <label class="lbl">Новый пароль</label>
+          <input id="np-pwd" class="inp" type="password" placeholder="Минимум 6 символов" autocomplete="new-password" onkeydown="if(event.key==='Enter')doNewPassword()">
+        </div>
+        <div class="field">
+          <label class="lbl">Повторите пароль</label>
+          <input id="np-pwd2" class="inp" type="password" placeholder="Повторите пароль" autocomplete="new-password" onkeydown="if(event.key==='Enter')doNewPassword()">
+        </div>
+        <div id="np-err" class="auth-err"></div>
+        <button class="btn btn-a btn-full btn-lg" id="btn-newpwd" onclick="doNewPassword()">Сохранить новый пароль →</button>
+      </div>
+
+      <!-- СБРОС ПАРОЛЯ -->
+      <div id="form-reset" class="auth-form hidden">
+        <div class="auth-form-ttl">Сброс пароля</div>
+        <div style="font-size:.78rem;color:var(--tx2);line-height:1.55;margin-bottom:2px">
+          Введите email вашего аккаунта. Мы отправим ссылку для создания нового пароля.
+        </div>
+        <div class="field">
+          <label class="lbl">Email</label>
+          <input id="rs-email" class="inp" type="email" placeholder="judge@example.com" autocomplete="email" onkeydown="if(event.key==='Enter')doReset()">
+        </div>
+        <div id="rs-err" class="auth-err"></div>
+        <div id="rs-ok" class="auth-err" style="display:none;color:var(--green);background:rgba(34,197,94,.08);border-color:rgba(34,197,94,.2)"></div>
+        <button class="btn btn-a btn-full btn-lg" id="btn-reset" onclick="doReset()">Отправить ссылку →</button>
+        <div class="auth-switch" onclick="showLoginForm()">
+          ← <em>Вернуться к входу</em>
         </div>
       </div>
 
@@ -793,6 +834,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   setTheme(_theme);
   _sb = window.supabase.createClient(SB_URL, SB_KEY);
 
+  /* Обработка ссылки сброса пароля из письма */
+  const hash = window.location.hash;
+  if (hash.includes('type=recovery')) {
+    showScreen('screen-auth');
+    showNewPasswordForm();
+    return;
+  }
+
   const { data: { session } } = await _sb.auth.getSession();
   if (session) {
     _user = session.user;
@@ -804,6 +853,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   _sb.auth.onAuthStateChange(async (ev, session) => {
+    if (ev === 'PASSWORD_RECOVERY') {
+      showScreen('screen-auth');
+      showNewPasswordForm();
+      return;
+    }
     if (ev === 'SIGNED_IN' && session) {
       _user = session.user;
       await loadProfile();
@@ -870,6 +924,24 @@ async function checkDevice() {
 window.toggleForm = function () {
   document.getElementById('form-login').classList.toggle('hidden');
   document.getElementById('form-reg').classList.toggle('hidden');
+  document.getElementById('form-reset').classList.add('hidden');
+};
+
+window.showResetForm = function () {
+  document.getElementById('form-login').classList.add('hidden');
+  document.getElementById('form-reg').classList.add('hidden');
+  document.getElementById('form-reset').classList.remove('hidden');
+  const email = document.getElementById('li-email').value;
+  if (email) document.getElementById('rs-email').value = email;
+  document.getElementById('rs-err').classList.remove('show');
+  document.getElementById('rs-ok').style.display = 'none';
+  setTimeout(() => document.getElementById('rs-email').focus(), 80);
+};
+
+window.showLoginForm = function () {
+  document.getElementById('form-login').classList.remove('hidden');
+  document.getElementById('form-reg').classList.add('hidden');
+  document.getElementById('form-reset').classList.add('hidden');
 };
 
 let _authBusy = false;
@@ -917,7 +989,66 @@ window.doRegister = async function () {
   }
 };
 
-window.confirmLogout = function () {
+window.showNewPasswordForm = function () {
+  ['form-login','form-reg','form-reset'].forEach(id => document.getElementById(id).classList.add('hidden'));
+  document.getElementById('form-newpwd').classList.remove('hidden');
+  setTimeout(() => document.getElementById('np-pwd').focus(), 100);
+};
+
+window.doNewPassword = async function () {
+  const pwd = document.getElementById('np-pwd').value;
+  const pwd2 = document.getElementById('np-pwd2').value;
+  const err = document.getElementById('np-err');
+  const btn = document.getElementById('btn-newpwd');
+  err.classList.remove('show');
+  if (pwd.length < 6) { err.textContent = 'Пароль минимум 6 символов'; err.classList.add('show'); return; }
+  if (pwd !== pwd2) { err.textContent = 'Пароли не совпадают'; err.classList.add('show'); return; }
+  btn.disabled = true; btn.textContent = '...';
+  try {
+    const { error } = await _sb.auth.updateUser({ password: pwd });
+    if (error) {
+      err.textContent = 'Ошибка: ' + error.message;
+      err.classList.add('show');
+      btn.disabled = false; btn.textContent = 'Сохранить новый пароль →';
+    } else {
+      toast('✓ Пароль успешно изменён');
+      /* Убираем токен из URL и входим в кабинет */
+      window.history.replaceState({}, document.title, window.location.pathname);
+      _user = (await _sb.auth.getUser()).data.user;
+      await loadProfile();
+      await checkDevice();
+      goDash();
+    }
+  } catch(e) {
+    btn.disabled = false; btn.textContent = 'Сохранить новый пароль →';
+  }
+};
+
+window.doReset = async function () {
+  const email = document.getElementById('rs-email').value.trim();
+  const err = document.getElementById('rs-err');
+  const ok = document.getElementById('rs-ok');
+  const btn = document.getElementById('btn-reset');
+  err.classList.remove('show');
+  ok.style.display = 'none';
+  if (!email) { err.textContent = 'Введите email'; err.classList.add('show'); return; }
+  btn.disabled = true; btn.textContent = '...';
+  try {
+    const { error } = await _sb.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + window.location.pathname
+    });
+    if (error) {
+      err.textContent = 'Ошибка: ' + error.message;
+      err.classList.add('show');
+    } else {
+      ok.style.display = 'block';
+      ok.textContent = '✓ Ссылка отправлена на ' + email + '. Проверьте почту (и папку «Спам»).';
+      btn.textContent = 'Отправлено';
+    }
+  } finally {
+    if (btn.textContent === '...') { btn.disabled = false; btn.textContent = 'Отправить ссылку →'; }
+  }
+};
   modal('🚪', 'Выйти из аккаунта?', 'Вам нужно будет войти снова.', 'Выйти', () => _sb.auth.signOut(), false);
 };
 
