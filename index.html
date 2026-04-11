@@ -1201,20 +1201,5 @@ async function loadAdminStats() {
 }
 window.loadAdminStats = loadAdminStats;
 </script>
-
-<!--
-  SQL для Supabase — выполните один раз в SQL Editor:
-
-  ALTER TABLE profiles ADD COLUMN IF NOT EXISTS is_blocked BOOLEAN DEFAULT FALSE;
-  ALTER TABLE profiles ADD COLUMN IF NOT EXISTS is_pro BOOLEAN DEFAULT FALSE;
-  ALTER TABLE profiles ADD COLUMN IF NOT EXISTS pro_until DATE;
-  ALTER TABLE profiles ADD COLUMN IF NOT EXISTS device_fingerprint TEXT;
-  ALTER TABLE profiles ADD COLUMN IF NOT EXISTS device_count INT DEFAULT 0;
-  ALTER TABLE profiles ADD COLUMN IF NOT EXISTS suspicious BOOLEAN DEFAULT FALSE;
-  ALTER TABLE profiles ADD COLUMN IF NOT EXISTS last_seen TIMESTAMPTZ;
-
-  Для выдачи прав администратора:
-  UPDATE profiles SET is_admin = true WHERE id = 'ВАШ_UUID';
--->
 </body>
 </html>
