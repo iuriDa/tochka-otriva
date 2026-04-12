@@ -474,6 +474,7 @@ select.inp { cursor: pointer; }
       <div class="profile-foot">
         <div class="profile-since" id="prof-since">—</div>
         <span id="prof-blocked-badge" class="badge br hidden">Заблокирован</span>
+        <button class="btn btn-s btn-sm" onclick="openProfileEdit()">✏️ Редактировать</button>
       </div>
     </div>
 
@@ -648,15 +649,15 @@ select.inp { cursor: pointer; }
     <div class="pro-grant-form">
       <div class="pro-grant-title">Срок Pro доступа</div>
       <div class="days-row">
-        <div class="day-chip on" onclick="selDays(30,this)">30 дней</div>
-        <div class="day-chip" onclick="selDays(90,this)">3 месяца</div>
-        <div class="day-chip" onclick="selDays(180,this)">6 месяцев</div>
+        <div class="day-chip on" onclick="selDays(1,this)">1 день</div>
+        <div class="day-chip" onclick="selDays(7,this)">7 дней</div>
         <div class="day-chip" onclick="selDays(365,this)">1 год</div>
         <div class="day-chip" onclick="selDays(3650,this)">Навсегда</div>
       </div>
     </div>
     <div class="modal-act" style="margin-top:14px">
       <button class="btn btn-g btn-sm" onclick="closeProModal()">Отмена</button>
+      <button class="btn btn-d btn-sm" onclick="removePro()">❌ Отключить</button>
       <button class="btn btn-a btn-sm" onclick="grantPro()">✓ Открыть Pro</button>
     </div>
   </div>
@@ -954,7 +955,12 @@ window.goDash = function () {
   const isBlocked = _profile?.is_blocked;
   const proUntil = _profile?.pro_until;
 
-  document.getElementById('prof-ava').textContent = initials(name);
+  if (_profile?.avatar_url) {
+      document.getElementById('prof-ava').innerHTML =
+        `<img src="${_profile.avatar_url}" style="width:100%;height:100%;border-radius:13px;object-fit:cover">`;
+    } else {
+      document.getElementById('prof-ava').textContent = initials(name);
+  }
   document.getElementById('prof-name').textContent = name;
   document.getElementById('prof-email').textContent = email;
   document.getElementById('prof-since').textContent = 'С нами с ' + since;
@@ -1126,6 +1132,19 @@ window.grantPro = async function () {
   await loadAdminUsers();
 };
 
+window.removePro = async function () {
+  if (!_proUserId) return;
+
+  await _sb.from('profiles').update({
+    is_pro: false,
+    pro_until: null
+  }).eq('id', _proUserId);
+
+  closeProModal();
+  toast('❌ Pro доступ отключён');
+  await loadAdminUsers();
+};
+
 /* СОБЫТИЯ */
 window.loadAdminEvents = async function () {
   const el = document.getElementById('admin-ev-list');
@@ -1200,7 +1219,84 @@ async function loadAdminStats() {
     </div>`).join('') || '<div class="empty">Нет данных</div>';
 }
 window.loadAdminStats = loadAdminStats;
-</script>
+window.openProfileEdit = function () {
+  document.getElementById('pf-name').value = _profile?.full_name || '';
+  document.getElementById('pf-birth').value = _profile?.birth_date || '';
+  document.getElementById('pf-city').value = _profile?.city || '';
+  document.getElementById('pf-club').value = _profile?.club || '';
+  document.getElementById('pf-athlete-rank').value = _profile?.athlete_rank || '';
+  document.getElementById('pf-judge-cat').value = _profile?.judge_category || '';
+  document.getElementById('pf-coach-exp').value = _profile?.coach_experience || '';
 
+  document.getElementById('modal-profile').classList.add('open');
+};
+
+window.closeProfile = function () {
+  document.getElementById('modal-profile').classList.remove('open');
+};
+
+window.saveProfile = async function () {
+  await _sb.from('profiles').update({
+    full_name: document.getElementById('pf-name').value,
+    birth_date: document.getElementById('pf-birth').value,
+    city: document.getElementById('pf-city').value,
+    club: document.getElementById('pf-club').value,
+    athlete_rank: document.getElementById('pf-athlete-rank').value,
+    judge_category: document.getElementById('pf-judge-cat').value,
+    coach_experience: document.getElementById('pf-coach-exp').value
+  }).eq('id', _user.id);
+
+  await loadProfile();
+  closeProfile();
+  goDash();
+  toast('✓ Профиль обновлён');
+};
+</script>
+  <div id="modal-profile" class="modal-ov">
+    <div class="modal anim" style="max-width:420px">
+      <div class="modal-ttl">Профиль</div>
+
+      <div class="field">
+        <label class="lbl">ФИО</label>
+        <input id="pf-name" class="inp">
+      </div>
+
+      <div class="field">
+        <label class="lbl">Дата рождения</label>
+        <input id="pf-birth" type="date" class="inp">
+      </div>
+
+      <div class="field">
+        <label class="lbl">Город</label>
+        <input id="pf-city" class="inp">
+      </div>
+
+      <div class="field">
+        <label class="lbl">Клуб</label>
+        <input id="pf-club" class="inp">
+      </div>
+
+      <div class="field">
+        <label class="lbl">Спортсмен</label>
+        <input id="pf-athlete-rank" class="inp" placeholder="Разряд">
+      </div>
+
+      <div class="field">
+        <label class="lbl">Судья</label>
+        <input id="pf-judge-cat" class="inp" placeholder="Категория">
+      </div>
+
+      <div class="field">
+        <label class="lbl">Тренер</label>
+        <input id="pf-coach-exp" class="inp" placeholder="Стаж">
+      </div>
+
+      <div class="modal-act">
+        <button class="btn btn-g btn-sm" onclick="closeProfile()">Отмена</button>
+        <button class="btn btn-a btn-sm" onclick="saveProfile()">Сохранить</button>
+      </div>
+    </div>
+  </div>
+  
 </body>
 </html>
