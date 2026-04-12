@@ -370,6 +370,41 @@ body {
 .header-right{display:flex;align-items:center;gap:6px;flex-shrink:0}
 .back-btn{display:flex;align-items:center;gap:4px;padding:7px 11px;border:1px solid var(--border);border-radius:20px;background:var(--bg2);color:var(--text2);font-family:'Manrope',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap}
 .back-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+/* ── НОВЫЕ КНОПКИ ТЕХНИЧЕСКОГО РАЗДЕЛА ── */
+.req-btns { display:flex; flex-wrap:wrap; gap:7px; margin-bottom:8px; }
+.req-btn {
+  padding:9px 13px; border-radius:10px; border:1.5px solid var(--border);
+  background:var(--bg); color:var(--text);
+  font-family:'Manrope',sans-serif; font-size:13px; font-weight:700;
+  cursor:pointer; transition:all .15s; flex-shrink:0; line-height:1.2;
+}
+.req-btn:active { transform:scale(.92); }
+.req-btn.sel {
+  background:var(--tri-02-bg); border-color:var(--tri-02-brd); color:var(--tri-02-txt);
+}
+.req-btn.disabled-btn { opacity:.35; pointer-events:none; }
+.role-toggle { display:flex; gap:6px; margin-bottom:10px; }
+.role-btn {
+  flex:1; padding:9px 8px; border-radius:10px; border:1.5px solid var(--border);
+  background:var(--bg2); color:var(--text2);
+  font-family:'Manrope',sans-serif; font-size:12px; font-weight:700;
+  cursor:pointer; transition:all .15s; text-align:center; line-height:1.3;
+}
+.role-btn.on { background:var(--tab-act-bg); color:var(--tab-act-txt); border-color:var(--tab-act-bg); }
+.cnt-row { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px; }
+.cnt-btn {
+  min-width:52px; height:50px; border-radius:10px; border:1.5px solid var(--border);
+  background:var(--bg); color:var(--text);
+  font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:700;
+  cursor:pointer; transition:all .15s; display:flex; align-items:center; justify-content:center;
+}
+.cnt-btn:active { transform:scale(.92); }
+.cnt-btn.sel-zero { background:var(--tri-zero-bg); border-color:var(--tri-zero-brd); color:var(--tri-zero-txt); }
+.cnt-btn.sel-mid  { background:var(--tri-01-bg);   border-color:var(--tri-01-brd);   color:var(--tri-01-txt); }
+.cnt-btn.sel-high { background:var(--tri-02-bg);   border-color:var(--tri-02-brd);   color:var(--tri-02-txt); }
+.req-hint-new { font-size:12px; color:var(--muted); margin-top:4px; min-height:16px; }
+
   </style>
 </head>
 <body>
@@ -486,72 +521,68 @@ body {
           <span class="tech-score-val" id="disp-single-req">0.0</span>
         </div>
         <div class="req-block">
-          <div class="req-item" data-disc="single" data-key="single_music">
+
+          <!-- 1. Музыка -->
+          <div class="req-item">
             <div class="req-name">1. Использование музыки</div>
-            <div class="tri-controls">
-              <button class="tri-btn active" data-val="0">0</button>
-              <button class="tri-btn" data-val="0.1">0,1</button>
-              <button class="tri-btn" data-val="0.2">0,2</button>
+            <div class="req-btns" data-mode="pair" data-disc="single">
+              <button class="req-btn">Начало</button>
+              <button class="req-btn">Конец</button>
             </div>
-            <div class="req-hints">
-              <span class="hint h0 active-hint">Не выполнено</span>
-              <span class="hint h1">Только начало или только конец</span>
-              <span class="hint h2">И начало, и конец выступления</span>
-            </div>
+            <div class="req-hint-new">0 кнопок = 0 · 1 кнопка = 0,1 · 2 кнопки = 0,2</div>
           </div>
-          <div class="req-item" data-disc="single" data-key="single_power">
-            <div class="req-name">2. Силовые (спец) навыки</div>
-            <div class="tri-controls">
-              <button class="tri-btn active" data-val="0">0</button>
-              <button class="tri-btn" data-val="0.1">0,1</button>
-              <button class="tri-btn" data-val="0.2">0,2</button>
+
+          <!-- 2. Силовые -->
+          <div class="req-item">
+            <div class="req-name">2. Силовые / гимнастические / мульти навыки</div>
+            <div class="req-btns" data-mode="multi-all" data-total="6" data-disc="single">
+              <button class="req-btn">1 Силовой</button>
+              <button class="req-btn">2 Силовой</button>
+              <button class="req-btn">1 Гимн.</button>
+              <button class="req-btn">2 Гимн.</button>
+              <button class="req-btn">1 Мульти</button>
+              <button class="req-btn">2 Мульти</button>
             </div>
-            <div class="req-hints">
-              <span class="hint h0 active-hint">Не выполнено</span>
-              <span class="hint h1">Один эл-т: акро / гимн / сила</span>
-              <span class="hint h2">Два успешно выполненных эл-та</span>
-            </div>
+            <div class="req-hint-new">Ни одна = 0 · Любые = 0,1 · Все 6 = 0,2</div>
           </div>
-          <div class="req-item" data-disc="single" data-key="single_dir">
+
+          <!-- 3. Направление -->
+          <div class="req-item">
             <div class="req-name">3. Изменение направления вращения</div>
-            <div class="tri-controls">
-              <button class="tri-btn active" data-val="0">0</button>
-              <button class="tri-btn" data-val="0.1">0,1</button>
-              <button class="tri-btn" data-val="0.2">0,2</button>
+            <div class="req-btns" data-mode="pair" data-disc="single">
+              <button class="req-btn">1 Смена</button>
+              <button class="req-btn">2 Смена</button>
             </div>
-            <div class="req-hints">
-              <span class="hint h0 active-hint">Не выполнено</span>
-              <span class="hint h1">Одна смена направления</span>
-              <span class="hint h2">Две смены направления</span>
-            </div>
+            <div class="req-hint-new">0 кнопок = 0 · 1 кнопка = 0,1 · 2 кнопки = 0,2</div>
           </div>
-          <div class="req-item" data-disc="single" data-key="single_space">
+
+          <!-- 4. Пространство -->
+          <div class="req-item">
             <div class="req-name">4. Пространственная динамика</div>
-            <div class="tri-controls">
-              <button class="tri-btn active" data-val="0">0</button>
-              <button class="tri-btn" data-val="0.1">0,1</button>
-              <button class="tri-btn" data-val="0.2">0,2</button>
+            <div class="req-btns" data-mode="multi-all" data-total="4" data-disc="single">
+              <button class="req-btn">1 Зона</button>
+              <button class="req-btn">2 Зона</button>
+              <button class="req-btn">3 Зона</button>
+              <button class="req-btn">4 Зона</button>
             </div>
-            <div class="req-hints">
-              <span class="hint h0 active-hint">Не выполнено</span>
-              <span class="hint h1">Посещение 2–3 квадратов</span>
-              <span class="hint h2">Посещение всех 4 квадратов</span>
-            </div>
+            <div class="req-hint-new">Ни одна = 0 · Любые = 0,1 · Все 4 = 0,2</div>
           </div>
-          <div class="req-item" data-disc="single" data-key="single_manip">
+
+          <!-- 5. Манипуляции -->
+          <div class="req-item">
             <div class="req-name">5. Манипуляции со скакалкой</div>
-            <div class="tri-controls">
-              <button class="tri-btn active" data-val="0">0</button>
-              <button class="tri-btn" data-val="0.1">0,1</button>
-              <button class="tri-btn" data-val="0.2">0,2</button>
+            <div class="req-btns" data-mode="multi-all" data-total="6" data-disc="single">
+              <button class="req-btn">Изоляция 1</button>
+              <button class="req-btn">Изоляция 2</button>
+              <button class="req-btn">Намотка 1</button>
+              <button class="req-btn">Намотка 2</button>
+              <button class="req-btn">Выброс 1</button>
+              <button class="req-btn">Выброс 2</button>
             </div>
-            <div class="req-hints">
-              <span class="hint h0 active-hint">Не выполнено</span>
-              <span class="hint h1">Один крест / намотка / релиз</span>
-              <span class="hint h2">Два креста / намотки / релиза</span>
-            </div>
+            <div class="req-hint-new">Ни одна = 0 · Любые = 0,1 · Все 6 = 0,2</div>
           </div>
         </div>
+
         <div class="tech-score-bar penalty-bar">
           <span class="tech-score-label">Штрафы</span>
           <span class="tech-score-val penalty-val" id="disp-single-pen">0.0</span>
@@ -576,72 +607,69 @@ body {
           <span class="tech-score-val" id="disp-double-req">0.0</span>
         </div>
         <div class="req-block">
-          <div class="req-item" data-disc="double" data-key="d_entry">
-            <div class="req-name">1. Вступление и завершение</div>
-            <div class="tri-controls">
-              <button class="tri-btn active" data-val="0">0</button>
-              <button class="tri-btn" data-val="0.1">0,1</button>
-              <button class="tri-btn" data-val="0.2">0,2</button>
+
+          <!-- 1. Музыка -->
+          <div class="req-item">
+            <div class="req-name">1. Использование музыки</div>
+            <div class="req-btns" data-mode="pair" data-disc="double">
+              <button class="req-btn">Начало</button>
+              <button class="req-btn">Конец</button>
             </div>
-            <div class="req-hints">
-              <span class="hint h0 active-hint">Не выполнено</span>
-              <span class="hint h1">Только начало или только конец</span>
-              <span class="hint h2">И начало, и конец выступления</span>
-            </div>
+            <div class="req-hint-new">0 кнопок = 0 · 1 кнопка = 0,1 · 2 кнопки = 0,2</div>
           </div>
-          <div class="req-item" data-disc="double" data-key="d_roles">
+
+          <!-- 2. Смены ролей -->
+          <div class="req-item">
             <div class="req-name">2. Смены ролей</div>
-            <div class="tri-controls">
-              <button class="tri-btn active" data-val="0">0</button>
-              <button class="tri-btn" data-val="0.1">0,1</button>
-              <button class="tri-btn" data-val="0.2">0,2</button>
+            <div class="role-toggle">
+              <button class="role-btn on" data-role="1">1 человек прыгает</button>
+              <button class="role-btn" data-role="2">2 человека прыгают</button>
             </div>
-            <div class="req-hints">
-              <span class="hint h0 active-hint">Не выполнено</span>
-              <span class="hint h1">Более одной смены, но не все роли</span>
-              <span class="hint h2">Каждый — и крутящий, и прыгающий</span>
+            <div class="req-btns" data-mode="multi-change" data-total="3" data-disc="double">
+              <button class="req-btn">1 Смена</button>
+              <button class="req-btn">2 Смены</button>
+              <button class="req-btn">3 Смены</button>
             </div>
+            <div class="req-hint-new">0 смен = 0 · 1–2 смены = 0,1 · 3 смены = 0,2</div>
           </div>
-          <div class="req-item" data-disc="double" data-key="d_manip">
-            <div class="req-name">3. Манипуляции</div>
-            <div class="tri-controls">
-              <button class="tri-btn active" data-val="0">0</button>
-              <button class="tri-btn" data-val="0.1">0,1</button>
-              <button class="tri-btn" data-val="0.2">0,2</button>
+
+          <!-- 3. Манипуляции -->
+          <div class="req-item">
+            <div class="req-name">3. Манипуляции (выбрать до 2 из 4)</div>
+            <div class="req-btns" data-mode="max2" data-disc="double">
+              <button class="req-btn">Изоляция 1</button>
+              <button class="req-btn">Изоляция 2</button>
+              <button class="req-btn">Выброс 1</button>
+              <button class="req-btn">Выброс 2</button>
             </div>
-            <div class="req-hints">
-              <span class="hint h0 active-hint">Не выполнено</span>
-              <span class="hint h1">Одна изоляция или один выброс</span>
-              <span class="hint h2">Два выброса / две изоляции / по одному каждого</span>
-            </div>
+            <div class="req-hint-new">0 = 0 · 1 = 0,1 · 2 = 0,2 (не более 2)</div>
           </div>
-          <div class="req-item" data-disc="double" data-key="d_dir">
+
+          <!-- 4. Направление -->
+          <div class="req-item">
             <div class="req-name">4. Изменение направления</div>
-            <div class="tri-controls">
-              <button class="tri-btn active" data-val="0">0</button>
-              <button class="tri-btn" data-val="0.1">0,1</button>
-              <button class="tri-btn" data-val="0.2">0,2</button>
+            <div class="req-btns" data-mode="pair" data-disc="double">
+              <button class="req-btn">1 Смена</button>
+              <button class="req-btn">2 Смены</button>
             </div>
-            <div class="req-hints">
-              <span class="hint h0 active-hint">Не выполнено</span>
-              <span class="hint h1">Одна смена направления</span>
-              <span class="hint h2">Две смены направления</span>
-            </div>
+            <div class="req-hint-new">0 кнопок = 0 · 1 кнопка = 0,1 · 2 кнопки = 0,2</div>
           </div>
-          <div class="req-item" data-disc="double" data-key="d_special">
+
+          <!-- 5. Специальные -->
+          <div class="req-item">
             <div class="req-name">5. Специальные навыки</div>
-            <div class="tri-controls">
-              <button class="tri-btn active" data-val="0">0</button>
-              <button class="tri-btn" data-val="0.1">0,1</button>
-              <button class="tri-btn" data-val="0.2">0,2</button>
+            <div class="req-btns" data-mode="multi-all" data-total="6" data-disc="double">
+              <button class="req-btn">1 Силовой</button>
+              <button class="req-btn">2 Силовой</button>
+              <button class="req-btn">1 Гимн.</button>
+              <button class="req-btn">2 Гимн.</button>
+              <button class="req-btn">1 Мульти</button>
+              <button class="req-btn">2 Мульти</button>
             </div>
-            <div class="req-hints">
-              <span class="hint h0 active-hint">Не выполнено</span>
-              <span class="hint h1">Один силовой / акроб. прыжок / мультипрыжок</span>
-              <span class="hint h2">Два силовых / акроб. прыжка / мультипрыжка</span>
-            </div>
+            <div class="req-hint-new">Ни одна = 0 · Любые = 0,1 · Все 6 = 0,2</div>
           </div>
         </div>
+
         <div class="tech-score-bar penalty-bar">
           <span class="tech-score-label">Штрафы</span>
           <span class="tech-score-val penalty-val" id="disp-double-pen">0.0</span>
@@ -666,71 +694,69 @@ body {
           <span class="tech-score-val" id="disp-team-req">0.0</span>
         </div>
         <div class="req-block">
-          <div class="req-item" data-disc="team" data-key="t_group">
-            <div class="req-name">1. Групповое выполнение</div>
-            <div class="tri-controls">
-              <button class="tri-btn active" data-val="0">0</button>
-              <button class="tri-btn" data-val="0.1">0,1</button>
-              <button class="tri-btn" data-val="0.2">0,2</button>
+
+          <!-- HELPER MACRO: team counter item -->
+          <!-- 1 -->
+          <div class="req-item">
+            <div class="req-name">1. Групповое выполнение (одиночные)</div>
+            <div class="cnt-row" data-disc="team">
+              <button class="cnt-btn" data-val="0">0</button>
+              <button class="cnt-btn" data-val="1">1</button>
+              <button class="cnt-btn" data-val="2">2</button>
+              <button class="cnt-btn" data-val="3">3</button>
+              <button class="cnt-btn" data-val="4">4+</button>
             </div>
-            <div class="req-hints">
-              <span class="hint h0 active-hint">Не выполнено</span>
-              <span class="hint h1">2–3 спортсмена — навыки на одиночных</span>
-              <span class="hint h2">Мин. 4 спортсмена — навыки на одиночных</span>
-            </div>
+            <div class="req-hint-new">0 = 0 · 1–3 чел. = 0,1 · 4+ чел. = 0,2</div>
           </div>
-          <div class="req-item" data-disc="team" data-key="t_double">
-            <div class="req-name">2. Две скакалки</div>
-            <div class="tri-controls">
-              <button class="tri-btn active" data-val="0">0</button>
-              <button class="tri-btn" data-val="0.1">0,1</button>
-              <button class="tri-btn" data-val="0.2">0,2</button>
+          <!-- 2 -->
+          <div class="req-item">
+            <div class="req-name">2. Две скакалки одновременно</div>
+            <div class="cnt-row" data-disc="team">
+              <button class="cnt-btn" data-val="0">0</button>
+              <button class="cnt-btn" data-val="1">1</button>
+              <button class="cnt-btn" data-val="2">2</button>
+              <button class="cnt-btn" data-val="3">3</button>
+              <button class="cnt-btn" data-val="4">4+</button>
             </div>
-            <div class="req-hints">
-              <span class="hint h0 active-hint">Не выполнено</span>
-              <span class="hint h1">2–3 спортсмена — с изменением направления</span>
-              <span class="hint h2">Мин. 4 спортсмена — с изменением направления</span>
-            </div>
+            <div class="req-hint-new">0 = 0 · 1–3 чел. = 0,1 · 4+ чел. = 0,2</div>
           </div>
-          <div class="req-item" data-disc="team" data-key="t_wheel">
+          <!-- 3 -->
+          <div class="req-item">
             <div class="req-name">3. Колесо</div>
-            <div class="tri-controls">
-              <button class="tri-btn active" data-val="0">0</button>
-              <button class="tri-btn" data-val="0.1">0,1</button>
-              <button class="tri-btn" data-val="0.2">0,2</button>
+            <div class="cnt-row" data-disc="team">
+              <button class="cnt-btn" data-val="0">0</button>
+              <button class="cnt-btn" data-val="1">1</button>
+              <button class="cnt-btn" data-val="2">2</button>
+              <button class="cnt-btn" data-val="3">3</button>
+              <button class="cnt-btn" data-val="4">4+</button>
             </div>
-            <div class="req-hints">
-              <span class="hint h0 active-hint">Не выполнено</span>
-              <span class="hint h1">2–3 спортсмена демонстрируют навык</span>
-              <span class="hint h2">4 спортсмена демонстрируют навык</span>
-            </div>
+            <div class="req-hint-new">0 = 0 · 1–3 чел. = 0,1 · 4+ чел. = 0,2</div>
           </div>
-          <div class="req-item" data-disc="team" data-key="t_long">
+          <!-- 4 -->
+          <div class="req-item">
             <div class="req-name">4. Длинная скакалка (7м)</div>
-            <div class="tri-controls">
-              <button class="tri-btn active" data-val="0">0</button>
-              <button class="tri-btn" data-val="0.1">0,1</button>
-              <button class="tri-btn" data-val="0.2">0,2</button>
+            <div class="cnt-row" data-disc="team">
+              <button class="cnt-btn" data-val="0">0</button>
+              <button class="cnt-btn" data-val="1">1</button>
+              <button class="cnt-btn" data-val="2">2</button>
+              <button class="cnt-btn" data-val="3">3</button>
+              <button class="cnt-btn" data-val="4">4+</button>
             </div>
-            <div class="req-hints">
-              <span class="hint h0 active-hint">Не выполнено</span>
-              <span class="hint h1">2–3 спортсмена демонстрируют навык</span>
-              <span class="hint h2">4 спортсмена демонстрируют навык</span>
-            </div>
+            <div class="req-hint-new">0 = 0 · 1–3 чел. = 0,1 · 4+ чел. = 0,2</div>
           </div>
-          <div class="req-item" data-disc="team" data-key="t_travel">
+          <!-- 5 -->
+          <div class="req-item">
             <div class="req-name">5. Путешественник / Взаимодействие</div>
-            <div class="tri-controls">
-              <button class="tri-btn active" data-val="0">0</button>
-              <button class="tri-btn" data-val="0.1">0,1</button>
-              <button class="tri-btn" data-val="0.2">0,2</button>
+            <div class="cnt-row" data-disc="team">
+              <button class="cnt-btn" data-val="0">0</button>
+              <button class="cnt-btn" data-val="1">1</button>
+              <button class="cnt-btn" data-val="2">2</button>
+              <button class="cnt-btn" data-val="3">3</button>
+              <button class="cnt-btn" data-val="4">4+</button>
             </div>
-            <div class="req-hints">
-              <span class="hint h0 active-hint">Не выполнено</span>
-              <span class="hint h1">2–3 спортсмена — «черпак» или «совок»</span>
-              <span class="hint h2">4 спортсмена — «черпак» или «совок»</span>
-            </div>
+            <div class="req-hint-new">0 = 0 · 1–3 чел. = 0,1 · 4+ чел. = 0,2</div>
           </div>
+
         </div>
         <div class="tech-score-bar penalty-bar">
           <span class="tech-score-label">Штрафы</span>
@@ -1070,25 +1096,18 @@ withConfirm(document.getElementById('reset-presentation'), () => {
 });
 
 // ══════════════════════════════════════════════
-// ТЕХНИЧЕСКИЙ
+// ТЕХНИЧЕСКИЙ — НОВАЯ СИСТЕМА КНОПОК
 // ══════════════════════════════════════════════
-const reqValues = {};
-const penValues = {};
+
 let currentDisc = 'single';
+const penValues = {};
 
-document.querySelectorAll('.req-item').forEach(item => {
-  reqValues[item.dataset.key] = 0;
-});
-
+/* Инициализация штрафов */
 document.querySelectorAll('.pen-btn').forEach(btn => {
-  penValues[btn.dataset.key] = {
-    pen:    parseFloat(btn.dataset.pen),
-    once:   btn.dataset.once === 'true',
-    count:  0,
-    active: false,
-  };
+  penValues[btn.dataset.key] = { pen:parseFloat(btn.dataset.pen), once:btn.dataset.once==='true', count:0, active:false };
 });
 
+/* Вкладки дисциплин */
 document.querySelectorAll('.disc-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.disc-btn').forEach(b=>{ b.classList.remove('active'); b.setAttribute('aria-selected','false'); });
@@ -1100,78 +1119,101 @@ document.querySelectorAll('.disc-btn').forEach(btn => {
   });
 });
 
-document.querySelectorAll('.tri-controls').forEach(ctrl => {
-  const item = ctrl.closest('.req-item');
-  const key  = item.dataset.key;
-  ctrl.querySelectorAll('.tri-btn').forEach(btn => {
+/* Роль-тоггл (только визуальный) */
+document.querySelectorAll('.role-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    btn.closest('.role-toggle').querySelectorAll('.role-btn').forEach(b=>b.classList.remove('on'));
+    btn.classList.add('on');
+  });
+});
+
+/* Кнопки обязательных навыков */
+function calcGroup(group) {
+  const mode = group.dataset.mode;
+  const btns = group.querySelectorAll('.req-btn');
+  const sel = [...btns].filter(b=>b.classList.contains('sel')).length;
+  const total = parseInt(group.dataset.total || btns.length);
+  if (mode === 'pair')         return sel===0?0:sel===1?0.1:0.2;
+  if (mode === 'multi-all')    return sel===0?0:sel>=total?0.2:0.1;
+  if (mode === 'multi-change') return sel===0?0:sel>=3?0.2:0.1;
+  if (mode === 'max2')         return sel===0?0:sel>=2?0.2:0.1;
+  return 0;
+}
+
+document.querySelectorAll('.req-btns').forEach(group => {
+  group.querySelectorAll('.req-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      ctrl.querySelectorAll('.tri-btn').forEach(b=>b.classList.remove('active'));
-      btn.classList.add('active');
-      reqValues[key] = parseFloat(btn.dataset.val);
-      item.querySelectorAll('.hint').forEach(h=>h.classList.remove('active-hint'));
-      const val = reqValues[key];
-      if     (val===0)   item.querySelector('.h0')?.classList.add('active-hint');
-      else if(val===0.1) item.querySelector('.h1')?.classList.add('active-hint');
-      else if(val===0.2) item.querySelector('.h2')?.classList.add('active-hint');
-      updateTechDisplay(item.dataset.disc);
-      updateDisplay('technical');
+      const mode = group.dataset.mode;
+      if (mode === 'max2') {
+        const selNow = group.querySelectorAll('.req-btn.sel').length;
+        if (btn.classList.contains('sel')) { btn.classList.remove('sel'); }
+        else if (selNow < 2) { btn.classList.add('sel'); }
+      } else {
+        btn.classList.toggle('sel');
+      }
+      if (navigator.vibrate) navigator.vibrate(7);
+      const disc = btn.closest('.disc-panel').id.replace('disc-','');
+      updateTechDisplay(disc);
     });
   });
 });
 
-document.querySelectorAll('.pen-btn').forEach(btn => {
-  const key   = btn.dataset.key;
-  const once  = btn.dataset.once === 'true';
-  let holdTimer = null;
+/* Счётчики (командное) */
+function calcCounter(row) {
+  const selBtn = row.querySelector('.cnt-btn.sel-zero,.cnt-btn.sel-mid,.cnt-btn.sel-high');
+  if (!selBtn) return 0;
+  const val = parseInt(selBtn.dataset.val);
+  return val===0?0:val>=4?0.2:0.1;
+}
 
+document.querySelectorAll('.cnt-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const row = btn.closest('.cnt-row');
+    row.querySelectorAll('.cnt-btn').forEach(b=>b.classList.remove('sel-zero','sel-mid','sel-high'));
+    const val = parseInt(btn.dataset.val);
+    btn.classList.add(val===0?'sel-zero':val>=4?'sel-high':'sel-mid');
+    if (navigator.vibrate) navigator.vibrate(7);
+    const disc = btn.closest('.disc-panel').id.replace('disc-','');
+    updateTechDisplay(disc);
+  });
+});
+
+/* Штрафы */
+document.querySelectorAll('.pen-btn').forEach(btn => {
+  const key  = btn.dataset.key;
+  const once = btn.dataset.once === 'true';
+  let holdTimer = null;
   btn.addEventListener('click', () => {
     const st = penValues[key];
-    if (once) {
-      st.active = !st.active;
-      st.count  = st.active ? 1 : 0;
-    } else {
-      st.count++;
-      st.active = true;
-    }
+    if (once) { st.active=!st.active; st.count=st.active?1:0; }
+    else { st.count++; st.active=true; }
     btn.classList.toggle('pen-active', st.active);
     refreshPenLabel(btn);
     updateTechDisplay(currentDisc);
   });
-
   if (!once) {
     const startHold = () => {
       holdTimer = setTimeout(() => {
         const st = penValues[key];
-        if (st.count > 0) {
-          st.count--;
-          if (st.count === 0) { st.active = false; btn.classList.remove('pen-active'); }
-          else btn.classList.add('pen-active');
-        }
-        refreshPenLabel(btn);
-        updateTechDisplay(currentDisc);
+        if (st.count>0) { st.count--; if(st.count===0){st.active=false;btn.classList.remove('pen-active');}else btn.classList.add('pen-active'); }
+        refreshPenLabel(btn); updateTechDisplay(currentDisc);
         if (navigator.vibrate) navigator.vibrate(40);
       }, 600);
     };
     const cancelHold = () => clearTimeout(holdTimer);
-    btn.addEventListener('touchstart',  startHold,  { passive: true });
+    btn.addEventListener('touchstart',  startHold, { passive:true });
     btn.addEventListener('touchend',    cancelHold);
     btn.addEventListener('touchcancel', cancelHold);
     btn.addEventListener('mousedown',   startHold);
     btn.addEventListener('mouseup',     cancelHold);
     btn.addEventListener('mouseleave',  cancelHold);
   }
-
   btn.addEventListener('contextmenu', e => {
     e.preventDefault();
     const st = penValues[key];
-    if (!once && st.count > 0) {
-      st.count--;
-      if (st.count === 0) { st.active = false; btn.classList.remove('pen-active'); }
-    } else if (once && st.active) {
-      st.active = false; st.count = 0; btn.classList.remove('pen-active');
-    }
-    refreshPenLabel(btn);
-    updateTechDisplay(currentDisc);
+    if (!once&&st.count>0) { st.count--; if(st.count===0){st.active=false;btn.classList.remove('pen-active');} }
+    else if(once&&st.active) { st.active=false; st.count=0; btn.classList.remove('pen-active'); }
+    refreshPenLabel(btn); updateTechDisplay(currentDisc);
   });
 });
 
@@ -1179,47 +1221,42 @@ function refreshPenLabel(btn) {
   const base = btn.getAttribute('data-base-label') || btn.textContent.replace(/\s*×\d+$/,'');
   btn.setAttribute('data-base-label', base);
   const cnt = penValues[btn.dataset.key].count;
-  btn.textContent = cnt > 1 ? base+` ×${cnt}` : base;
+  btn.textContent = cnt>1 ? base+` ×${cnt}` : base;
 }
 
 function updateTechDisplay(disc) {
   if (!disc) return;
-  const prefix = disc==='single'?'single_':disc==='double'?'d_':'t_';
-  const reqSum = Object.entries(reqValues)
-    .filter(([k])=>k.startsWith(prefix))
-    .reduce((a,[,v])=>a+v,0);
+  const panel = document.getElementById('disc-'+disc);
+  if (!panel) return;
+  let reqSum = 0;
+  panel.querySelectorAll('.req-btns').forEach(g => { reqSum += calcGroup(g); });
+  panel.querySelectorAll('.cnt-row').forEach(r  => { reqSum += calcCounter(r); });
   const reqEl = document.getElementById('disp-'+disc+'-req');
   if (reqEl) reqEl.textContent = reqSum.toFixed(1);
-
   const penPrefix = disc==='single'?'s_p_':disc==='double'?'d_p_':'t_p_';
-  const penSum = Object.entries(penValues)
-    .filter(([k])=>k.startsWith(penPrefix))
-    .reduce((a,[,v])=>a+v.pen*v.count,0);
+  const penSum = Object.entries(penValues).filter(([k])=>k.startsWith(penPrefix)).reduce((a,[,v])=>a+v.pen*v.count,0);
   const penEl = document.getElementById('disp-'+disc+'-pen');
   if (penEl) penEl.textContent = penSum.toFixed(1);
 }
 
+/* Сброс дисциплины */
 document.querySelectorAll('.disc-reset').forEach(btn => {
   withConfirm(btn, () => {
     const disc  = btn.dataset.disc;
     const panel = document.getElementById('disc-'+disc);
-    panel.querySelectorAll('.req-item').forEach(item => {
-      reqValues[item.dataset.key] = 0;
-      item.querySelectorAll('.tri-btn').forEach((b,i)=>b.classList.toggle('active',i===0));
-      item.querySelectorAll('.hint').forEach(h=>h.classList.remove('active-hint'));
-      item.querySelector('.h0')?.classList.add('active-hint');
-    });
+    panel.querySelectorAll('.req-btn').forEach(b=>b.classList.remove('sel'));
+    panel.querySelectorAll('.cnt-btn').forEach(b=>b.classList.remove('sel-zero','sel-mid','sel-high'));
+    panel.querySelectorAll('.role-btn').forEach((b,i)=>b.classList.toggle('on',i===0));
     panel.querySelectorAll('.pen-btn').forEach(b => {
       const st = penValues[b.dataset.key];
-      st.count=0; st.active=false;
-      b.classList.remove('pen-active');
-      const base = b.getAttribute('data-base-label');
-      if (base) b.textContent = base;
+      st.count=0; st.active=false; b.classList.remove('pen-active');
+      const base = b.getAttribute('data-base-label'); if(base) b.textContent=base;
     });
     updateTechDisplay(disc);
     updateDisplay('technical');
   });
 });
+
 
 // ══════════════════════════════════════════════
 // ГЛАВНЫЙ ДИСПЛЕЙ
@@ -1247,11 +1284,7 @@ function updateDisplay(tab) {
       </div>`;
     return;
   }
-  if (tab === 'about') {
-    displayEl.innerHTML=`
-      <div class="score-label">О приложении</div>
-      <div style="font-size:14px;color:var(--text2);margin-top:4px">Инструмент для судей соревнований по спортивным прыжкам со скакалкой</div>`;
-  }
+
 }
 
 updateDisplay('complexity');
