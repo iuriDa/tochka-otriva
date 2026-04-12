@@ -1,1112 +1,1263 @@
-<!DOCTYPE html>
-<html lang="ru" data-theme="dark">
+<!doctype html>
+<html lang="ru" data-theme="light">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Точка Подсчёта · Судейский Калькулятор</title>
-<meta name="description" content="Профессиональный судейский калькулятор вольных выступлений по спортивной скакалке. IJRU.">
-<meta name="author" content="Данильченко Юрий Леонидович">
-<meta name="theme-color" content="#0B0C10" id="meta-theme">
-<link rel="manifest" href="./manifest.json">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Точка Подсчёта">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Mulish:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
-<style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>Точка Подсчета · Судейский Калькулятор</title>
+
+  <!-- ══ PWA / Установка на экран ══ -->
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#111110" id="meta-theme">
+
+  <!-- iOS / Safari -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="ТО Судья">
+  <link rel="apple-touch-icon" href="./icons/icon-152.png">
+  <link rel="apple-touch-icon" sizes="72x72"   href="./icons/icon-72.png">
+  <link rel="apple-touch-icon" sizes="96x96"   href="./icons/icon-96.png">
+  <link rel="apple-touch-icon" sizes="128x128" href="./icons/icon-128.png">
+  <link rel="apple-touch-icon" sizes="144x144" href="./icons/icon-144.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="./icons/icon-152.png">
+  <link rel="apple-touch-icon" sizes="192x192" href="./icons/icon-192.png">
+
+  <!-- Android / Chrome -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="./icons/icon-512.png">
+
+  <!-- SEO / Описание -->
+  <meta name="description" content="Профессиональный судейский калькулятор для вольных выступлений по спортивной скакалке. Сложность, Презентация, Технический раздел.">
+  <meta name="author" content="Данильченко Юрий Леонидович · Точка Отрыва">
+
+  <!-- Шрифты -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;700;900&family=JetBrains+Mono:wght@400;700&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <style>
+/*
+ * Точка Подсчёта · tochka.html
+ * Версия: 2.1.0 · 2025
+ * Автор: Данильченко Юрий Леонидович · 21.07.1988
+ * Студия «Точка Отрыва» · Крым
+ * Telegram: @iuriletics · Тел: +7 916 837 42 59
+ * © 2025 Все права защищены.
+ */
+/* ══════════════════════════════════════════
+   Судья скакалки · styles.css
+   Данильченко Юрий · Точка Отрыва
+   ══════════════════════════════════════════ */
+
 :root {
-  --accent: #FF6B2B;
-  --accent-d: #D4521A;
-  --accent-s: rgba(255,107,43,.14);
-  --green: #22C55E;
-  --red: #EF4444;
-  --amber: #F59E0B;
-  --yellow: #EAB308;
-  --purple: #A855F7;
-  --blue: #3B82F6;
-  --font: 'Mulish', system-ui, sans-serif;
-  --head: 'Russo One', sans-serif;
-  --mono: 'JetBrains Mono', monospace;
-  --r: 10px;
-  --r-lg: 16px;
-  --r-xl: 22px;
-  --r-pill: 999px;
+  --lv0: #94a3b8; --lv1: #22c55e; --lv2: #84cc16;
+  --lv3: #eab308; --lv4: #f97316; --lv5: #ef4444; --lv6: #a855f7;
 }
-[data-theme="dark"] {
-  --bg: #0B0C10;
-  --sur: #14161E;
-  --sur2: #1A1D28;
-  --sur3: #20243A;
-  --bor: #252A3D;
-  --bor2: #2E344F;
-  --tx: #E8ECFF;
-  --tx2: #7880A0;
-  --tx3: #3D4460;
-  --sh: 0 2px 8px rgba(0,0,0,.4);
-  --sh2: 0 6px 24px rgba(0,0,0,.55);
-  --sh3: 0 14px 48px rgba(0,0,0,.7);
-  --lv1: #22C55E; --lv2: #84CC16; --lv3: #EAB308;
-  --lv4: #F97316; --lv5: #EF4444; --lv6: #A855F7;
-}
+
 [data-theme="light"] {
-  --bg: #F0F2FA;
-  --sur: #FFFFFF;
-  --sur2: #F4F6FF;
-  --sur3: #ECEFFE;
-  --bor: #DDE1F0;
-  --bor2: #C8CEEA;
-  --tx: #0D1026;
-  --tx2: #5E6685;
-  --tx3: #A0A8C0;
-  --sh: 0 2px 8px rgba(0,0,0,.06);
-  --sh2: 0 6px 24px rgba(0,0,0,.08);
-  --sh3: 0 14px 48px rgba(0,0,0,.12);
-  --lv1: #16A34A; --lv2: #65A30D; --lv3: #CA8A04;
-  --lv4: #EA580C; --lv5: #DC2626; --lv6: #9333EA;
+  --bg: #f5f5f0; --bg2: #ffffff; --bg3: #eeeee8;
+  --text: #111110; --text2: #555550; --muted: #888880;
+  --border: #ddddd6; --accent: #111110; --accent-inv: #ffffff;
+  --shadow: rgba(0,0,0,0.07); --card-bg: #ffffff;
+  --tab-act-bg: #111110; --tab-act-txt: #ffffff;
+  --tri-zero-bg: #f0f0ee; --tri-zero-brd: #aaaaaa; --tri-zero-txt: #555;
+  --tri-01-bg: #fffbea; --tri-01-brd: #b8970a; --tri-01-txt: #8a6f00;
+  --tri-02-bg: #edfbf0; --tri-02-brd: #22c55e; --tri-02-txt: #166534;
+  --pen-active-bg: #ef4444; --pen-active-txt: #ffffff;
+  --score-bar-bg: #f0f0ee; --pen-bar-bg: #fff5f5;
 }
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-html { font-size: 16px; }
-body { height: 100dvh; overflow: hidden; background: var(--bg); color: var(--tx); font-family: var(--font); line-height: 1.5; transition: background .2s, color .2s; }
-.screen { display: none; flex-direction: column; height: 100dvh; overflow: hidden; }
-.screen.active { display: flex; }
-.scroll { overflow-y: auto; -webkit-overflow-scrolling: touch; }
-.row { display: flex; align-items: center; }
-.row-b { display: flex; align-items: center; justify-content: space-between; }
-.f1 { flex: 1; }
-.hidden { display: none !important; }
-.mono { font-family: var(--mono); }
 
-.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 0 14px; height: 40px; border-radius: var(--r); border: none; cursor: pointer; font-family: var(--font); font-size: .84rem; font-weight: 700; transition: all .14s; user-select: none; white-space: nowrap; }
-.btn:active { transform: scale(.96); }
-.btn:disabled { opacity: .4; cursor: not-allowed; transform: none !important; }
-.btn-a { background: var(--accent); color: #fff; box-shadow: 0 2px 12px rgba(255,107,43,.28); }
-.btn-a:hover:not(:disabled) { background: var(--accent-d); }
-.btn-d { background: var(--red); color: #fff; }
-.btn-d:hover:not(:disabled) { background: #DC2626; }
-.btn-g { background: transparent; color: var(--tx); border: 1.5px solid var(--bor); }
-.btn-g:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
-.btn-s { background: var(--sur2); color: var(--tx2); border: 1px solid var(--bor); }
-.btn-s:hover:not(:disabled) { color: var(--tx); }
-.btn-sm { height: 32px; padding: 0 11px; font-size: .73rem; border-radius: 7px; }
-.btn-full { width: 100%; }
-.btn-lg { height: 50px; font-size: .97rem; border-radius: var(--r-lg); }
+[data-theme="dark"] {
+  --bg: #0f0f0e; --bg2: #1a1a18; --bg3: #242422;
+  --text: #f0f0ec; --text2: #aaaaaa; --muted: #666660;
+  --border: #2e2e2a; --accent: #f0f0ec; --accent-inv: #111110;
+  --shadow: rgba(0,0,0,0.4); --card-bg: #1a1a18;
+  --tab-act-bg: #f0f0ec; --tab-act-txt: #111110;
+  --tri-zero-bg: #2a2a28; --tri-zero-brd: #555550; --tri-zero-txt: #aaa;
+  --tri-01-bg: #2a2500; --tri-01-brd: #b8970a; --tri-01-txt: #eab308;
+  --tri-02-bg: #0a2010; --tri-02-brd: #22c55e; --tri-02-txt: #22c55e;
+  --pen-active-bg: #c0392b; --pen-active-txt: #ffffff;
+  --score-bar-bg: #242422; --pen-bar-bg: #1f1010;
+}
 
-.inp { width: 100%; padding: 0 13px; height: 46px; background: var(--sur2); border: 1.5px solid var(--bor); border-radius: var(--r); color: var(--tx); font-family: var(--font); font-size: .94rem; outline: none; transition: border-color .2s, box-shadow .2s; -webkit-appearance: none; }
-.inp:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-s); }
-.inp::placeholder { color: var(--tx3); }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; margin: 0; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: 'Manrope', system-ui, sans-serif;
+  -webkit-text-size-adjust: 100%; touch-action: manipulation;
+  transition: background .25s, color .25s;
+}
 
-.pill { display: flex; align-items: center; background: var(--sur2); border: 1px solid var(--bor); border-radius: var(--r-pill); padding: 3px; gap: 2px; }
-.pill button { border: none; background: transparent; cursor: pointer; font-size: .68rem; font-weight: 800; color: var(--tx2); padding: 3px 9px; border-radius: var(--r-pill); transition: all .15s; font-family: var(--font); }
-.pill button.on { background: var(--accent); color: #fff; }
+.app-header {
+  position: sticky; top: 0; z-index: 20;
+  background: var(--bg2); border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 14px; gap: 10px;
+  transition: background .25s, border-color .25s;
+}
+.header-left { display: flex; align-items: center; gap: 10px; }
+.logo-mark {
+  width: 36px; height: 36px; background: var(--accent); color: var(--accent-inv);
+  border-radius: 8px; display: flex; align-items: center; justify-content: center;
+  font-family: 'Unbounded', sans-serif; font-size: 11px; font-weight: 900;
+  letter-spacing: -.5px; flex-shrink: 0;
+}
+.header-titles { display: flex; flex-direction: column; gap: 1px; }
+.app-title { font-family: 'Unbounded', sans-serif; font-size: 13px; font-weight: 700; line-height: 1; }
+.app-sub   { font-size: 10px; color: var(--muted); font-weight: 500; }
+.theme-toggle {
+  width: 40px; height: 40px; border: 1px solid var(--border); border-radius: 50%;
+  background: var(--bg2); color: var(--text); font-size: 18px;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  transition: background .2s;
+}
 
-.modal-ov { position: fixed; inset: 0; background: rgba(0,0,0,.72); backdrop-filter: blur(8px); z-index: 900; display: none; align-items: center; justify-content: center; padding: 18px; }
-.modal-ov.open { display: flex; }
-.modal { background: var(--sur); border: 1px solid var(--bor2); border-radius: var(--r-xl); padding: 22px; max-width: 340px; width: 100%; box-shadow: var(--sh3); animation: up .2s ease; }
-.modal-ico { font-size: 1.5rem; margin-bottom: 7px; }
-.modal-ttl { font-family: var(--head); font-size: .95rem; margin-bottom: 6px; }
-.modal-txt { font-size: .83rem; color: var(--tx2); line-height: 1.6; margin-bottom: 16px; }
-.modal-act { display: flex; gap: 8px; justify-content: flex-end; }
+.top-tabs {
+  position: sticky; top: 57px; z-index: 10;
+  background: var(--bg); border-bottom: 1px solid var(--border);
+  display: flex; gap: 6px; padding: 8px 10px;
+  overflow-x: auto; scrollbar-width: none; transition: background .25s;
+}
+.top-tabs::-webkit-scrollbar { display: none; }
+.tab-btn {
+  flex-shrink: 0; display: flex; align-items: center; gap: 5px;
+  padding: 9px 14px; border: 1px solid var(--border); border-radius: 20px;
+  background: var(--bg2); color: var(--text2);
+  font-family: 'Manrope', sans-serif; font-size: 13px; font-weight: 600;
+  white-space: nowrap; transition: all .2s;
+}
+.tab-btn .tab-icon { font-size: 11px; opacity: .7; }
+.tab-btn.active { background: var(--tab-act-bg); color: var(--tab-act-txt); border-color: var(--tab-act-bg); }
 
-#toast { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%) translateY(70px); background: var(--sur2); border: 1px solid var(--bor2); color: var(--tx); border-radius: var(--r-pill); padding: 9px 20px; font-size: .81rem; font-weight: 600; z-index: 800; transition: transform .26s cubic-bezier(.34,1.56,.64,1); pointer-events: none; white-space: nowrap; box-shadow: var(--sh2); }
-#toast.show { transform: translateX(-50%) translateY(0); }
+.content { padding: 12px; height: calc(100dvh - 117px); overflow-y: auto; scroll-behavior: smooth; }
 
-@keyframes up { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-::-webkit-scrollbar { width: 3px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: var(--bor2); border-radius: 2px; }
+.display {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 14px;
+  padding: 14px 16px; margin-bottom: 0;
+  box-shadow: 0 2px 8px var(--shadow);
+  height: 120px;
+  display: flex; flex-direction: column;
+  transition: background .25s, border-color .25s;
+  overflow: hidden;
+}
+.display .score-big  { font-family: 'JetBrains Mono', monospace; font-size: 22px; font-weight: 400; line-height: 1; }
+.display .score-row  { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; flex-shrink: 0; }
+.display .score-label{ font-size: 11px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; flex-shrink: 0; }
+.display .score-range{ font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--muted); }
+.display .seq-chips  {
+  display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px;
+  overflow-y: auto; scrollbar-width: none;
+  flex-shrink: 1; min-height: 0;
+}
+.display .seq-chips::-webkit-scrollbar { display: none; }
+.chip {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; border-radius: 6px;
+  font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700; color: white;
+}
+.chip-0{background:var(--lv0);color:var(--text);opacity:.6}
+.chip-1{background:var(--lv1)}.chip-2{background:var(--lv2)}
+.chip-3{background:var(--lv3)}.chip-4{background:var(--lv4)}
+.chip-5{background:var(--lv5)}.chip-6{background:var(--lv6)}
 
-/* TOPBAR */
-.topbar { display: flex; align-items: center; justify-content: space-between; padding: 0 13px; height: 52px; flex-shrink: 0; background: var(--sur); border-bottom: 1px solid var(--bor); }
-.tb-l { display: flex; flex-direction: column; gap: 1px; }
-.tb-title { font-family: var(--head); font-size: .88rem; letter-spacing: .01em; }
-.tb-sub { font-size: .65rem; color: var(--tx2); }
-.tb-r { display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
+.tab-panel{display:none} .tab-panel.active{display:block}
 
-/* DISPLAY BAR */
-.disp-bar { background: var(--sur); border-bottom: 1px solid var(--bor); padding: 0 13px; height: 52px; display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
-.disp-score { font-family: var(--mono); font-size: 1.7rem; font-weight: 700; min-width: 54px; transition: color .2s; }
-.disp-detail { flex: 1; display: flex; flex-direction: column; gap: 0px; }
-.disp-row { display: flex; align-items: center; gap: 5px; font-size: .69rem; color: var(--tx2); line-height: 1.6; }
-.disp-val { font-family: var(--mono); font-weight: 700; color: var(--tx); font-size: .72rem; }
-.disp-pen { color: var(--red) !important; }
+#tab-complexity { display: none; }
+#tab-complexity.active { display: block; }
+#tab-complexity > .btn-zero {
+  /* нормальная кнопка со скруглениями, просто отступ сверху */
+  margin-top: 8px;
+  aspect-ratio: 5/1;
+}
 
-/* TAB BAR */
-.calc-tabs { display: flex; background: var(--sur); border-bottom: 1px solid var(--bor); flex-shrink: 0; }
-.ctab { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 8px 4px 7px; border: none; background: transparent; cursor: pointer; font-family: var(--font); transition: all .14s; border-bottom: 2px solid transparent; gap: 2px; }
-.ctab-ico { font-size: 1rem; }
-.ctab-lbl { font-size: .59rem; font-weight: 800; color: var(--tx2); text-transform: uppercase; letter-spacing: .04em; }
-.ctab.on { border-bottom-color: var(--accent); }
-.ctab.on .ctab-lbl { color: var(--accent); }
+.grid-complexity {
+  display: grid; grid-template-columns: 1fr 1fr;
+  grid-auto-rows: minmax(32vw,32vw); gap: 8px;
+  margin-top: 8px;
+}
+.btn-level {
+  width: 100%; height: 100%; border-radius: 14px; border: 2px solid transparent;
+  background: var(--bg2); display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 4px;
+  box-shadow: 0 2px 8px var(--shadow); transition: transform .1s;
+}
+.btn-level:active { transform: scale(.95); }
+.lv-num   { font-family: 'Unbounded', sans-serif; font-size: 9vw; font-weight: 900; line-height: 1; }
+.lv-label { font-size: 9px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
+.btn-level[data-level="1"]{ border-color:var(--lv1) } .btn-level[data-level="1"] .lv-num{color:var(--lv1)}
+.btn-level[data-level="2"]{ border-color:var(--lv2) } .btn-level[data-level="2"] .lv-num{color:var(--lv2)}
+.btn-level[data-level="3"]{ border-color:var(--lv3) } .btn-level[data-level="3"] .lv-num{color:var(--lv3)}
+.btn-level[data-level="4"]{ border-color:var(--lv4) } .btn-level[data-level="4"] .lv-num{color:var(--lv4)}
+.btn-level[data-level="5"]{ border-color:var(--lv5) } .btn-level[data-level="5"] .lv-num{color:var(--lv5)}
+.btn-level[data-level="6"]{ border-color:var(--lv6) } .btn-level[data-level="6"] .lv-num{color:var(--lv6)}
+.btn-zero {
+  width: 100%; border-radius: 14px;
+  border: 2px solid var(--border); background: var(--bg2);
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  box-shadow: 0 2px 8px var(--shadow); transition: transform .1s;
+}
+.btn-zero:active{transform:scale(.98)}
+.btn-zero .lv-num  { font-family:'Unbounded',sans-serif; font-size:7vw; font-weight:900; color:var(--muted); line-height:1; }
+.btn-zero .lv-label{ font-size:11px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; }
 
-/* BODY */
-.calc-body { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-.panel { display: none; padding: 11px 13px; flex-direction: column; gap: 10px; }
-.panel.on { display: flex; }
+.actions-row { display:flex; gap:8px; margin:8px 0; }
+.action-btn {
+  flex:1; display:flex; align-items:center; justify-content:center; gap:5px;
+  padding:12px 10px; border:1px solid var(--border); border-radius:12px;
+  background:var(--bg2); color:var(--text);
+  font-family:'Manrope',sans-serif; font-weight:600; font-size:13px;
+  box-shadow:0 1px 4px var(--shadow); transition:all .15s;
+}
+.action-btn:active{transform:scale(.97)}
+.action-btn.danger{ background:var(--accent); color:var(--accent-inv); border-color:var(--accent); }
 
-/* COMPLEXITY */
-.lvl-zero { width: 100%; height: 50px; border-radius: var(--r); border: 1.5px dashed var(--bor2); background: transparent; cursor: pointer; font-family: var(--font); font-size: .86rem; font-weight: 700; color: var(--tx2); display: flex; align-items: center; justify-content: center; gap: 8px; transition: all .14s; }
-.lvl-zero:hover { border-color: var(--red); color: var(--red); }
-.lvl-zero:active { transform: scale(.97); }
+.stats.hidden{display:none}
+.stats-title{ font-family:'Unbounded',sans-serif; font-size:13px; font-weight:700; margin:0 0 12px; color:var(--text2); }
+.stats-seq-block{ background:var(--bg2); border:1px solid var(--border); border-radius:12px; padding:12px; margin-bottom:10px; }
+.seq-display{ font-family:'JetBrains Mono',monospace; font-size:14px; word-break:break-all; min-height:24px; }
+.stats-grid{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.stat-card{ background:var(--bg2); border:1px solid var(--border); border-radius:12px; padding:12px; }
+.stat-card.full-width{grid-column:1/-1}
+.stat-big{ font-family:'JetBrains Mono',monospace; font-size:28px; font-weight:700; }
+.label{ font-size:11px; color:var(--muted); font-weight:600; text-transform:uppercase; letter-spacing:.4px; margin-bottom:4px; }
+.counts-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:4px; }
+.counts-list li{ display:flex; align-items:center; gap:8px; font-size:13px; }
+.lv-dot{ width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+.mono{ font-family:'JetBrains Mono',monospace; }
 
-.lvl-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
-.lvl-btn { height: 62px; border-radius: var(--r-lg); border: 2px solid var(--bor); background: var(--sur); cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; transition: all .14s; position: relative; overflow: hidden; }
-.lvl-btn::before { content: ''; position: absolute; inset: 0; opacity: 0; transition: opacity .14s; }
-.lvl-btn:active { transform: scale(.91); }
-.lvl-num { font-family: var(--head); font-size: 1.45rem; position: relative; z-index: 1; transition: transform .1s; }
-.lvl-label { font-size: .57rem; font-weight: 800; color: var(--tx2); text-transform: uppercase; letter-spacing: .03em; position: relative; z-index: 1; }
-.lvl-btn[data-lv="1"] { border-color: rgba(34,197,94,.28); } .lvl-btn[data-lv="1"]::before { background: rgba(34,197,94,.06); } .lvl-btn[data-lv="1"] .lvl-num { color: var(--lv1); }
-.lvl-btn[data-lv="2"] { border-color: rgba(132,204,22,.28); } .lvl-btn[data-lv="2"]::before { background: rgba(132,204,22,.06); } .lvl-btn[data-lv="2"] .lvl-num { color: var(--lv2); }
-.lvl-btn[data-lv="3"] { border-color: rgba(234,179,8,.28); }  .lvl-btn[data-lv="3"]::before { background: rgba(234,179,8,.06); }  .lvl-btn[data-lv="3"] .lvl-num { color: var(--lv3); }
-.lvl-btn[data-lv="4"] { border-color: rgba(249,115,22,.28); } .lvl-btn[data-lv="4"]::before { background: rgba(249,115,22,.06); } .lvl-btn[data-lv="4"] .lvl-num { color: var(--lv4); }
-.lvl-btn[data-lv="5"] { border-color: rgba(239,68,68,.28); }  .lvl-btn[data-lv="5"]::before { background: rgba(239,68,68,.06); }  .lvl-btn[data-lv="5"] .lvl-num { color: var(--lv5); }
-.lvl-btn[data-lv="6"] { border-color: rgba(168,85,247,.28); } .lvl-btn[data-lv="6"]::before { background: rgba(168,85,247,.07); } .lvl-btn[data-lv="6"] .lvl-num { color: var(--lv6); }
-.lvl-btn:hover::before { opacity: 1; }
+.criteria-block{ margin:0 0 14px; }
+.block-title{
+  font-family:'Unbounded',sans-serif; font-size:13px; font-weight:700; margin:0 0 10px;
+  display:flex; align-items:center; gap:8px;
+}
+.block-max{ margin-left:auto; font-size:11px; font-weight:600; color:var(--muted); font-family:'Manrope',sans-serif; }
+.criteria-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px; }
+.criteria-list li{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:12px; border:1px solid var(--border); border-radius:12px;
+  background:var(--bg2); box-shadow:0 1px 4px var(--shadow);
+}
+.crit-name{ font-size:14px; font-weight:600; }
+.pm-controls{ display:flex; gap:5px; }
+.pm-btn{
+  min-width:44px; height:44px; padding:0;
+  border:1.5px solid var(--border); border-radius:10px;
+  background:var(--bg); color:var(--text);
+  font-weight:800; font-size:17px;
+  display:flex; align-items:center; justify-content:center; transition:all .15s;
+}
+.pm-btn:active{transform:scale(.92)}
+.pm-btn.active.plus { border-color:#22c55e; background:#22c55e18; color:#22c55e; }
+.pm-btn.active.check{ border-color:#eab308; background:#eab30818; color:#eab308; }
+.pm-btn.active.minus{ border-color:#ef4444; background:#ef444418; color:#ef4444; }
 
-.seq-card { background: var(--sur); border: 1px solid var(--bor); border-radius: var(--r); padding: 10px 12px; }
-.seq-lbl { font-size: .64rem; font-weight: 800; color: var(--tx2); text-transform: uppercase; letter-spacing: .07em; margin-bottom: 6px; }
-.seq-chips { display: flex; flex-wrap: wrap; gap: 4px; min-height: 22px; }
-.chip { font-family: var(--mono); font-size: .72rem; font-weight: 700; padding: 2px 7px; border-radius: 5px; }
-.chip-0 { background: rgba(148,163,184,.12); color: #94a3b8; border: 1px solid rgba(148,163,184,.2); }
-.chip-1 { background: rgba(34,197,94,.1); color: var(--lv1); border: 1px solid rgba(34,197,94,.18); }
-.chip-2 { background: rgba(132,204,22,.1); color: var(--lv2); border: 1px solid rgba(132,204,22,.18); }
-.chip-3 { background: rgba(234,179,8,.1); color: var(--lv3); border: 1px solid rgba(234,179,8,.18); }
-.chip-4 { background: rgba(249,115,22,.1); color: var(--lv4); border: 1px solid rgba(249,115,22,.18); }
-.chip-5 { background: rgba(239,68,68,.1); color: var(--lv5); border: 1px solid rgba(239,68,68,.18); }
-.chip-6 { background: rgba(168,85,247,.1); color: var(--lv6); border: 1px solid rgba(168,85,247,.18); }
+.action-btn.danger.confirming {
+  background: #ef4444; border-color: #ef4444;
+  animation: confirm-pulse 0.3s ease;
+}
+@keyframes confirm-pulse {
+  0%{transform:scale(1)} 40%{transform:scale(1.07)} 100%{transform:scale(1)}
+}
 
-.stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
-.stat-box { background: var(--sur); border: 1px solid var(--bor); border-radius: var(--r); padding: 10px; text-align: center; }
-.stat-v { font-family: var(--mono); font-size: 1.35rem; font-weight: 700; color: var(--accent); }
-.stat-l { font-size: .6rem; font-weight: 800; color: var(--tx2); text-transform: uppercase; letter-spacing: .04em; margin-top: 2px; }
+.disc-tabs { display:flex; gap:6px; margin-bottom:12px; overflow-x:auto; scrollbar-width:none; }
+.disc-tabs::-webkit-scrollbar{display:none}
+.disc-btn {
+  flex-shrink:0; padding:9px 16px;
+  border:1.5px solid var(--border); border-radius:20px;
+  background:var(--bg2); color:var(--text2);
+  font-family:'Manrope',sans-serif; font-size:13px; font-weight:600;
+  white-space:nowrap; transition:all .2s;
+}
+.disc-btn.active{ background:var(--tab-act-bg); color:var(--tab-act-txt); border-color:var(--tab-act-bg); }
+.disc-panel{display:none} .disc-panel.active{display:block}
 
-.act-row { display: flex; gap: 7px; }
+.tech-score-bar {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 18px; border-radius:14px; margin-bottom:10px;
+  background:var(--bg2); border:2px solid var(--border); box-shadow:0 2px 10px var(--shadow);
+}
+.penalty-bar{ margin-top:18px; background:var(--pen-bar-bg); border-color:var(--border); }
+.tech-score-label{ font-family:'Unbounded',sans-serif; font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; }
+.tech-score-val{ font-family:'JetBrains Mono',monospace; font-size:26px; font-weight:700; color:var(--text); }
+.penalty-val{ color:#ef4444; }
 
-.counts-card { background: var(--sur); border: 1px solid var(--bor); border-radius: var(--r); padding: 10px 12px; }
-.counts-lbl { font-size: .64rem; font-weight: 800; color: var(--tx2); text-transform: uppercase; letter-spacing: .07em; margin-bottom: 7px; }
-.counts-list { list-style: none; display: flex; flex-direction: column; gap: 5px; }
-.counts-list li { display: flex; align-items: center; gap: 7px; font-size: .78rem; }
-.lv-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.req-block{ display:flex; flex-direction:column; gap:8px; }
+.req-item{ background:var(--bg2); border:1px solid var(--border); border-radius:14px; padding:14px; box-shadow:0 1px 4px var(--shadow); }
+.req-name{ font-family:'Manrope',sans-serif; font-size:14px; font-weight:700; margin-bottom:12px; line-height:1.3; }
 
-/* PRESENTATION */
-.pres-section { background: var(--sur); border: 1px solid var(--bor); border-radius: var(--r-lg); overflow: hidden; }
-.pres-section-hd { display: flex; align-items: center; justify-content: space-between; padding: 11px 13px; border-bottom: 1px solid var(--bor); }
-.pres-section-name { font-family: var(--head); font-size: .74rem; display: flex; align-items: center; gap: 7px; }
-.pres-section-max { font-size: .68rem; color: var(--tx2); }
-.pres-section-score { font-family: var(--mono); font-size: .88rem; font-weight: 700; color: var(--accent); }
-.crit-list { padding: 8px 11px; display: flex; flex-direction: column; gap: 6px; }
-.crit-item { display: flex; align-items: center; gap: 8px; }
-.crit-name { flex: 1; font-size: .8rem; line-height: 1.35; color: var(--tx); }
-.pm-wrap { display: flex; gap: 3px; flex-shrink: 0; }
-.pm-btn { width: 34px; height: 34px; border-radius: 7px; border: 1.5px solid var(--bor); background: var(--sur2); cursor: pointer; font-size: .82rem; font-weight: 800; font-family: var(--font); color: var(--tx2); transition: all .13s; display: flex; align-items: center; justify-content: center; }
-.pm-btn:active { transform: scale(.88); }
-.pm-btn.minus { background: rgba(239,68,68,.1); border-color: var(--red); color: var(--red); }
-.pm-btn.check { background: rgba(34,197,94,.1); border-color: var(--green); color: var(--green); }
-.pm-btn.plus  { background: rgba(255,107,43,.1); border-color: var(--accent); color: var(--accent); }
+.tri-controls{ display:flex; gap:8px; margin-bottom:8px; }
+.tri-btn{
+  flex:1; padding:12px 4px;
+  border:1.5px solid var(--border); border-radius:10px;
+  background:var(--bg); color:var(--text);
+  font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:700; transition:all .15s;
+}
+.tri-btn:active{transform:scale(.95)}
+.tri-btn.active[data-val="0"]  { background:var(--tri-zero-bg); border-color:var(--tri-zero-brd); color:var(--tri-zero-txt); }
+.tri-btn.active[data-val="0.1"]{ background:var(--tri-01-bg);   border-color:var(--tri-01-brd);   color:var(--tri-01-txt); }
+.tri-btn.active[data-val="0.2"]{ background:var(--tri-02-bg);   border-color:var(--tri-02-brd);   color:var(--tri-02-txt); }
 
-.pres-total { background: var(--sur2); border: 1px solid var(--bor); border-radius: var(--r); padding: 10px 13px; display: flex; align-items: center; justify-content: space-between; }
-.pres-total-lbl { font-size: .74rem; font-weight: 700; color: var(--tx2); }
-.pres-total-val { font-family: var(--mono); font-size: 1.05rem; font-weight: 700; color: var(--accent); }
-.pres-range { font-size: .68rem; color: var(--tx2); font-family: var(--mono); }
+.req-hints{ min-height:16px; }
+.hint{ display:none; font-size:12px; color:var(--muted); line-height:1.4; }
+.hint.active-hint{ display:block; }
 
-/* TECHNICAL */
-.disc-tabs { display: flex; gap: 4px; background: var(--sur2); border: 1px solid var(--bor); border-radius: var(--r); padding: 3px; }
-.disc-tab { flex: 1; height: 32px; border: none; background: transparent; cursor: pointer; font-family: var(--font); font-size: .72rem; font-weight: 800; color: var(--tx2); border-radius: 7px; transition: all .14s; }
-.disc-tab.on { background: var(--accent); color: #fff; }
+.penalty-block{ display:flex; flex-direction:column; gap:8px; margin-bottom:4px; }
+.pen-btn{
+  width:100%; padding:14px 16px; border:1.5px solid var(--border); border-radius:12px;
+  background:var(--bg2); color:var(--text);
+  font-family:'Manrope',sans-serif; font-size:14px; font-weight:600; text-align:left;
+  box-shadow:0 1px 4px var(--shadow); transition:all .15s; line-height:1.3;
+}
+.pen-btn:active{transform:scale(.98); opacity:.85}
+.pen-btn.pen-active{ background:var(--pen-active-bg); color:var(--pen-active-txt); border-color:var(--pen-active-bg); }
 
-.disc-panel { display: none; flex-direction: column; gap: 8px; }
-.disc-panel.on { display: flex; }
+.about-hero{ text-align:center; padding:28px 16px 20px; }
+.about-logo{
+  width:64px; height:64px; background:var(--accent); color:var(--accent-inv);
+  border-radius:16px; display:flex; align-items:center; justify-content:center;
+  font-family:'Unbounded',sans-serif; font-size:18px; font-weight:900; margin:0 auto 14px;
+}
+.about-app-name{ font-family:'Unbounded',sans-serif; font-size:18px; font-weight:800; margin:0 0 4px; }
+.about-version{ font-size:12px; color:var(--muted); margin:0; }
+.about-card{
+  background:var(--card-bg); border:1px solid var(--border); border-radius:16px;
+  padding:16px; margin-bottom:10px; box-shadow:0 2px 8px var(--shadow);
+}
+.author-card{ display:flex; gap:14px; align-items:flex-start; }
+.about-avatar{
+  width:52px; height:52px; background:var(--bg3); border:2px solid var(--border); border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Unbounded',sans-serif; font-size:13px; font-weight:700; flex-shrink:0;
+}
+.about-author-name{ font-weight:700; font-size:16px; margin-bottom:2px; }
+.about-author-role{ font-size:12px; color:var(--muted); margin-bottom:8px; }
+.about-author-tags{ display:flex; flex-wrap:wrap; gap:5px; }
+.tag{ font-size:11px; font-weight:600; padding:4px 8px; border-radius:20px; background:var(--bg3); border:1px solid var(--border); color:var(--text2); }
+.about-desc-title{ font-family:'Unbounded',sans-serif; font-size:14px; font-weight:700; margin:0 0 10px; }
+.about-desc-text{ font-size:13px; color:var(--text2); margin:0 0 10px; line-height:1.6; }
+.about-desc-list{ font-size:13px; color:var(--text2); line-height:1.8; padding-left:16px; margin:0 0 10px; }
+.support-title,.feedback-title{ font-family:'Unbounded',sans-serif; font-size:14px; font-weight:700; margin:0 0 8px; }
+.support-desc,.feedback-desc{ font-size:13px; color:var(--text2); margin:0 0 14px; line-height:1.5; }
+.feedback-btn{
+  display:block; text-align:center; padding:13px; border-radius:12px;
+  background:var(--bg3); border:1px solid var(--border); color:var(--text);
+  font-weight:700; font-size:14px; text-decoration:none;
+}
+.about-footer{ text-align:center; padding:20px 0 30px; color:var(--muted); font-size:12px; }
+.about-footer p{margin:2px 0} .about-footer-sub{font-size:11px;opacity:.7}
 
-.req-card { background: var(--sur); border: 1px solid var(--bor); border-radius: var(--r); padding: 11px 12px; }
-.req-name { font-size: .8rem; font-weight: 700; color: var(--tx); margin-bottom: 8px; line-height: 1.35; }
-.tri-row { display: flex; gap: 4px; margin-bottom: 5px; }
-.tri-btn { flex: 1; height: 34px; border: 1.5px solid var(--bor); background: var(--sur2); border-radius: 7px; cursor: pointer; font-family: var(--mono); font-size: .8rem; font-weight: 700; color: var(--tx2); transition: all .13s; }
-.tri-btn:active { transform: scale(.93); }
-.tri-btn.on { background: var(--accent); border-color: var(--accent); color: #fff; }
-.req-hint { font-size: .68rem; color: var(--tx3); line-height: 1.4; min-height: 18px; }
+@media(min-width:500px){
+  .grid-complexity{ grid-template-columns:repeat(3,1fr); grid-auto-rows:minmax(22vw,22vw); }
+  .btn-zero{ aspect-ratio:6/1; } .lv-num{font-size:6vw} .btn-zero .lv-num{font-size:4vw}
+}
+@media(min-width:700px){
+  .stats-grid{grid-template-columns:repeat(3,1fr)}
+}
 
-.pen-card { background: var(--sur); border: 1px solid var(--bor); border-radius: var(--r); padding: 11px 12px; }
-.pen-card-lbl { font-size: .64rem; font-weight: 800; color: var(--tx2); text-transform: uppercase; letter-spacing: .07em; margin-bottom: 7px; }
-.pen-list { display: flex; flex-direction: column; gap: 5px; }
-.pen-btn { width: 100%; min-height: 38px; border: 1.5px solid var(--bor); background: var(--sur2); border-radius: var(--r); cursor: pointer; font-family: var(--font); font-size: .76rem; font-weight: 700; color: var(--tx2); display: flex; align-items: center; padding: 0 11px; gap: 8px; transition: all .13s; text-align: left; }
-.pen-btn:active { transform: scale(.97); }
-.pen-btn.pen-active { background: rgba(239,68,68,.09); border-color: var(--red); color: var(--red); }
-.pen-btn.repeatable.pen-active { background: rgba(245,158,11,.09); border-color: var(--amber); color: var(--amber); }
-.pen-cnt { font-family: var(--mono); font-size: .72rem; font-weight: 700; background: var(--red); color: #fff; border-radius: var(--r-pill); width: 19px; height: 19px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-left: auto; }
-.pen-cnt.am { background: var(--amber); }
 
-.tech-total { background: var(--sur2); border: 1px solid var(--bor); border-radius: var(--r); padding: 10px 13px; display: flex; align-items: center; justify-content: space-between; }
-.tech-total-lbl { font-size: .74rem; font-weight: 700; color: var(--tx2); }
-.tech-total-nums { display: flex; gap: 12px; align-items: center; }
-.tech-req-val { font-family: var(--mono); font-size: 1rem; font-weight: 700; color: var(--green); }
-.tech-pen-val { font-family: var(--mono); font-size: 1rem; font-weight: 700; color: var(--red); }
-
-/* ABOUT */
-.about-wrap { padding: 14px; display: flex; flex-direction: column; gap: 12px; }
-.about-hero-card { background: linear-gradient(135deg, var(--sur) 0%, var(--sur2) 100%); border: 1.5px solid var(--accent); border-radius: var(--r-xl); padding: 22px 18px; text-align: center; position: relative; overflow: hidden; }
-.about-hero-card::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 50% -10%, rgba(255,107,43,.08), transparent 60%); pointer-events: none; }
-.about-logo { display: inline-flex; align-items: center; justify-content: center; width: 54px; height: 54px; border-radius: 15px; background: var(--accent); font-family: var(--head); font-size: .72rem; color: #fff; margin-bottom: 10px; box-shadow: 0 6px 22px rgba(255,107,43,.35); line-height: 1.2; text-align: center; position: relative; z-index: 1; }
-.about-app-name { font-family: var(--head); font-size: 1.1rem; position: relative; z-index: 1; }
-.about-version { font-size: .74rem; color: var(--tx2); margin-top: 3px; position: relative; z-index: 1; }
-.about-card { background: var(--sur); border: 1px solid var(--bor); border-radius: var(--r-lg); padding: 14px 16px; }
-.about-card-ttl { font-family: var(--head); font-size: .8rem; margin-bottom: 8px; display: flex; align-items: center; gap: 7px; }
-.about-author-row { display: flex; align-items: center; gap: 12px; }
-.about-ava { width: 46px; height: 46px; border-radius: 13px; background: var(--accent); display: flex; align-items: center; justify-content: center; font-family: var(--head); font-size: .76rem; color: #fff; flex-shrink: 0; }
-.about-author-name { font-weight: 800; font-size: .9rem; }
-.about-author-role { font-size: .72rem; color: var(--tx2); margin-top: 1px; }
-.about-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 9px; }
-.about-tag { background: var(--sur2); border: 1px solid var(--bor); border-radius: var(--r-pill); padding: 3px 10px; font-size: .68rem; font-weight: 700; color: var(--tx2); }
-.about-contacts { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
-.about-contact-row { display: flex; align-items: center; gap: 8px; font-size: .8rem; color: var(--tx2); }
-.about-contact-row a { color: var(--accent); font-weight: 700; text-decoration: none; }
-.about-desc-text { font-size: .8rem; color: var(--tx2); line-height: 1.65; }
-.about-desc-text + .about-desc-text { margin-top: 7px; }
-.about-feat-list { margin-top: 7px; display: flex; flex-direction: column; gap: 5px; }
-.about-feat-item { display: flex; gap: 8px; font-size: .78rem; color: var(--tx2); line-height: 1.4; }
-.about-feat-item b { color: var(--tx); }
-.about-footer { text-align: center; font-size: .72rem; color: var(--tx3); padding: 4px 0 8px; }
-
-/* BLOCKED SCREEN */
-#screen-blocked { background: var(--bg); }
-.blocked-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; text-align: center; gap: 14px; }
-.blocked-ico { font-size: 3rem; }
-.blocked-ttl { font-family: var(--head); font-size: 1.1rem; }
-.blocked-txt { font-size: .84rem; color: var(--tx2); line-height: 1.6; max-width: 300px; }
-
-/* LOADING */
-#screen-loading { background: var(--bg); }
-.loading-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; }
-.loading-logo { font-family: var(--head); font-size: .82rem; width: 56px; height: 56px; border-radius: 16px; background: var(--accent); display: flex; align-items: center; justify-content: center; color: #fff; line-height: 1.2; text-align: center; box-shadow: 0 6px 22px rgba(255,107,43,.35); animation: pulse 1.4s ease-in-out infinite; }
-@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .6; } }
-.loading-txt { font-size: .8rem; color: var(--tx2); }
-</style>
+/* ЗАГРУЗКА */
+#screen-loading{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:999}
+.loading-logo{width:56px;height:56px;background:var(--accent);color:var(--accent-inv);border-radius:14px;display:flex;align-items:center;justify-content:center;font-family:'Unbounded',sans-serif;font-size:11px;font-weight:900;line-height:1.2;text-align:center;animation:ld-pulse 1.4s ease-in-out infinite}
+.loading-txt{font-size:13px;color:var(--muted);font-weight:600}
+@keyframes ld-pulse{0%,100%{opacity:1}50%{opacity:.4}}
+#screen-blocked{position:fixed;inset:0;background:var(--bg);display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;text-align:center;z-index:999}
+#screen-blocked.show{display:flex}
+.bl-ico{font-size:3rem}.bl-ttl{font-family:'Unbounded',sans-serif;font-size:16px;font-weight:800}
+.bl-txt{font-size:13px;color:var(--muted);line-height:1.6;max-width:280px}
+.bl-btn{display:inline-flex;align-items:center;gap:7px;padding:12px 22px;background:var(--accent);color:var(--accent-inv);border:none;border-radius:12px;font-family:'Manrope',sans-serif;font-size:14px;font-weight:700;cursor:pointer;text-decoration:none}
+.header-right{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.back-btn{display:flex;align-items:center;gap:4px;padding:7px 11px;border:1px solid var(--border);border-radius:20px;background:var(--bg2);color:var(--text2);font-family:'Manrope',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap}
+.back-btn:hover{border-color:var(--accent);color:var(--accent)}
+  </style>
 </head>
 <body>
 
-<!-- ЗАГРУЗКА -->
-<div id="screen-loading" class="screen active">
-  <div class="loading-wrap">
-    <div class="loading-logo">ТОЧКА<br>ОТРЫВА</div>
-    <div class="loading-txt">Загрузка...</div>
-  </div>
-</div>
-
-<!-- ЗАБЛОКИРОВАН -->
-<div id="screen-blocked" class="screen">
-  <div class="topbar">
-    <div class="tb-l"><div class="tb-title">Точка Подсчёта</div></div>
-    <div class="tb-r">
-      <div class="pill" id="tp-bl"><button onclick="setTheme('dark')">🌙</button><button onclick="setTheme('light')">☀️</button></div>
-    </div>
-  </div>
-  <div class="blocked-wrap">
-    <div class="blocked-ico">🔒</div>
-    <div class="blocked-ttl">Аккаунт заблокирован</div>
-    <div class="blocked-txt">Ваш аккаунт заблокирован администратором. Для восстановления доступа свяжитесь с администратором.</div>
-    <a href="https://t.me/iuriletics" target="_blank" class="btn btn-a" style="margin-top:8px">✈ Написать администратору</a>
-    <button class="btn btn-g" onclick="doLogout()">Выйти из аккаунта</button>
-  </div>
-</div>
-
-<!-- КАЛЬКУЛЯТОР -->
-<div id="screen-calc" class="screen">
-  <div class="topbar">
-    <div class="tb-l">
-      <div class="tb-title">Точка Подсчёта</div>
-      <div class="tb-sub" id="calc-user-lbl">Судейский калькулятор</div>
-    </div>
-    <div class="tb-r">
-      <div class="pill" id="tp-calc"><button onclick="setTheme('dark')">🌙</button><button onclick="setTheme('light')">☀️</button></div>
-      <button class="btn btn-g btn-sm" onclick="goBack()">← Кабинет</button>
-    </div>
+  <!-- ЗАГРУЗКА -->
+  <div id="screen-loading"><div class="loading-logo">ТО</div><div class="loading-txt">Загрузка...</div></div>
+  <!-- ЗАБЛОКИРОВАН -->
+  <div id="screen-blocked">
+    <div class="bl-ico">🔒</div>
+    <div class="bl-ttl">Аккаунт заблокирован</div>
+    <div class="bl-txt">Ваш аккаунт заблокирован. Свяжитесь с администратором.</div>
+    <a href="https://t.me/iuriletics" target="_blank" class="bl-btn">✈ Написать администратору</a>
+    <button class="bl-btn" style="background:var(--bg3);color:var(--text);border:1px solid var(--border)" onclick="_sb.auth.signOut().then(()=>window.location.href='./index.html')">Выйти</button>
   </div>
 
-  <!-- Итоговый дисплей -->
-  <div class="disp-bar">
-    <div class="disp-score" id="main-score">—</div>
-    <div class="disp-detail">
-      <div class="disp-row">⬡ Сложность: <span class="disp-val" id="d-comp">—</span></div>
-      <div class="disp-row">◈ Презент.: <span class="disp-val" id="d-pres">—</span>&nbsp;|&nbsp;⚠ Техн.: <span class="disp-val" id="d-tech">—</span>&nbsp;<span class="disp-pen" id="d-pen"></span></div>
-    </div>
-    <button class="btn btn-s btn-sm" onclick="confirmResetAll()">↺</button>
-  </div>
-
-  <!-- Вкладки -->
-  <div class="calc-tabs">
-    <button class="ctab on" onclick="switchTab('complexity', this)">
-      <span class="ctab-ico">⬡</span><span class="ctab-lbl">Сложность</span>
-    </button>
-    <button class="ctab" onclick="switchTab('presentation', this)">
-      <span class="ctab-ico">◈</span><span class="ctab-lbl">Презентация</span>
-    </button>
-    <button class="ctab" onclick="switchTab('technical', this)">
-      <span class="ctab-ico">⚠</span><span class="ctab-lbl">Технический</span>
-    </button>
-    <button class="ctab" onclick="switchTab('about', this)">
-      <span class="ctab-ico">◉</span><span class="ctab-lbl">О нас</span>
-    </button>
-  </div>
-
-  <div class="calc-body scroll">
-
-    <!-- СЛОЖНОСТЬ -->
-    <div id="panel-complexity" class="panel on">
-      <button class="lvl-zero" onclick="addLvl(0)">✕&ensp;0 — Пропуск / Остановка</button>
-      <div class="lvl-grid">
-        <button class="lvl-btn" data-lv="1" onclick="addLvl(1)"><span class="lvl-num">1</span><span class="lvl-label">Базовый</span></button>
-        <button class="lvl-btn" data-lv="2" onclick="addLvl(2)"><span class="lvl-num">2</span><span class="lvl-label">Лёгкий</span></button>
-        <button class="lvl-btn" data-lv="3" onclick="addLvl(3)"><span class="lvl-num">3</span><span class="lvl-label">Средний</span></button>
-        <button class="lvl-btn" data-lv="4" onclick="addLvl(4)"><span class="lvl-num">4</span><span class="lvl-label">Сложный</span></button>
-        <button class="lvl-btn" data-lv="5" onclick="addLvl(5)"><span class="lvl-num">5</span><span class="lvl-label">Мастер</span></button>
-        <button class="lvl-btn" data-lv="6" onclick="addLvl(6)"><span class="lvl-num">6</span><span class="lvl-label">Элита</span></button>
-      </div>
-      <div class="seq-card">
-        <div class="seq-lbl">Последовательность навыков</div>
-        <div class="seq-chips" id="seq-chips"><span style="font-size:.72rem;color:var(--tx3)">Нажимайте на уровни навыков</span></div>
-      </div>
-      <div class="stats-grid">
-        <div class="stat-box"><div class="stat-v" id="st-avg">—</div><div class="stat-l">Коэф.</div></div>
-        <div class="stat-box"><div class="stat-v" id="st-sum">0</div><div class="stat-l">Сумма</div></div>
-        <div class="stat-box"><div class="stat-v" id="st-cnt">0</div><div class="stat-l">Элементов</div></div>
-      </div>
-      <div id="counts-card" class="counts-card hidden">
-        <div class="counts-lbl">По уровням</div>
-        <ul class="counts-list" id="counts-list"></ul>
-      </div>
-      <div class="act-row">
-        <button class="btn btn-s f1" onclick="eraseLast()">⌫ Стереть</button>
-        <button class="btn btn-s f1" onclick="toggleCounts()" id="btn-stats">≡ Детали</button>
-        <button class="btn btn-d f1" id="btn-reset-comp" onclick="confirmReset('comp')">Сбросить</button>
+  <header class="app-header">
+    <div class="header-left">
+      <div class="logo-mark">ТО</div>
+      <div class="header-titles">
+        <span class="app-title">Точка Подсчета</span>
+        <span class="app-sub" id="header-username">Судейский Калькулятор</span>
       </div>
     </div>
+    <div class="header-right">
+      <button class="back-btn" onclick="window.location.href='./index.html'">← Кабинет</button>
+      <button class="theme-toggle" id="theme-toggle" aria-label="Переключить тему">
+        <span class="theme-icon">☀</span>
+      </button>
+    </div>
+  </header>
 
-    <!-- ПРЕЗЕНТАЦИЯ -->
-    <div id="panel-presentation" class="panel">
-      <!-- Презентация: 6 критериев -->
-      <div class="pres-section">
-        <div class="pres-section-hd">
-          <div class="pres-section-name">◈ Презентация</div>
-          <div style="display:flex;align-items:center;gap:8px">
-            <div class="pres-section-max">макс. 2.0</div>
-            <div class="pres-section-score" id="pres-score-p">0.00</div>
-          </div>
+  <nav class="top-tabs" role="tablist" aria-label="Разделы">
+    <button class="tab-btn active" role="tab" aria-selected="true"  data-tab="complexity"><span class="tab-icon">⬡</span>Сложность</button>
+    <button class="tab-btn"        role="tab" aria-selected="false" data-tab="presentation"><span class="tab-icon">◈</span>Презентация</button>
+    <button class="tab-btn"        role="tab" aria-selected="false" data-tab="technical"><span class="tab-icon">⚠</span>Технический</button>
+
+  </nav>
+
+  <main id="app" class="content" tabindex="-1">
+
+    <section id="display" class="display" aria-live="polite"></section>
+
+    <!-- ══ СЛОЖНОСТЬ ══ -->
+    <section id="tab-complexity" class="tab-panel active" role="tabpanel">
+      <button class="btn-zero" data-level="0"><span class="lv-num">0</span><span class="lv-label">Пропуск / Стоп</span></button>
+      <div class="grid-complexity">
+        <button class="btn-level" data-level="1"><span class="lv-num">1</span><span class="lv-label">Базовый</span></button>
+        <button class="btn-level" data-level="2"><span class="lv-num">2</span><span class="lv-label">Лёгкий</span></button>
+        <button class="btn-level" data-level="3"><span class="lv-num">3</span><span class="lv-label">Средний</span></button>
+        <button class="btn-level" data-level="4"><span class="lv-num">4</span><span class="lv-label">Сложный</span></button>
+        <button class="btn-level" data-level="5"><span class="lv-num">5</span><span class="lv-label">Мастер</span></button>
+        <button class="btn-level" data-level="6"><span class="lv-num">6</span><span class="lv-label">Элита</span></button>
+      </div>
+      <div class="actions-row">
+        <button class="action-btn erase"     id="erase-last"><span>⌫</span> Стереть</button>
+        <button class="action-btn danger"    id="reset-complexity">Сбросить</button>
+        <button class="action-btn secondary" id="toggle-stats"><span>≡</span> Статистика</button>
+      </div>
+      <div id="complexity-stats" class="stats hidden">
+        <h3 class="stats-title">Подробная статистика</h3>
+        <div class="stats-seq-block">
+          <div class="label">Последовательность навыков</div>
+          <div id="skills-seq" class="mono seq-display"></div>
         </div>
-        <div class="crit-list" id="pres-list"></div>
-      </div>
-      <!-- Креативность: 4 критерия -->
-      <div class="pres-section">
-        <div class="pres-section-hd">
-          <div class="pres-section-name">✦ Креативность</div>
-          <div style="display:flex;align-items:center;gap:8px">
-            <div class="pres-section-max">макс. 1.0</div>
-            <div class="pres-section-score" id="pres-score-c">0.00</div>
-          </div>
-        </div>
-        <div class="crit-list" id="creat-list"></div>
-      </div>
-      <div class="pres-total">
-        <div class="pres-total-lbl">Итого Презентация + Креативность</div>
-        <div>
-          <div class="pres-total-val" id="pres-total">0.00</div>
-          <div class="pres-range" id="pres-range">0.0 – 0.0</div>
+        <div class="stats-grid">
+          <div class="stat-card"><div class="label">Сумма навыков</div><div id="skills-sum" class="mono stat-big"></div></div>
+          <div class="stat-card"><div class="label">Элементов</div><div id="skills-amount" class="mono stat-big"></div></div>
+          <div class="stat-card"><div class="label">Коэффициент</div><div id="skills-coef" class="mono stat-big"></div></div>
+          <div class="stat-card full-width"><div class="label">По уровням</div><ul id="skills-counts" class="counts-list"></ul></div>
         </div>
       </div>
-      <button class="btn btn-d btn-full" id="btn-reset-pres" onclick="confirmReset('pres')">Сбросить презентацию</button>
-    </div>
+    </section>
 
-    <!-- ТЕХНИЧЕСКИЙ -->
-    <div id="panel-technical" class="panel">
-      <div class="disc-tabs">
-        <button class="disc-tab on" onclick="switchDisc('single', this)">Одиночка</button>
-        <button class="disc-tab" onclick="switchDisc('double', this)">Две скакалки</button>
-        <button class="disc-tab" onclick="switchDisc('team', this)">Команда</button>
+    <!-- ══ ПРЕЗЕНТАЦИЯ ══ -->
+    <section id="tab-presentation" class="tab-panel" role="tabpanel">
+      <div class="criteria-block">
+        <h3 class="block-title"><span class="block-icon">◈</span> Презентация <span class="block-max">макс. 2.0</span></h3>
+        <ul class="criteria-list" id="presentation-list">
+          <li data-crit="Артистизм"><span class="crit-name">Артистизм</span><div class="pm-controls"></div></li>
+          <li data-crit="Исполнение"><span class="crit-name">Исполнение</span><div class="pm-controls"></div></li>
+          <li data-crit="Комбинации"><span class="crit-name">Комбинации</span><div class="pm-controls"></div></li>
+          <li data-crit="Двигательные навыки"><span class="crit-name">Двигательные навыки</span><div class="pm-controls"></div></li>
+          <li data-crit="Положение тела"><span class="crit-name">Положение тела</span><div class="pm-controls"></div></li>
+          <li data-crit="Синхронность"><span class="crit-name">Синхронность</span><div class="pm-controls"></div></li>
+        </ul>
       </div>
-      <div id="disc-single" class="disc-panel on"></div>
-      <div id="disc-double" class="disc-panel"></div>
-      <div id="disc-team"   class="disc-panel"></div>
-    </div>
+      <div class="criteria-block">
+        <h3 class="block-title"><span class="block-icon">✦</span> Креативность <span class="block-max">макс. 1.0</span></h3>
+        <ul class="criteria-list" id="creativity-list">
+          <li data-crit="Изложение"><span class="crit-name">Изложение</span><div class="pm-controls"></div></li>
+          <li data-crit="Разнообразие элементов"><span class="crit-name">Разнообразие</span><div class="pm-controls"></div></li>
+          <li data-crit="Уникальность"><span class="crit-name">Уникальность</span><div class="pm-controls"></div></li>
+          <li data-crit="Вариативность"><span class="crit-name">Вариативность</span><div class="pm-controls"></div></li>
+        </ul>
+      </div>
+      <div class="actions-row">
+        <button class="action-btn danger" id="reset-presentation">Сбросить</button>
+      </div>
+    </section>
 
-    <!-- О НАС -->
-    <div id="panel-about" class="panel" style="padding:0">
-      <div class="about-wrap">
-        <div class="about-hero-card">
-          <div class="about-logo">ТОЧКА<br>ОТРЫВА</div>
-          <div class="about-app-name">Точка Подсчёта</div>
-          <div class="about-version">Версия 2.0 · 2025</div>
+    <!-- ══ ТЕХНИЧЕСКИЙ ══ -->
+    <section id="tab-technical" class="tab-panel" role="tabpanel">
+
+      <nav class="disc-tabs" role="tablist">
+        <button class="disc-btn active" data-disc="single">🪢 Одиночная</button>
+        <button class="disc-btn"        data-disc="double">✌️ Две скакалки</button>
+        <button class="disc-btn"        data-disc="team">👥 Командное</button>
+      </nav>
+
+      <!-- ─── ОДИНОЧНАЯ ─── -->
+      <div class="disc-panel active" id="disc-single">
+        <div class="tech-score-bar">
+          <span class="tech-score-label">Обязательные навыки</span>
+          <span class="tech-score-val" id="disp-single-req">0.0</span>
         </div>
-        <div class="about-card">
-          <div class="about-card-ttl">👤 Автор</div>
-          <div class="about-author-row">
-            <div class="about-ava">ЮД</div>
-            <div>
-              <div class="about-author-name">Данильченко Юрий Леонидович</div>
-              <div class="about-author-role">Идея, дизайн, разработка · 21.07.1988</div>
+        <div class="req-block">
+          <div class="req-item" data-disc="single" data-key="single_music">
+            <div class="req-name">1. Использование музыки</div>
+            <div class="tri-controls">
+              <button class="tri-btn active" data-val="0">0</button>
+              <button class="tri-btn" data-val="0.1">0,1</button>
+              <button class="tri-btn" data-val="0.2">0,2</button>
+            </div>
+            <div class="req-hints">
+              <span class="hint h0 active-hint">Не выполнено</span>
+              <span class="hint h1">Только начало или только конец</span>
+              <span class="hint h2">И начало, и конец выступления</span>
             </div>
           </div>
-          <div class="about-tags">
-            <div class="about-tag">Цирковой артист</div>
-            <div class="about-tag">Тренер по акробатике</div>
-            <div class="about-tag">Тренер по спортивной скакалке</div>
-            <div class="about-tag">Судья 2-й категории</div>
-            <div class="about-tag">Глава направления Double Dutch ФРСР</div>
+          <div class="req-item" data-disc="single" data-key="single_power">
+            <div class="req-name">2. Силовые (спец) навыки</div>
+            <div class="tri-controls">
+              <button class="tri-btn active" data-val="0">0</button>
+              <button class="tri-btn" data-val="0.1">0,1</button>
+              <button class="tri-btn" data-val="0.2">0,2</button>
+            </div>
+            <div class="req-hints">
+              <span class="hint h0 active-hint">Не выполнено</span>
+              <span class="hint h1">Один эл-т: акро / гимн / сила</span>
+              <span class="hint h2">Два успешно выполненных эл-та</span>
+            </div>
           </div>
-          <div class="about-contacts">
-            <div class="about-contact-row">✈ Telegram: <a href="https://t.me/iuriletics" target="_blank">@iuriletics</a></div>
-            <div class="about-contact-row">📞 Телефон: <a href="tel:+79168374259">+7 916 837 42 59</a></div>
-            <div class="about-contact-row">📍 Крым · Спортивно-цирковая студия «Точка Отрыва»</div>
+          <div class="req-item" data-disc="single" data-key="single_dir">
+            <div class="req-name">3. Изменение направления вращения</div>
+            <div class="tri-controls">
+              <button class="tri-btn active" data-val="0">0</button>
+              <button class="tri-btn" data-val="0.1">0,1</button>
+              <button class="tri-btn" data-val="0.2">0,2</button>
+            </div>
+            <div class="req-hints">
+              <span class="hint h0 active-hint">Не выполнено</span>
+              <span class="hint h1">Одна смена направления</span>
+              <span class="hint h2">Две смены направления</span>
+            </div>
+          </div>
+          <div class="req-item" data-disc="single" data-key="single_space">
+            <div class="req-name">4. Пространственная динамика</div>
+            <div class="tri-controls">
+              <button class="tri-btn active" data-val="0">0</button>
+              <button class="tri-btn" data-val="0.1">0,1</button>
+              <button class="tri-btn" data-val="0.2">0,2</button>
+            </div>
+            <div class="req-hints">
+              <span class="hint h0 active-hint">Не выполнено</span>
+              <span class="hint h1">Посещение 2–3 квадратов</span>
+              <span class="hint h2">Посещение всех 4 квадратов</span>
+            </div>
+          </div>
+          <div class="req-item" data-disc="single" data-key="single_manip">
+            <div class="req-name">5. Манипуляции со скакалкой</div>
+            <div class="tri-controls">
+              <button class="tri-btn active" data-val="0">0</button>
+              <button class="tri-btn" data-val="0.1">0,1</button>
+              <button class="tri-btn" data-val="0.2">0,2</button>
+            </div>
+            <div class="req-hints">
+              <span class="hint h0 active-hint">Не выполнено</span>
+              <span class="hint h1">Один крест / намотка / релиз</span>
+              <span class="hint h2">Два креста / намотки / релиза</span>
+            </div>
           </div>
         </div>
-        <div class="about-card">
-          <div class="about-card-ttl">📋 О приложении</div>
-          <div class="about-desc-text">
-            <b>Точка Подсчёта</b> — профессиональный судейский калькулятор для вольных выступлений по спортивной скакалке. Создан практикующим судьёй для практикующих судей.
-          </div>
-          <div class="about-feat-list">
-            <div class="about-feat-item"><span>⬡</span><span><b>Сложность</b> — ввод уровней навыков 0–6, подсчёт суммы и коэффициента по методике IJRU</span></div>
-            <div class="about-feat-item"><span>◈</span><span><b>Презентация</b> — оценка по критериям (+/✓/−) с диапазоном итогового балла</span></div>
-            <div class="about-feat-item"><span>⚠</span><span><b>Технический раздел</b> — обязательные навыки (0/0.1/0.2) и штрафные баллы по дисциплинам</span></div>
-          </div>
+        <div class="tech-score-bar penalty-bar">
+          <span class="tech-score-label">Штрафы</span>
+          <span class="tech-score-val penalty-val" id="disp-single-pen">0.0</span>
         </div>
-        <div class="about-card">
-          <div class="about-card-ttl">⚖️ Права</div>
-          <div class="about-desc-text">© 2025 Данильченко Юрий Леонидович · Точка Отрыва · Крым.<br>Все права защищены. Несанкционированное копирование и распространение запрещено.</div>
+        <div class="penalty-block">
+          <button class="pen-btn" data-pen="0.4" data-once="true"  data-key="s_p_time">−0,4&ensp;Превышение / недостаток времени</button>
+          <button class="pen-btn" data-pen="0.2" data-once="true"  data-key="s_p_music">−0,2&ensp;Тихая или громкая музыка</button>
+          <button class="pen-btn" data-pen="0.2" data-once="false" data-key="s_p_space">−0,2&ensp;Нарушение пространства</button>
+          <button class="pen-btn" data-pen="3"   data-once="false" data-key="s_p_acc">−3,0&ensp;Потеря аксессуара</button>
+          <button class="pen-btn" data-pen="0.2" data-once="true"  data-key="s_p_d1">−0,2&ensp;Задержка (выступление)</button>
+          <button class="pen-btn" data-pen="0.4" data-once="true"  data-key="s_p_d2">−0,4&ensp;Задержка (не выход на площадку)</button>
         </div>
-        <div class="about-footer">Точка Отрыва · Экосистема профессионального судьи</div>
+        <div class="actions-row">
+          <button class="action-btn danger disc-reset" data-disc="single">Сбросить всё</button>
+        </div>
       </div>
-    </div>
 
-  </div>
-</div>
+      <!-- ─── ДВЕ СКАКАЛКИ ─── -->
+      <div class="disc-panel" id="disc-double">
+        <div class="tech-score-bar">
+          <span class="tech-score-label">Обязательные навыки</span>
+          <span class="tech-score-val" id="disp-double-req">0.0</span>
+        </div>
+        <div class="req-block">
+          <div class="req-item" data-disc="double" data-key="d_entry">
+            <div class="req-name">1. Вступление и завершение</div>
+            <div class="tri-controls">
+              <button class="tri-btn active" data-val="0">0</button>
+              <button class="tri-btn" data-val="0.1">0,1</button>
+              <button class="tri-btn" data-val="0.2">0,2</button>
+            </div>
+            <div class="req-hints">
+              <span class="hint h0 active-hint">Не выполнено</span>
+              <span class="hint h1">Только начало или только конец</span>
+              <span class="hint h2">И начало, и конец выступления</span>
+            </div>
+          </div>
+          <div class="req-item" data-disc="double" data-key="d_roles">
+            <div class="req-name">2. Смены ролей</div>
+            <div class="tri-controls">
+              <button class="tri-btn active" data-val="0">0</button>
+              <button class="tri-btn" data-val="0.1">0,1</button>
+              <button class="tri-btn" data-val="0.2">0,2</button>
+            </div>
+            <div class="req-hints">
+              <span class="hint h0 active-hint">Не выполнено</span>
+              <span class="hint h1">Более одной смены, но не все роли</span>
+              <span class="hint h2">Каждый — и крутящий, и прыгающий</span>
+            </div>
+          </div>
+          <div class="req-item" data-disc="double" data-key="d_manip">
+            <div class="req-name">3. Манипуляции</div>
+            <div class="tri-controls">
+              <button class="tri-btn active" data-val="0">0</button>
+              <button class="tri-btn" data-val="0.1">0,1</button>
+              <button class="tri-btn" data-val="0.2">0,2</button>
+            </div>
+            <div class="req-hints">
+              <span class="hint h0 active-hint">Не выполнено</span>
+              <span class="hint h1">Одна изоляция или один выброс</span>
+              <span class="hint h2">Два выброса / две изоляции / по одному каждого</span>
+            </div>
+          </div>
+          <div class="req-item" data-disc="double" data-key="d_dir">
+            <div class="req-name">4. Изменение направления</div>
+            <div class="tri-controls">
+              <button class="tri-btn active" data-val="0">0</button>
+              <button class="tri-btn" data-val="0.1">0,1</button>
+              <button class="tri-btn" data-val="0.2">0,2</button>
+            </div>
+            <div class="req-hints">
+              <span class="hint h0 active-hint">Не выполнено</span>
+              <span class="hint h1">Одна смена направления</span>
+              <span class="hint h2">Две смены направления</span>
+            </div>
+          </div>
+          <div class="req-item" data-disc="double" data-key="d_special">
+            <div class="req-name">5. Специальные навыки</div>
+            <div class="tri-controls">
+              <button class="tri-btn active" data-val="0">0</button>
+              <button class="tri-btn" data-val="0.1">0,1</button>
+              <button class="tri-btn" data-val="0.2">0,2</button>
+            </div>
+            <div class="req-hints">
+              <span class="hint h0 active-hint">Не выполнено</span>
+              <span class="hint h1">Один силовой / акроб. прыжок / мультипрыжок</span>
+              <span class="hint h2">Два силовых / акроб. прыжка / мультипрыжка</span>
+            </div>
+          </div>
+        </div>
+        <div class="tech-score-bar penalty-bar">
+          <span class="tech-score-label">Штрафы</span>
+          <span class="tech-score-val penalty-val" id="disp-double-pen">0.0</span>
+        </div>
+        <div class="penalty-block">
+          <button class="pen-btn" data-pen="0.4" data-once="true"  data-key="d_p_time">−0,4&ensp;Превышение / недостаток времени</button>
+          <button class="pen-btn" data-pen="0.2" data-once="true"  data-key="d_p_music">−0,2&ensp;Тихая или громкая музыка</button>
+          <button class="pen-btn" data-pen="0.2" data-once="false" data-key="d_p_space">−0,2&ensp;Нарушение пространства</button>
+          <button class="pen-btn" data-pen="3"   data-once="false" data-key="d_p_acc">−3,0&ensp;Потеря аксессуара</button>
+          <button class="pen-btn" data-pen="0.2" data-once="true"  data-key="d_p_d1">−0,2&ensp;Задержка (выступление)</button>
+          <button class="pen-btn" data-pen="0.4" data-once="true"  data-key="d_p_d2">−0,4&ensp;Задержка (не выход на площадку)</button>
+        </div>
+        <div class="actions-row">
+          <button class="action-btn danger disc-reset" data-disc="double">Сбросить всё</button>
+        </div>
+      </div>
 
-<!-- МОДАЛКА -->
-<div id="modal" class="modal-ov">
-  <div class="modal">
-    <div class="modal-ico" id="m-ico">⚠️</div>
-    <div class="modal-ttl" id="m-ttl"></div>
-    <div class="modal-txt" id="m-txt"></div>
-    <div class="modal-act">
-      <button class="btn btn-g btn-sm" onclick="closeModal()">Отмена</button>
-      <button class="btn btn-sm" id="m-ok"></button>
-    </div>
-  </div>
-</div>
-<div id="toast"></div>
+      <!-- ─── КОМАНДНОЕ ─── -->
+      <div class="disc-panel" id="disc-team">
+        <div class="tech-score-bar">
+          <span class="tech-score-label">Обязательные навыки</span>
+          <span class="tech-score-val" id="disp-team-req">0.0</span>
+        </div>
+        <div class="req-block">
+          <div class="req-item" data-disc="team" data-key="t_group">
+            <div class="req-name">1. Групповое выполнение</div>
+            <div class="tri-controls">
+              <button class="tri-btn active" data-val="0">0</button>
+              <button class="tri-btn" data-val="0.1">0,1</button>
+              <button class="tri-btn" data-val="0.2">0,2</button>
+            </div>
+            <div class="req-hints">
+              <span class="hint h0 active-hint">Не выполнено</span>
+              <span class="hint h1">2–3 спортсмена — навыки на одиночных</span>
+              <span class="hint h2">Мин. 4 спортсмена — навыки на одиночных</span>
+            </div>
+          </div>
+          <div class="req-item" data-disc="team" data-key="t_double">
+            <div class="req-name">2. Две скакалки</div>
+            <div class="tri-controls">
+              <button class="tri-btn active" data-val="0">0</button>
+              <button class="tri-btn" data-val="0.1">0,1</button>
+              <button class="tri-btn" data-val="0.2">0,2</button>
+            </div>
+            <div class="req-hints">
+              <span class="hint h0 active-hint">Не выполнено</span>
+              <span class="hint h1">2–3 спортсмена — с изменением направления</span>
+              <span class="hint h2">Мин. 4 спортсмена — с изменением направления</span>
+            </div>
+          </div>
+          <div class="req-item" data-disc="team" data-key="t_wheel">
+            <div class="req-name">3. Колесо</div>
+            <div class="tri-controls">
+              <button class="tri-btn active" data-val="0">0</button>
+              <button class="tri-btn" data-val="0.1">0,1</button>
+              <button class="tri-btn" data-val="0.2">0,2</button>
+            </div>
+            <div class="req-hints">
+              <span class="hint h0 active-hint">Не выполнено</span>
+              <span class="hint h1">2–3 спортсмена демонстрируют навык</span>
+              <span class="hint h2">4 спортсмена демонстрируют навык</span>
+            </div>
+          </div>
+          <div class="req-item" data-disc="team" data-key="t_long">
+            <div class="req-name">4. Длинная скакалка (7м)</div>
+            <div class="tri-controls">
+              <button class="tri-btn active" data-val="0">0</button>
+              <button class="tri-btn" data-val="0.1">0,1</button>
+              <button class="tri-btn" data-val="0.2">0,2</button>
+            </div>
+            <div class="req-hints">
+              <span class="hint h0 active-hint">Не выполнено</span>
+              <span class="hint h1">2–3 спортсмена демонстрируют навык</span>
+              <span class="hint h2">4 спортсмена демонстрируют навык</span>
+            </div>
+          </div>
+          <div class="req-item" data-disc="team" data-key="t_travel">
+            <div class="req-name">5. Путешественник / Взаимодействие</div>
+            <div class="tri-controls">
+              <button class="tri-btn active" data-val="0">0</button>
+              <button class="tri-btn" data-val="0.1">0,1</button>
+              <button class="tri-btn" data-val="0.2">0,2</button>
+            </div>
+            <div class="req-hints">
+              <span class="hint h0 active-hint">Не выполнено</span>
+              <span class="hint h1">2–3 спортсмена — «черпак» или «совок»</span>
+              <span class="hint h2">4 спортсмена — «черпак» или «совок»</span>
+            </div>
+          </div>
+        </div>
+        <div class="tech-score-bar penalty-bar">
+          <span class="tech-score-label">Штрафы</span>
+          <span class="tech-score-val penalty-val" id="disp-team-pen">0.0</span>
+        </div>
+        <div class="penalty-block">
+          <button class="pen-btn" data-pen="0.4" data-once="true"  data-key="t_p_time">−0,4&ensp;Превышение / недостаток времени</button>
+          <button class="pen-btn" data-pen="0.2" data-once="true"  data-key="t_p_music">−0,2&ensp;Тихая или громкая музыка</button>
+          <button class="pen-btn" data-pen="0.2" data-once="false" data-key="t_p_space">−0,2&ensp;Нарушение пространства</button>
+          <button class="pen-btn" data-pen="3"   data-once="false" data-key="t_p_acc">−3,0&ensp;Потеря аксессуара</button>
+          <button class="pen-btn" data-pen="0.2" data-once="true"  data-key="t_p_d1">−0,2&ensp;Задержка (выступление)</button>
+          <button class="pen-btn" data-pen="0.4" data-once="true"  data-key="t_p_d2">−0,4&ensp;Задержка (не выход на площадку)</button>
+        </div>
+        <div class="actions-row">
+          <button class="action-btn danger disc-reset" data-disc="team">Сбросить всё</button>
+        </div>
+      </div>
+
+    </section>
+
+
+  </main>
 
 <script>
+
 /*
- * Точка Подсчёта · Судейский калькулятор · tochka.html
- * Версия: 2.0.0
- * Дата: 2025
- *
- * Автор: Данильченко Юрий Леонидович
- * Дата рождения: 21.07.1988
- * Организация: Спортивно-цирковая студия «Точка Отрыва»
- * Крым
- * Telegram: @iuriletics
- * Телефон: +7 916 837 42 59
- *
- * Все права защищены. Несанкционированное копирование,
- * распространение и использование данного программного
- * обеспечения запрещено без письменного разрешения автора.
+ * Точка Подсчёта · tochka.html
+ * Версия: 2.1.0 · 2025
+ * Автор: Данильченко Юрий Леонидович · 21.07.1988
+ * © 2025 Все права защищены.
  */
 
 const SB_URL = 'https://anuapnxrwqcsucisehrr.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFudWFwbnhyd3Fjc3VjaXNlaHJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE3ODQzMjEsImV4cCI6MjA4NzM2MDMyMX0.U1TKmw6KtHmNnhnzwRfbfVERPl6ybSsayUWkM6Whqn4';
 
-let _sb, _user = null, _profile = null;
-let _theme = localStorage.getItem('to_theme') || 'dark';
-
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-}
-function setTheme(t) {
-  _theme = t;
-  localStorage.setItem('to_theme', t);
-  document.documentElement.setAttribute('data-theme', t);
-  const mt = document.getElementById('meta-theme');
-  if (mt) mt.setAttribute('content', t === 'dark' ? '#0B0C10' : '#F0F2FA');
-  document.querySelectorAll('[id^="tp-"]').forEach(p => {
-    p.querySelectorAll('button').forEach((b, i) => b.classList.toggle('on', i === (t === 'dark' ? 0 : 1)));
-  });
-}
-function toast(msg) {
-  const el = document.getElementById('toast');
-  el.textContent = msg; el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 2600);
-}
-function modal(ico, ttl, txt, okLabel, onOk, danger = true) {
-  document.getElementById('m-ico').textContent = ico;
-  document.getElementById('m-ttl').textContent = ttl;
-  document.getElementById('m-txt').textContent = txt;
-  const btn = document.getElementById('m-ok');
-  btn.textContent = okLabel;
-  btn.className = 'btn btn-sm ' + (danger ? 'btn-d' : 'btn-a');
-  btn.onclick = () => { closeModal(); onOk(); };
-  document.getElementById('modal').classList.add('open');
-}
-function closeModal() { document.getElementById('modal').classList.remove('open'); }
-function goBack() { window.location.href = './index.html'; }
-function doLogout() { _sb.auth.signOut().then(() => { window.location.href = './index.html'; }); }
-
-/* ИНИЦИАЛИЗАЦИЯ */
+let _sb;
 window.onerror = function(msg) { console.error('[ТочкаПодсчёта]', msg); return false; };
 
-document.addEventListener('DOMContentLoaded', async () => {
-  setTheme(_theme);
+(async function initAuth() {
   _sb = window.supabase.createClient(SB_URL, SB_KEY);
-
   const { data: { session } } = await _sb.auth.getSession();
   if (!session) { window.location.href = './index.html'; return; }
 
-  _user = session.user;
-  const { data, error } = await _sb.from('profiles').select('*').eq('id', _user.id).single();
-  if (error || !data) {
-    const name = _user.user_metadata?.full_name || _user.email.split('@')[0];
-    await _sb.from('profiles').upsert({ id: _user.id, full_name: name });
-    const { data: fresh } = await _sb.from('profiles').select('*').eq('id', _user.id).single();
+  const { data: profile, error } = await _sb.from('profiles').select('*').eq('id', session.user.id).single();
+  let _profile = profile;
+  if (error || !profile) {
+    const name = session.user.user_metadata?.full_name || session.user.email.split('@')[0];
+    await _sb.from('profiles').upsert({ id: session.user.id, full_name: name });
+    const { data: fresh } = await _sb.from('profiles').select('*').eq('id', session.user.id).single();
     _profile = fresh;
-  } else {
-    _profile = data;
   }
 
-  if (_profile?.is_blocked) { showScreen('screen-blocked'); return; }
+  if (_profile?.is_blocked) {
+    document.getElementById('screen-loading').style.display = 'none';
+    document.getElementById('screen-blocked').classList.add('show');
+    return;
+  }
 
-  const name = _profile?.full_name || _user.email;
-  document.getElementById('calc-user-lbl').textContent = name;
+  document.getElementById('header-username').textContent = _profile?.full_name || session.user.email;
+  document.getElementById('screen-loading').style.display = 'none';
 
-  buildPresentation();
-  buildTechnical();
-  loadState();
-  showScreen('screen-calc');
-});
+  /* Восстановить тему */
+  const savedTheme = localStorage.getItem('theme') || 'light';
+  applyTheme(savedTheme);
+})();
 
-/* ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК */
-let _activeTab = 'complexity';
-function switchTab(id, btn) {
-  _activeTab = id;
-  document.querySelectorAll('.ctab').forEach(b => b.classList.remove('on'));
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('on'));
-  btn.classList.add('on');
-  document.getElementById('panel-' + id).classList.add('on');
-  document.querySelector('.calc-body').scrollTo({ top: 0, behavior: 'smooth' });
-  updateDisplay();
+
+/* ══════════════════════════════════════════
+   Судья скакалки · app.js
+   Данильченко Юрий · Точка Отрыва
+   ══════════════════════════════════════════ */
+
+// ── Тёмная тема ──────────────────────────────
+const themeToggle = document.getElementById('theme-toggle');
+const themeIcon   = themeToggle.querySelector('.theme-icon');
+let currentTheme  = localStorage.getItem('theme') || 'light';
+applyTheme(currentTheme);
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  themeIcon.textContent = theme === 'dark' ? '☾' : '☀';
+  currentTheme = theme;
+  localStorage.setItem('theme', theme);
+  // Обновляем meta theme-color для PWA
+  const metaTheme = document.getElementById('meta-theme');
+  if (metaTheme) metaTheme.setAttribute('content', theme === 'dark' ? '#0f0f0e' : '#111110');
+}
+themeToggle.addEventListener('click', () => applyTheme(currentTheme === 'dark' ? 'light' : 'dark'));
+
+// ── Подтверждение сброса ─────────────────────
+function withConfirm(btn, callback) {
+  let pending = false;
+  let timer   = null;
+
+  function reset() {
+    pending = false;
+    btn.classList.remove('confirming');
+    btn.textContent = btn.dataset.origLabel;
+  }
+
+  btn.dataset.origLabel = btn.innerHTML;
+
+  btn.addEventListener('click', () => {
+    if (!pending) {
+      pending = true;
+      btn.classList.add('confirming');
+      btn.textContent = 'Точно?';
+      clearTimeout(timer);
+      timer = setTimeout(reset, 3000);
+    } else {
+      clearTimeout(timer);
+      reset();
+      callback();
+    }
+  });
+
+  btn.addEventListener('blur', () => { clearTimeout(timer); reset(); });
 }
 
-/* ЗВУК */
-let _actx = null;
-function getActx() { if (!_actx) _actx = new (window.AudioContext || window.webkitAudioContext)(); return _actx; }
-function playTick(type) {
+// ── double-tap zoom prevention ────────────────
+let lastTouch = 0;
+window.addEventListener('touchend', (e) => {
+  const now = Date.now();
+  const safe = e.target.closest('.grid-complexity,.btn-zero,.criteria-list,.actions-row,.top-tabs,.disc-tabs,.tri-controls,.penalty-block,.pm-controls');
+  if (safe) { lastTouch = now; return; }
+  if (now - lastTouch <= 300) e.preventDefault();
+  lastTouch = now;
+}, { passive: false });
+
+// ══════════════════════════════════════════════
+// ГЛАВНЫЕ ВКЛАДКИ
+// ══════════════════════════════════════════════
+const tabBtns = document.querySelectorAll('.tab-btn');
+const panels  = {
+  complexity:   document.getElementById('tab-complexity'),
+  presentation: document.getElementById('tab-presentation'),
+  technical:    document.getElementById('tab-technical'),
+};
+const displayEl = document.getElementById('display');
+
+tabBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    tabBtns.forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected','false'); });
+    btn.classList.add('active'); btn.setAttribute('aria-selected','true');
+    const id = btn.dataset.tab;
+    Object.values(panels).forEach(p => p.classList.remove('active'));
+    panels[id].classList.add('active');
+    updateDisplay(id);
+    document.querySelector('.content').scrollTo({ top:0, behavior:'smooth' });
+  });
+});
+
+// ══════════════════════════════════════════════
+// СЛОЖНОСТЬ
+// ══════════════════════════════════════════════
+const seq = [];
+const LV_COLORS = { 0:'#94a3b8',1:'#22c55e',2:'#84cc16',3:'#eab308',4:'#f97316',5:'#ef4444',6:'#a855f7' };
+const statsBox = document.getElementById('complexity-stats');
+const toggleStatsBtn = document.getElementById('toggle-stats');
+
+function renderComplexityDisplay() {
+  const total = seq.reduce((a,b)=>a+b,0);
+  const avg   = seq.length ? (total/seq.length).toFixed(2) : '—';
+  const avgColor = seq.length ? LV_COLORS[Math.round(total/seq.length)] : 'var(--text)';
+  const chips = seq.map(v=>`<span class="chip chip-${v}">${v}</span>`).join('');
+  displayEl.innerHTML = `
+    <div class="score-label">Сложность</div>
+    <div class="score-row">
+      <div class="score-big" style="color:${avgColor}">${avg}</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--muted)">${seq.length} эл.; сч. ${total}</div>
+    </div>
+    <div class="seq-chips">${chips || '<span style="color:var(--muted);font-size:13px">Нажимайте на уровни навыков</span>'}</div>`;
+}
+
+function renderComplexityStats() {
+  const total = seq.reduce((a,b)=>a+b,0);
+  document.getElementById('skills-seq').innerHTML =
+    seq.map(v=>`<span class="chip chip-${v}" style="display:inline-flex">${v}</span>`).join(' ');
+  document.getElementById('skills-sum').textContent    = total;
+  document.getElementById('skills-amount').textContent = seq.length;
+  document.getElementById('skills-coef').textContent   = seq.length ? (total/seq.length).toFixed(2) : '0.00';
+  const names = {0:'Пропуск',1:'Базовый',2:'Лёгкий',3:'Средний',4:'Сложный',5:'Мастер',6:'Элита'};
+  document.getElementById('skills-counts').innerHTML =
+    Array.from({length:7},(_,i)=>({n:i,c:seq.filter(v=>v===i).length}))
+      .filter(x=>x.c>0)
+      .map(x=>`<li>
+        <span class="lv-dot" style="background:${LV_COLORS[x.n]}"></span>
+        <span style="color:var(--muted);font-size:12px">${names[x.n]}</span>
+        <span class="mono" style="margin-left:auto;font-weight:700">${x.c}</span>
+      </li>`).join('') || '<li style="color:var(--muted);font-size:12px">Нет данных</li>';
+}
+
+// ══════════════════════════════════════════════
+// ЗВУК И ВИБРАЦИЯ
+// ══════════════════════════════════════════════
+let audioCtx = null;
+function getAudio() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+function playTick(type = 'key') {
   try {
-    const ctx = getActx(), osc = ctx.createOscillator(), g = ctx.createGain();
-    osc.connect(g); g.connect(ctx.destination);
+    const ctx  = getAudio();
+    const osc  = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
     if (type === 'key') {
-      osc.type = 'sine'; osc.frequency.setValueAtTime(1050, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(800, ctx.currentTime + .04);
-      g.gain.setValueAtTime(.16, ctx.currentTime);
-      g.gain.exponentialRampToValueAtTime(.0001, ctx.currentTime + .06);
-      osc.start(ctx.currentTime); osc.stop(ctx.currentTime + .06);
-    } else {
-      osc.type = 'sine'; osc.frequency.setValueAtTime(700, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(500, ctx.currentTime + .07);
-      g.gain.setValueAtTime(.12, ctx.currentTime);
-      g.gain.exponentialRampToValueAtTime(.0001, ctx.currentTime + .09);
-      osc.start(ctx.currentTime); osc.stop(ctx.currentTime + .09);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(1050, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(800, ctx.currentTime + 0.04);
+      gain.gain.setValueAtTime(0.18, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.06);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.06);
+    } else if (type === 'erase') {
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(750, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(550, ctx.currentTime + 0.06);
+      gain.gain.setValueAtTime(0.14, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.08);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.08);
     }
   } catch(e) {}
 }
-function haptic(ms) { if (navigator.vibrate) navigator.vibrate(ms || 7); }
 
-/* СЛОЖНОСТЬ */
-const LV_COLORS = { 0:'#94a3b8',1:'#22c55e',2:'#84cc16',3:'#eab308',4:'#f97316',5:'#ef4444',6:'#a855f7' };
-const LV_NAMES  = { 0:'Пропуск',1:'Базовый',2:'Лёгкий',3:'Средний',4:'Сложный',5:'Мастер',6:'Элита' };
-let _seq = [];
-let _showCounts = false;
-
-function addLvl(v) {
-  _seq.push(v);
-  playTick('key'); haptic(6);
-  updateComplexity(); updateDisplay(); saveState();
-}
-function eraseLast() {
-  if (!_seq.length) return;
-  _seq.pop();
-  playTick('erase'); haptic(12);
-  updateComplexity(); updateDisplay(); saveState();
-}
-function toggleCounts() {
-  _showCounts = !_showCounts;
-  document.getElementById('counts-card').classList.toggle('hidden', !_showCounts);
-  document.getElementById('btn-stats').textContent = _showCounts ? '≡ Скрыть' : '≡ Детали';
-  if (_showCounts) updateComplexity();
+function vibrate(pattern = [8]) {
+  if (navigator.vibrate) navigator.vibrate(pattern);
 }
 
-function updateComplexity() {
-  const total = _seq.reduce((a, b) => a + b, 0);
-  const avg = _seq.length ? (total / _seq.length) : 0;
-  const avgColor = _seq.length ? LV_COLORS[Math.round(avg)] : 'var(--accent)';
-
-  document.getElementById('st-avg').textContent = _seq.length ? avg.toFixed(2) : '—';
-  document.getElementById('st-avg').style.color = avgColor;
-  document.getElementById('st-sum').textContent = total;
-  document.getElementById('st-cnt').textContent = _seq.length;
-
-  const chips = document.getElementById('seq-chips');
-  if (_seq.length) {
-    chips.innerHTML = _seq.map(v => `<span class="chip chip-${v}">${v}</span>`).join('');
-  } else {
-    chips.innerHTML = '<span style="font-size:.72rem;color:var(--tx3)">Нажимайте на уровни навыков</span>';
-  }
-
-  if (_showCounts) {
-    const ul = document.getElementById('counts-list');
-    ul.innerHTML = Array.from({ length: 7 }, (_, i) => ({ n: i, c: _seq.filter(v => v === i).length }))
-      .filter(x => x.c > 0)
-      .map(x => `<li>
-        <div class="lv-dot" style="background:${LV_COLORS[x.n]}"></div>
-        <span style="color:var(--tx2);font-size:.76rem">${LV_NAMES[x.n]}</span>
-        <span class="mono" style="margin-left:auto;font-weight:700;font-size:.8rem">${x.c}</span>
-      </li>`).join('') || '<li style="color:var(--tx3);font-size:.75rem">Нет данных</li>';
-  }
-}
-
-/* ПРЕЗЕНТАЦИЯ */
-const PRES_ITEMS = [
-  'Техника и контроль тела',
-  'Выразительность и артистизм',
-  'Взаимодействие с музыкой',
-  'Разнообразие движений',
-  'Энергетика и динамика',
-  'Пространственное использование',
-];
-const CREAT_ITEMS = [
-  'Оригинальность и новизна',
-  'Хореографический дизайн',
-  'Целостность выступления',
-  'Общее впечатление',
-];
-
-let _presVals = {};
-let _creatVals = {};
-
-function buildPresentation() {
-  buildCritGroup('pres-list', PRES_ITEMS, 'p');
-  buildCritGroup('creat-list', CREAT_ITEMS, 'c');
-}
-
-function buildCritGroup(containerId, items, prefix) {
-  const el = document.getElementById(containerId);
-  items.forEach((name, i) => {
-    const key = prefix + i;
-    const row = document.createElement('div');
-    row.className = 'crit-item';
-    row.innerHTML = `
-      <div class="crit-name">${name}</div>
-      <div class="pm-wrap">
-        <button class="pm-btn" data-key="${key}" data-val="-1" onclick="setCrit('${key}',-1,this.parentElement)">−</button>
-        <button class="pm-btn" data-key="${key}" data-val="0"  onclick="setCrit('${key}',0,this.parentElement)">✓</button>
-        <button class="pm-btn" data-key="${key}" data-val="1"  onclick="setCrit('${key}',1,this.parentElement)">+</button>
-      </div>`;
-    el.appendChild(row);
-  });
-}
-
-function setCrit(key, val, wrap) {
-  if (key.startsWith('p')) _presVals[key] = val;
-  else _creatVals[key] = val;
-  wrap.querySelectorAll('.pm-btn').forEach(b => b.classList.remove('minus','check','plus'));
-  const active = wrap.querySelector(`[data-val="${val}"]`);
-  if (active) active.classList.add(val === -1 ? 'minus' : val === 0 ? 'check' : 'plus');
-  haptic(7);
-  updatePresentation(); updateDisplay(); saveState();
-}
-
-function updatePresentation() {
-  const pCount = PRES_ITEMS.length;
-  const cCount = CREAT_ITEMS.length;
-
-  const pSum = Array.from({ length: pCount }, (_, i) => _presVals['p' + i] ?? -1).reduce((a, v) => a + (v === 1 ? 1 : v === 0 ? .5 : 0), 0);
-  const cSum = Array.from({ length: cCount }, (_, i) => _creatVals['c' + i] ?? -1).reduce((a, v) => a + (v === 1 ? 1 : v === 0 ? .5 : 0), 0);
-
-  const pScore = (pSum / pCount) * 2;
-  const cScore = (cSum / cCount) * 1;
-  const total = pScore + cScore;
-
-  const pCounts = { plus: 0, check: 0, minus: 0 };
-  Array.from({ length: pCount }, (_, i) => _presVals['p' + i] ?? -1).forEach(v => { if (v === 1) pCounts.plus++; else if (v === 0) pCounts.check++; else pCounts.minus++; });
-  const cCounts = { plus: 0, check: 0, minus: 0 };
-  Array.from({ length: cCount }, (_, i) => _creatVals['c' + i] ?? -1).forEach(v => { if (v === 1) cCounts.plus++; else if (v === 0) cCounts.check++; else cCounts.minus++; });
-
-  const [pLo, pHi] = rangeP(pCounts);
-  const [cLo, cHi] = rangeC(cCounts);
-
-  document.getElementById('pres-score-p').textContent = pScore.toFixed(2);
-  document.getElementById('pres-score-c').textContent = cScore.toFixed(2);
-  document.getElementById('pres-total').textContent = total.toFixed(2);
-  document.getElementById('pres-range').textContent = (pLo + cLo).toFixed(1) + ' – ' + (pHi + cHi).toFixed(1);
-}
-
-/* Оригинальные формулы диапазонов из v1.0 */
-function rangeP(c) {
-  if (c.plus === 6)                           return [1.7, 2.0];
-  if (c.plus === 3 && c.check === 3)          return [1.3, 1.6];
-  if (c.plus === 1 && c.check === 4 && c.minus === 1) return [0.9, 1.2];
-  if (c.check === 3 && c.minus === 3)         return [0.5, 0.8];
-  if (c.check <= 1 && c.minus >= 4)           return [0.0, 0.4];
-  const s = Math.max(0, Math.min(2, ((c.plus + c.check * .5) / 6) * 2));
-  return [+Math.max(0, s - .2).toFixed(1), +Math.min(2, s + .2).toFixed(1)];
-}
-function rangeC(c) {
-  if (c.plus === 4)                           return [0.9, 1.0];
-  if (c.plus === 2 && c.check === 2)          return [0.7, 0.8];
-  if (c.plus === 1 && c.check === 2 && c.minus === 1) return [0.5, 0.6];
-  if (c.check === 2 && c.minus === 2)         return [0.3, 0.4];
-  if (c.check <= 1 && c.minus >= 3)           return [0.0, 0.2];
-  const s = Math.max(0, Math.min(1, (c.plus + c.check * .5) / 4));
-  return [+Math.max(0, s - .1).toFixed(1), +Math.min(1, s + .1).toFixed(1)];
-}
-
-/* ТЕХНИЧЕСКИЙ */
-const TECH = {
-  single: {
-    reqs: [
-      { key: 'single_cross', name: '1. Кресты / Намотки / Релизы', hints: ['Не выполнено', 'Один крест / намотка / релиз', 'Два креста / намотки / релиза'] },
-    ],
-    pens: [
-      { key: 's_p_time',  val: .4, once: true,  lbl: '−0.4  Превышение / недостаток времени' },
-      { key: 's_p_music', val: .2, once: true,  lbl: '−0.2  Тихая или громкая музыка' },
-      { key: 's_p_space', val: .2, once: false, lbl: '−0.2  Нарушение пространства' },
-      { key: 's_p_acc',   val: 3,  once: false, lbl: '−3.0  Потеря аксессуара' },
-      { key: 's_p_d1',    val: .2, once: true,  lbl: '−0.2  Задержка (выступление)' },
-      { key: 's_p_d2',    val: .4, once: true,  lbl: '−0.4  Задержка (не выход на площадку)' },
-    ]
-  },
-  double: {
-    reqs: [
-      { key: 'd_entry',   name: '1. Вступление и завершение',    hints: ['Не выполнено','Только начало или только конец','И начало, и конец выступления'] },
-      { key: 'd_roles',   name: '2. Смены ролей',                hints: ['Не выполнено','Более одной смены, но не все роли','Каждый — и крутящий, и прыгающий'] },
-      { key: 'd_manip',   name: '3. Манипуляции со скакалкой',   hints: ['Не выполнено','Одна изоляция или один выброс','Два выброса / две изоляции'] },
-      { key: 'd_dir',     name: '4. Изменение направления',      hints: ['Не выполнено','Одна смена направления','Две смены направления'] },
-      { key: 'd_special', name: '5. Специальные навыки',         hints: ['Не выполнено','Один силовой / акроб. прыжок','Два силовых / акроб. прыжка'] },
-    ],
-    pens: [
-      { key: 'd_p_time',  val: .4, once: true,  lbl: '−0.4  Превышение / недостаток времени' },
-      { key: 'd_p_music', val: .2, once: true,  lbl: '−0.2  Тихая или громкая музыка' },
-      { key: 'd_p_space', val: .2, once: false, lbl: '−0.2  Нарушение пространства' },
-      { key: 'd_p_acc',   val: 3,  once: false, lbl: '−3.0  Потеря аксессуара' },
-      { key: 'd_p_d1',    val: .2, once: true,  lbl: '−0.2  Задержка (выступление)' },
-      { key: 'd_p_d2',    val: .4, once: true,  lbl: '−0.4  Задержка (не выход на площадку)' },
-    ]
-  },
-  team: {
-    reqs: [
-      { key: 't_group',   name: '1. Групповое выполнение',          hints: ['Не выполнено','2–3 спортсмена','Минимум 4 спортсмена'] },
-      { key: 't_double',  name: '2. Навыки на двух скакалках',       hints: ['Не выполнено','2–3 спортсмена c изменением направления','Мин. 4 спортсмена c изменением направления'] },
-      { key: 't_wheel',   name: '3. Колесо',                         hints: ['Не выполнено','2–3 спортсмена демонстрируют навык','4 спортсмена демонстрируют навык'] },
-      { key: 't_long',    name: '4. Длинная скакалка (7 м)',          hints: ['Не выполнено','2–3 спортсмена демонстрируют навык','4 спортсмена демонстрируют навык'] },
-      { key: 't_travel',  name: '5. Путешественник / Взаимодействие', hints: ['Не выполнено','2–3 спортсмена — «черпак» или «совок»','4 спортсмена — «черпак» или «совок»'] },
-    ],
-    pens: [
-      { key: 't_p_time',  val: .4, once: true,  lbl: '−0.4  Превышение / недостаток времени' },
-      { key: 't_p_music', val: .2, once: true,  lbl: '−0.2  Тихая или громкая музыка' },
-      { key: 't_p_space', val: .2, once: false, lbl: '−0.2  Нарушение пространства' },
-      { key: 't_p_acc',   val: 3,  once: false, lbl: '−3.0  Потеря аксессуара' },
-      { key: 't_p_d1',    val: .2, once: true,  lbl: '−0.2  Задержка (выступление)' },
-      { key: 't_p_d2',    val: .4, once: true,  lbl: '−0.4  Задержка (не выход на площадку)' },
-    ]
-  }
-};
-
-let _reqVals = {};
-let _penVals = {};
-let _currentDisc = 'single';
-
-function buildTechnical() {
-  ['single', 'double', 'team'].forEach(disc => {
-    const container = document.getElementById('disc-' + disc);
-    const data = TECH[disc];
-
-    data.reqs.forEach(req => {
-      const card = document.createElement('div');
-      card.className = 'req-card';
-      card.innerHTML = `
-        <div class="req-name">${req.name}</div>
-        <div class="tri-row">
-          <button class="tri-btn on" onclick="setReq('${req.key}',0,this.parentElement,'${disc}')">0</button>
-          <button class="tri-btn"   onclick="setReq('${req.key}',.1,this.parentElement,'${disc}')">0.1</button>
-          <button class="tri-btn"   onclick="setReq('${req.key}',.2,this.parentElement,'${disc}')">0.2</button>
-        </div>
-        <div class="req-hint" id="hint-${req.key}">${req.hints[0]}</div>`;
-      container.appendChild(card);
-      _reqVals[req.key] = 0;
-    });
-
-    const penCard = document.createElement('div');
-    penCard.className = 'pen-card';
-    penCard.innerHTML = `<div class="pen-card-lbl">Штрафы</div><div class="pen-list" id="pen-${disc}"></div>`;
-    container.appendChild(penCard);
-    const penList = penCard.querySelector('#pen-' + disc);
-
-    data.pens.forEach(pen => {
-      const btn = document.createElement('button');
-      btn.className = 'pen-btn' + (pen.once ? '' : ' repeatable');
-      btn.id = 'penb-' + pen.key;
-      btn.setAttribute('data-base', pen.lbl);
-      btn.innerHTML = `<span class="f1">${pen.lbl}</span>`;
-      _penVals[pen.key] = { val: pen.val, once: pen.once, count: 0 };
-
-      btn.addEventListener('click', () => clickPen(pen.key, btn));
-
-      if (!pen.once) {
-        let hold;
-        const startHold = () => { hold = setTimeout(() => { decrementPen(pen.key, btn); haptic(40); }, 600); };
-        const cancelHold = () => clearTimeout(hold);
-        btn.addEventListener('touchstart', startHold, { passive: true });
-        btn.addEventListener('touchend', cancelHold);
-        btn.addEventListener('touchcancel', cancelHold);
-        btn.addEventListener('mousedown', startHold);
-        btn.addEventListener('mouseup', cancelHold);
-        btn.addEventListener('mouseleave', cancelHold);
-      }
-      btn.addEventListener('contextmenu', e => { e.preventDefault(); decrementPen(pen.key, btn); });
-
-      penList.appendChild(btn);
-    });
-
-    const resetBtn = document.createElement('button');
-    resetBtn.className = 'btn btn-d btn-full';
-    resetBtn.textContent = 'Сбросить ' + (disc === 'single' ? 'одиночку' : disc === 'double' ? 'две скакалки' : 'команду');
-    resetBtn.onclick = () => confirmResetDisc(disc, resetBtn);
-    container.appendChild(resetBtn);
-  });
-}
-
-function setReq(key, val, row, disc) {
-  _reqVals[key] = val;
-  row.querySelectorAll('.tri-btn').forEach((b, i) => b.classList.toggle('on', [0, .1, .2][i] === val));
-  const hintEl = document.getElementById('hint-' + key);
-  const req = TECH[disc].reqs.find(r => r.key === key);
-  if (hintEl && req) hintEl.textContent = req.hints[[0, .1, .2].indexOf(val)];
-  haptic(7);
-  updateTechTotal(disc); updateDisplay(); saveState();
-}
-
-function clickPen(key, btn) {
-  const st = _penVals[key];
-  if (st.once) { st.count = st.count > 0 ? 0 : 1; }
-  else { st.count++; }
-  refreshPenBtn(btn, key);
-  haptic(8);
-  updateTechTotal(_currentDisc); updateDisplay(); saveState();
-}
-
-function decrementPen(key, btn) {
-  const st = _penVals[key];
-  if (st.count > 0) { st.count--; }
-  refreshPenBtn(btn, key);
-  updateTechTotal(_currentDisc); updateDisplay(); saveState();
-}
-
-function refreshPenBtn(btn, key) {
-  const st = _penVals[key];
-  const active = st.count > 0;
-  btn.classList.toggle('pen-active', active);
-  const isRep = !st.once;
-  let cnt = btn.querySelector('.pen-cnt');
-  if (active && st.count > 1) {
-    if (!cnt) { cnt = document.createElement('span'); cnt.className = 'pen-cnt' + (isRep ? ' am' : ''); btn.appendChild(cnt); }
-    cnt.textContent = st.count;
-  } else {
-    if (cnt) cnt.remove();
-  }
-}
-
-function updateTechTotal(disc) {
-  const reqs = TECH[disc].reqs;
-  const reqSum = reqs.reduce((a, r) => a + (_reqVals[r.key] || 0), 0);
-  const pens = TECH[disc].pens;
-  const penSum = pens.reduce((a, p) => a + (_penVals[p.key]?.val || 0) * (_penVals[p.key]?.count || 0), 0);
-  return { reqSum: +reqSum.toFixed(1), penSum: +penSum.toFixed(1) };
-}
-
-function switchDisc(disc, btn) {
-  _currentDisc = disc;
-  document.querySelectorAll('.disc-tab').forEach(b => b.classList.remove('on'));
-  document.querySelectorAll('.disc-panel').forEach(p => p.classList.remove('on'));
-  btn.classList.add('on');
-  document.getElementById('disc-' + disc).classList.add('on');
-  updateDisplay();
-}
-
-/* ГЛАВНЫЙ ДИСПЛЕЙ */
-function updateDisplay() {
-  const total = _seq.reduce((a, b) => a + b, 0);
-  const avg = _seq.length ? (total / _seq.length) : 0;
-  const compScore = avg;
-  const avgColor = _seq.length ? LV_COLORS[Math.round(avg)] : 'var(--tx2)';
-
-  const pSum = Array.from({ length: PRES_ITEMS.length }, (_, i) => _presVals['p' + i] ?? -1).reduce((a, v) => a + (v === 1 ? 1 : v === 0 ? .5 : 0), 0);
-  const cSum = Array.from({ length: CREAT_ITEMS.length }, (_, i) => _creatVals['c' + i] ?? -1).reduce((a, v) => a + (v === 1 ? 1 : v === 0 ? .5 : 0), 0);
-  const presScore = (pSum / PRES_ITEMS.length) * 2 + (cSum / CREAT_ITEMS.length);
-
-  const tech = updateTechTotal(_currentDisc);
-  const netTech = tech.reqSum - tech.penSum;
-  const grand = +(compScore + presScore + netTech).toFixed(2);
-
-  document.getElementById('main-score').textContent = _seq.length ? grand.toFixed(2) : '—';
-  document.getElementById('main-score').style.color = _seq.length
-    ? (grand > 3 ? 'var(--green)' : grand > 1.5 ? 'var(--amber)' : 'var(--tx)')
-    : 'var(--tx2)';
-  document.getElementById('d-comp').textContent = _seq.length ? avg.toFixed(2) : '—';
-  document.getElementById('d-comp').style.color = avgColor;
-  document.getElementById('d-pres').textContent = presScore.toFixed(2);
-  document.getElementById('d-tech').textContent = tech.reqSum.toFixed(1);
-  document.getElementById('d-pen').textContent = tech.penSum > 0 ? '−' + tech.penSum.toFixed(1) : '';
-}
-
-/* СБРОСЫ */
-function confirmReset(type) {
-  const map = {
-    comp: ['↺', 'Сбросить сложность?', 'Все введённые уровни навыков будут удалены.', 'Сбросить', resetComp],
-    pres: ['↺', 'Сбросить презентацию?', 'Все оценки будут сброшены в исходное состояние.', 'Сбросить', resetPres],
-  };
-  const [ico, ttl, txt, lbl, fn] = map[type];
-  modal(ico, ttl, txt, lbl, fn);
-}
-
-function confirmResetDisc(disc, btn) {
-  if (!btn._pending) {
-    btn._pending = true; const orig = btn.textContent; btn._orig = orig;
-    btn.textContent = 'Точно?';
-    btn._t = setTimeout(() => { btn._pending = false; btn.textContent = btn._orig; }, 3000);
-  } else {
-    clearTimeout(btn._t); btn._pending = false; btn.textContent = btn._orig;
-    resetDisc(disc);
-  }
-}
-
-function confirmResetAll() {
-  modal('↺', 'Сбросить всё?', 'Сложность, презентация и технический раздел будут очищены.', 'Сбросить', () => {
-    resetComp(); resetPres();
-    ['single','double','team'].forEach(d => resetDisc(d));
-    toast('↺ Всё сброшено');
-  });
-}
-
-function resetComp() {
-  _seq = [];
-  updateComplexity(); updateDisplay(); saveState();
-}
-
-function resetPres() {
-  _presVals = {}; _creatVals = {};
-  document.querySelectorAll('.pm-btn').forEach(b => b.classList.remove('minus','check','plus'));
-  updatePresentation(); updateDisplay(); saveState();
-}
-
-function resetDisc(disc) {
-  TECH[disc].reqs.forEach(r => {
-    _reqVals[r.key] = 0;
-    const card = document.querySelector(`#disc-${disc} .tri-row`);
-  });
-  document.querySelectorAll('#disc-' + disc + ' .tri-btn').forEach((b, i) => b.classList.toggle('on', i % 3 === 0));
-  document.querySelectorAll('#disc-' + disc + ' .req-hint').forEach((h, i) => {
-    h.textContent = TECH[disc].reqs[i]?.hints[0] || '';
-  });
-  TECH[disc].pens.forEach(p => {
-    _penVals[p.key].count = 0;
-    const btn = document.getElementById('penb-' + p.key);
-    if (btn) { btn.classList.remove('pen-active'); const cnt = btn.querySelector('.pen-cnt'); if (cnt) cnt.remove(); }
-  });
-  updateTechTotal(disc); updateDisplay(); saveState();
-}
-
-/* СОХРАНЕНИЕ СОСТОЯНИЯ */
-let _saveTimer;
-function saveState() {
-  clearTimeout(_saveTimer);
-  _saveTimer = setTimeout(() => {
-    try {
-      localStorage.setItem('to_calc', JSON.stringify({
-        seq: _seq,
-        pres: _presVals,
-        creat: _creatVals,
-        req: _reqVals,
-        pen: Object.fromEntries(Object.entries(_penVals).map(([k, v]) => [k, v.count]))
-      }));
-    } catch(e) {}
-  }, 400);
-}
-
-function loadState() {
+function hapticTick() {
   try {
-    const raw = localStorage.getItem('to_calc');
-    if (!raw) { updateComplexity(); updatePresentation(); updateDisplay(); return; }
-    const s = JSON.parse(raw);
-
-    if (s.seq) { _seq = s.seq; }
-
-    if (s.pres) {
-      _presVals = s.pres;
-      Object.entries(_presVals).forEach(([key, val]) => {
-        const wrap = document.querySelector(`[data-key="${key}"]`)?.parentElement;
-        if (!wrap) return;
-        wrap.querySelectorAll('.pm-btn').forEach(b => b.classList.remove('minus','check','plus'));
-        const active = wrap.querySelector(`[data-val="${val}"]`);
-        if (active) active.classList.add(val === -1 ? 'minus' : val === 0 ? 'check' : 'plus');
-      });
-    }
-    if (s.creat) {
-      _creatVals = s.creat;
-      Object.entries(_creatVals).forEach(([key, val]) => {
-        const wrap = document.querySelector(`[data-key="${key}"]`)?.parentElement;
-        if (!wrap) return;
-        wrap.querySelectorAll('.pm-btn').forEach(b => b.classList.remove('minus','check','plus'));
-        const active = wrap.querySelector(`[data-val="${val}"]`);
-        if (active) active.classList.add(val === -1 ? 'minus' : val === 0 ? 'check' : 'plus');
-      });
-    }
-    if (s.req) {
-      Object.entries(s.req).forEach(([key, val]) => {
-        _reqVals[key] = val;
-        ['single','double','team'].forEach(disc => {
-          const req = TECH[disc].reqs.find(r => r.key === key);
-          if (!req) return;
-          const hintEl = document.getElementById('hint-' + key);
-          const idx = [0, .1, .2].indexOf(val);
-          const card = hintEl?.closest('.req-card');
-          if (card) card.querySelectorAll('.tri-btn').forEach((b, i) => b.classList.toggle('on', i === idx));
-          if (hintEl && idx >= 0) hintEl.textContent = req.hints[idx];
-        });
-      });
-    }
-    if (s.pen) {
-      Object.entries(s.pen).forEach(([key, count]) => {
-        if (!_penVals[key]) return;
-        _penVals[key].count = count;
-        const btn = document.getElementById('penb-' + key);
-        if (btn && count > 0) refreshPenBtn(btn, key);
-      });
-    }
-
-    updateComplexity(); updatePresentation(); updateDisplay();
-  } catch(e) { updateComplexity(); updatePresentation(); updateDisplay(); }
+    const ctx = getAudio();
+    const buf = ctx.createBuffer(1, 1, 22050);
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+    src.connect(ctx.destination);
+    src.start(0);
+  } catch(e) {}
 }
 
-/* Предотвращение двойного тапа на iOS */
-let _lastTouch = 0;
-window.addEventListener('touchend', e => {
-  const now = Date.now();
-  const safe = e.target.closest('.lvl-grid,.lvl-zero,.crit-list,.tri-row,.pen-list,.disc-tabs,.act-row');
-  if (safe) { _lastTouch = now; return; }
-  if (now - _lastTouch <= 300) e.preventDefault();
-  _lastTouch = now;
-}, { passive: false });
+function complexityFeedback(type = 'key') {
+  playTick(type);
+  vibrate(type === 'key' ? [6] : [12]);
+  hapticTick();
+}
+
+document.querySelectorAll('#tab-complexity [data-level]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    complexityFeedback('key');
+    seq.push(Number(btn.dataset.level));
+    renderComplexityDisplay();
+    if (!statsBox.classList.contains('hidden')) renderComplexityStats();
+  });
+});
+document.getElementById('erase-last').addEventListener('click', () => {
+  complexityFeedback('erase');
+  seq.pop(); renderComplexityDisplay();
+  if (!statsBox.classList.contains('hidden')) renderComplexityStats();
+});
+withConfirm(document.getElementById('reset-complexity'), () => {
+  seq.length=0; renderComplexityDisplay();
+  if (!statsBox.classList.contains('hidden')) renderComplexityStats();
+});
+toggleStatsBtn.addEventListener('click', () => {
+  statsBox.classList.toggle('hidden');
+  if (!statsBox.classList.contains('hidden')) renderComplexityStats();
+});
+
+// ══════════════════════════════════════════════
+// ПРЕЗЕНТАЦИЯ
+// ══════════════════════════════════════════════
+const plus='+', check='✓', minus='−';
+
+function makePMControls(container) {
+  const mk = label => {
+    const b = document.createElement('button');
+    b.className='pm-btn'; b.textContent=label; b.setAttribute('aria-pressed','false');
+    return b;
+  };
+  const [bP,bC,bM] = [mk(plus),mk(check),mk(minus)];
+  container.append(bM,bC,bP);
+  [bP,bC,bM].forEach(btn => {
+    btn.addEventListener('click', () => {
+      container.querySelectorAll('.pm-btn').forEach(x=>{
+        x.classList.remove('active','plus','check','minus'); x.setAttribute('aria-pressed','false');
+      });
+      btn.classList.add('active');
+      btn.classList.add(btn.textContent===plus?'plus':btn.textContent===check?'check':'minus');
+      btn.setAttribute('aria-pressed','true');
+      updateDisplay('presentation');
+    });
+  });
+}
+document.querySelectorAll('#presentation-list .pm-controls').forEach(makePMControls);
+document.querySelectorAll('#creativity-list .pm-controls').forEach(makePMControls);
+
+function valFor(sym){ return sym===plus?1:sym===check?.5:0; }
+function readGroup(sel){
+  const syms = Array.from(document.querySelectorAll(sel+' li')).map(li=>{
+    const a=li.querySelector('.pm-btn.active'); return a?a.textContent:minus;
+  });
+  const counts={plus:syms.filter(s=>s===plus).length,check:syms.filter(s=>s===check).length,minus:syms.filter(s=>s===minus).length};
+  return {syms,counts,sum:syms.reduce((a,s)=>a+valFor(s),0)};
+}
+function rangeC(c){
+  if(c.plus===4)                           return [0.9,1.0];
+  if(c.plus===2&&c.check===2)              return [0.7,0.8];
+  if(c.plus===1&&c.check===2&&c.minus===1) return [0.5,0.6];
+  if(c.check===2&&c.minus===2)             return [0.3,0.4];
+  if(c.check<=1&&c.minus>=3)               return [0.0,0.2];
+  const s=Math.max(0,Math.min(1,(c.plus+c.check*.5)/4));
+  return [+Math.max(0,s-.1).toFixed(1),+Math.min(1,s+.1).toFixed(1)];
+}
+function rangeP(c){
+  if(c.plus===6)                           return [1.7,2.0];
+  if(c.plus===3&&c.check===3)              return [1.3,1.6];
+  if(c.plus===1&&c.check===4&&c.minus===1) return [0.9,1.2];
+  if(c.check===3&&c.minus===3)             return [0.5,0.8];
+  if(c.check<=1&&c.minus>=4)               return [0.0,0.4];
+  const s=Math.max(0,Math.min(2,((c.plus+c.check*.5)/6)*2));
+  return [+Math.max(0,s-.2).toFixed(1),+Math.min(2,s+.2).toFixed(1)];
+}
+function scoreColor(val,max){
+  const r=val/max;
+  return r>=.75?'#22c55e':r>=.5?'#eab308':'#ef4444';
+}
+
+withConfirm(document.getElementById('reset-presentation'), () => {
+  document.querySelectorAll('.pm-btn.active').forEach(b=>{
+    b.classList.remove('active','plus','check','minus'); b.setAttribute('aria-pressed','false');
+  });
+  updateDisplay('presentation');
+});
+
+// ══════════════════════════════════════════════
+// ТЕХНИЧЕСКИЙ
+// ══════════════════════════════════════════════
+const reqValues = {};
+const penValues = {};
+let currentDisc = 'single';
+
+document.querySelectorAll('.req-item').forEach(item => {
+  reqValues[item.dataset.key] = 0;
+});
+
+document.querySelectorAll('.pen-btn').forEach(btn => {
+  penValues[btn.dataset.key] = {
+    pen:    parseFloat(btn.dataset.pen),
+    once:   btn.dataset.once === 'true',
+    count:  0,
+    active: false,
+  };
+});
+
+document.querySelectorAll('.disc-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.disc-btn').forEach(b=>{ b.classList.remove('active'); b.setAttribute('aria-selected','false'); });
+    btn.classList.add('active'); btn.setAttribute('aria-selected','true');
+    currentDisc = btn.dataset.disc;
+    document.querySelectorAll('.disc-panel').forEach(p=>p.classList.remove('active'));
+    document.getElementById('disc-'+currentDisc).classList.add('active');
+    updateDisplay('technical');
+  });
+});
+
+document.querySelectorAll('.tri-controls').forEach(ctrl => {
+  const item = ctrl.closest('.req-item');
+  const key  = item.dataset.key;
+  ctrl.querySelectorAll('.tri-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      ctrl.querySelectorAll('.tri-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      reqValues[key] = parseFloat(btn.dataset.val);
+      item.querySelectorAll('.hint').forEach(h=>h.classList.remove('active-hint'));
+      const val = reqValues[key];
+      if     (val===0)   item.querySelector('.h0')?.classList.add('active-hint');
+      else if(val===0.1) item.querySelector('.h1')?.classList.add('active-hint');
+      else if(val===0.2) item.querySelector('.h2')?.classList.add('active-hint');
+      updateTechDisplay(item.dataset.disc);
+      updateDisplay('technical');
+    });
+  });
+});
+
+document.querySelectorAll('.pen-btn').forEach(btn => {
+  const key   = btn.dataset.key;
+  const once  = btn.dataset.once === 'true';
+  let holdTimer = null;
+
+  btn.addEventListener('click', () => {
+    const st = penValues[key];
+    if (once) {
+      st.active = !st.active;
+      st.count  = st.active ? 1 : 0;
+    } else {
+      st.count++;
+      st.active = true;
+    }
+    btn.classList.toggle('pen-active', st.active);
+    refreshPenLabel(btn);
+    updateTechDisplay(currentDisc);
+  });
+
+  if (!once) {
+    const startHold = () => {
+      holdTimer = setTimeout(() => {
+        const st = penValues[key];
+        if (st.count > 0) {
+          st.count--;
+          if (st.count === 0) { st.active = false; btn.classList.remove('pen-active'); }
+          else btn.classList.add('pen-active');
+        }
+        refreshPenLabel(btn);
+        updateTechDisplay(currentDisc);
+        if (navigator.vibrate) navigator.vibrate(40);
+      }, 600);
+    };
+    const cancelHold = () => clearTimeout(holdTimer);
+    btn.addEventListener('touchstart',  startHold,  { passive: true });
+    btn.addEventListener('touchend',    cancelHold);
+    btn.addEventListener('touchcancel', cancelHold);
+    btn.addEventListener('mousedown',   startHold);
+    btn.addEventListener('mouseup',     cancelHold);
+    btn.addEventListener('mouseleave',  cancelHold);
+  }
+
+  btn.addEventListener('contextmenu', e => {
+    e.preventDefault();
+    const st = penValues[key];
+    if (!once && st.count > 0) {
+      st.count--;
+      if (st.count === 0) { st.active = false; btn.classList.remove('pen-active'); }
+    } else if (once && st.active) {
+      st.active = false; st.count = 0; btn.classList.remove('pen-active');
+    }
+    refreshPenLabel(btn);
+    updateTechDisplay(currentDisc);
+  });
+});
+
+function refreshPenLabel(btn) {
+  const base = btn.getAttribute('data-base-label') || btn.textContent.replace(/\s*×\d+$/,'');
+  btn.setAttribute('data-base-label', base);
+  const cnt = penValues[btn.dataset.key].count;
+  btn.textContent = cnt > 1 ? base+` ×${cnt}` : base;
+}
+
+function updateTechDisplay(disc) {
+  if (!disc) return;
+  const prefix = disc==='single'?'single_':disc==='double'?'d_':'t_';
+  const reqSum = Object.entries(reqValues)
+    .filter(([k])=>k.startsWith(prefix))
+    .reduce((a,[,v])=>a+v,0);
+  const reqEl = document.getElementById('disp-'+disc+'-req');
+  if (reqEl) reqEl.textContent = reqSum.toFixed(1);
+
+  const penPrefix = disc==='single'?'s_p_':disc==='double'?'d_p_':'t_p_';
+  const penSum = Object.entries(penValues)
+    .filter(([k])=>k.startsWith(penPrefix))
+    .reduce((a,[,v])=>a+v.pen*v.count,0);
+  const penEl = document.getElementById('disp-'+disc+'-pen');
+  if (penEl) penEl.textContent = penSum.toFixed(1);
+}
+
+document.querySelectorAll('.disc-reset').forEach(btn => {
+  withConfirm(btn, () => {
+    const disc  = btn.dataset.disc;
+    const panel = document.getElementById('disc-'+disc);
+    panel.querySelectorAll('.req-item').forEach(item => {
+      reqValues[item.dataset.key] = 0;
+      item.querySelectorAll('.tri-btn').forEach((b,i)=>b.classList.toggle('active',i===0));
+      item.querySelectorAll('.hint').forEach(h=>h.classList.remove('active-hint'));
+      item.querySelector('.h0')?.classList.add('active-hint');
+    });
+    panel.querySelectorAll('.pen-btn').forEach(b => {
+      const st = penValues[b.dataset.key];
+      st.count=0; st.active=false;
+      b.classList.remove('pen-active');
+      const base = b.getAttribute('data-base-label');
+      if (base) b.textContent = base;
+    });
+    updateTechDisplay(disc);
+    updateDisplay('technical');
+  });
+});
+
+// ══════════════════════════════════════════════
+// ГЛАВНЫЙ ДИСПЛЕЙ
+// ══════════════════════════════════════════════
+function updateDisplay(tab) {
+  displayEl.style.display = tab === 'technical' ? 'none' : '';
+  if (tab === 'complexity') { renderComplexityDisplay(); return; }
+  if (tab === 'presentation') {
+    const gP=readGroup('#presentation-list'), gC=readGroup('#creativity-list');
+    const sP=(gP.sum/6)*2, sC=gC.sum/4, tot=sP+sC;
+    const [pLo,pHi]=rangeP(gP.counts), [cLo,cHi]=rangeC(gC.counts);
+    displayEl.innerHTML=`
+      <div class="score-label">Презентация + Креативность</div>
+      <div class="score-row">
+        <div class="score-big" style="color:${scoreColor(tot,3)}">${tot.toFixed(2)}</div>
+        <div class="score-range">от ${(pLo+cLo).toFixed(1)} до ${(pHi+cHi).toFixed(1)}</div>
+      </div>
+      <div style="display:flex;gap:16px;margin-top:6px">
+        <div><div class="label">Презентация</div>
+          <span class="mono" style="font-size:15px;font-weight:700">${sP.toFixed(2)}</span>
+          <span class="score-range"> (${pLo}–${pHi})</span></div>
+        <div><div class="label">Креативность</div>
+          <span class="mono" style="font-size:15px;font-weight:700">${sC.toFixed(2)}</span>
+          <span class="score-range"> (${cLo}–${cHi})</span></div>
+      </div>`;
+    return;
+  }
+  if (tab === 'about') {
+    displayEl.innerHTML=`
+      <div class="score-label">О приложении</div>
+      <div style="font-size:14px;color:var(--text2);margin-top:4px">Инструмент для судей соревнований по спортивным прыжкам со скакалкой</div>`;
+  }
+}
+
+updateDisplay('complexity');
+['single','double','team'].forEach(updateTechDisplay);
+
 </script>
 
-<!--
-  tochka.html требует тех же таблиц Supabase что и index.html.
-  Дополнительных SQL-миграций не нужно.
-
-  Для работы офлайн (PWA) создайте manifest.json и sw.js в той же папке.
--->
 </body>
 </html>
