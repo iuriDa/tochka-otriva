@@ -629,7 +629,6 @@ body {
               <button class="req-btn">1 Смена</button>
               <button class="req-btn">2 Смены</button>
               <button class="req-btn">3 Смены</button>
-              <button class="req-btn" style="display:none;">4 Смены</button>
             </div>
             <div class="req-hint-new">0 смен = 0 · 1–2 смены = 0,1 · 3 смены = 0,2</div>
           </div>
@@ -1120,37 +1119,49 @@ document.querySelectorAll('.disc-btn').forEach(btn => {
   });
 });
 
-/* Роль-тоггл (переключение режимов для смен ролей) */
+/* Роль-тоггл (только визуальный) */
 document.querySelectorAll('.role-btn').forEach(btn => {
   btn.addEventListener('click', () => {
-    const toggleContainer = btn.closest('.role-toggle');
-    toggleContainer.querySelectorAll('.role-btn').forEach(b=>b.classList.remove('on'));
+
+    const wrap  = btn.closest('.req-item');
+    const group = wrap.querySelector('.req-btns');
+
+    // переключение UI
+    wrap.querySelectorAll('.role-btn').forEach(b=>b.classList.remove('on'));
     btn.classList.add('on');
 
-    const role = btn.dataset.role; // "1" или "2"
-    const reqItem = btn.closest('.req-item');
-    const reqBtnsGroup = reqItem.querySelector('.req-btns');
-    const btns = reqBtnsGroup.querySelectorAll('.req-btn');
-    const btn4 = btns.length > 3 ? btns[3] : null; // 4-я кнопка
-    const hint = reqItem.querySelector('.req-hint-new');
+    const role = btn.dataset.role;
 
-    if (role === "1") {
-      reqBtnsGroup.dataset.total = "3";
-      if (btn4) {
-        btn4.style.display = 'none';
-        btn4.classList.remove('sel'); // снимаем выделение, если спрятали
-      }
-      hint.textContent = '0 смен = 0 · 1–2 смены = 0,1 · 3 смены = 0,2';
-    } else if (role === "2") {
-      reqBtnsGroup.dataset.total = "4";
-      if (btn4) {
-        btn4.style.display = ''; // делаем видимой
-      }
-      hint.textContent = '0 смен = 0 · 1–3 смены = 0,1 · 4 смены = 0,2';
+    // очищаем кнопки
+    group.innerHTML = '';
+
+    if (role === '1') {
+      // ===== 1 человек прыгает =====
+      group.dataset.total = 3;
+
+      group.innerHTML = `
+        <button class="req-btn">1 Смена</button>
+        <button class="req-btn">2 Смены</button>
+        <button class="req-btn">3 Смены</button>
+      `;
+
+    } else {
+      // ===== 2 человека прыгают =====
+      group.dataset.total = 4;
+
+      group.innerHTML = `
+        <button class="req-btn">1 Смена</button>
+        <button class="req-btn">2 Смены</button>
+        <button class="req-btn">3 Смены</button>
+        <button class="req-btn">4 Смены</button>
+      `;
     }
 
-    const disc = reqBtnsGroup.dataset.disc;
-    if (disc) updateTechDisplay(disc);
+    // навешиваем обработчики
+    bindReqButtons(group);
+
+    // пересчёт
+    updateTechDisplay('double');
   });
 });
 
@@ -1159,14 +1170,38 @@ function calcGroup(group) {
   const mode = group.dataset.mode;
   const btns = group.querySelectorAll('.req-btn');
   const sel = [...btns].filter(b=>b.classList.contains('sel')).length;
-  // Динамически получаем требуемое количество (total), если не задано — берем все кнопки
   const total = parseInt(group.dataset.total || btns.length);
-  
   if (mode === 'pair')         return sel===0?0:sel===1?0.1:0.2;
   if (mode === 'multi-all')    return sel===0?0:sel>=total?0.2:0.1;
-  if (mode === 'multi-change') return sel===0?0:sel>=total?0.2:0.1; // Теперь опирается на динамический total (3 или 4)
+  if (mode === 'multi-change') {
+  return sel === 0 ? 0 : sel >= total ? 0.2 : 0.1;
+  }
   if (mode === 'max2')         return sel===0?0:sel>=2?0.2:0.1;
   return 0;
+}
+
+function bindReqButtons(group) {
+  group.querySelectorAll('.req-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const mode = group.dataset.mode;
+
+      if (mode === 'max2') {
+        const selNow = group.querySelectorAll('.req-btn.sel').length;
+        if (btn.classList.contains('sel')) {
+          btn.classList.remove('sel');
+        } else if (selNow < 2) {
+          btn.classList.add('sel');
+        }
+      } else {
+        btn.classList.toggle('sel');
+      }
+
+      if (navigator.vibrate) navigator.vibrate(7);
+
+      const disc = btn.closest('.disc-panel').id.replace('disc-','');
+      updateTechDisplay(disc);
+    });
+  });
 }
 
 document.querySelectorAll('.req-btns').forEach(group => {
@@ -1275,12 +1310,7 @@ document.querySelectorAll('.disc-reset').forEach(btn => {
     const panel = document.getElementById('disc-'+disc);
     panel.querySelectorAll('.req-btn').forEach(b=>b.classList.remove('sel'));
     panel.querySelectorAll('.cnt-btn').forEach(b=>b.classList.remove('sel-zero','sel-mid','sel-high'));
-    
-    // Возвращаем переключатель ролей в исходное состояние (1 человек), 
-    // что также спрячет 4-ю кнопку и обновит текст
-    const roleToggle1 = panel.querySelector('.role-btn[data-role="1"]');
-    if (roleToggle1) roleToggle1.click();
-
+    panel.querySelectorAll('.role-btn').forEach((b,i)=>b.classList.toggle('on',i===0));
     panel.querySelectorAll('.pen-btn').forEach(b => {
       const st = penValues[b.dataset.key];
       st.count=0; st.active=false; b.classList.remove('pen-active');
