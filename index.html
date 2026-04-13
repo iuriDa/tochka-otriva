@@ -237,12 +237,28 @@ select.inp { cursor: pointer; }
 }
 [data-theme="light"] .profile-banner { background: linear-gradient(135deg, #FF6B2B 0%, #E55A1F 50%, #9B3AB0 100%); }
 .profile-banner-glow { position: absolute; width: 200px; height: 200px; border-radius: 50%; background: var(--accent); filter: blur(60px); opacity: .1; top: -60px; right: -40px; pointer-events: none; }
-.profile-avatar { width: 44px; height: 44px; border-radius: 13px; background: var(--accent); display: flex; align-items: center; justify-content: center; font-family: var(--head); font-size: .78rem; color: #fff; flex-shrink: 0; margin-bottom: 10px; }
+.profile-avatar { width: 44px; height: 44px; border-radius: 13px; background: var(--accent); display: flex; align-items: center; justify-content: center; font-family: var(--head); font-size: .78rem; color: #fff; flex-shrink: 0; margin-bottom: 10px; overflow: hidden; }
+.profile-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 13px; }
 .profile-name { font-family: var(--head); font-size: 1.05rem; letter-spacing: .01em; color: #fff; position: relative; z-index: 1; }
 .profile-email { font-size: .75rem; color: rgba(255,255,255,.5); margin-top: 2px; position: relative; z-index: 1; }
 .profile-badges { display: flex; gap: 5px; margin-top: 9px; flex-wrap: wrap; position: relative; z-index: 1; }
 .profile-badge { background: rgba(255,255,255,.1); color: rgba(255,255,255,.8); border-radius: var(--r-pill); padding: 2px 9px; font-size: .65rem; font-weight: 700; letter-spacing: .03em; text-transform: uppercase; border: 1px solid rgba(255,255,255,.12); }
-.profile-foot { padding: 12px 18px; display: flex; align-items: center; justify-content: space-between; }
+.profile-foot { padding: 12px 18px; display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.btn-edit-profile { display: inline-flex; align-items: center; gap: 5px; padding: 6px 13px; border-radius: var(--r); border: 1px solid var(--bor); background: var(--sur2); color: var(--tx2); font-family: var(--font); font-size: .74rem; font-weight: 700; cursor: pointer; transition: all .15s; white-space: nowrap; }
+.btn-edit-profile:hover { border-color: var(--accent); color: var(--accent); }
+.pf-modal { max-height: 90dvh; overflow-y: auto; }
+.pf-fields { display: flex; flex-direction: column; gap: 11px; margin-bottom: 16px; }
+.pf-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+.avatar-upload-row { display: flex; align-items: center; gap: 12px; margin-bottom: 4px; }
+.avatar-preview { width: 52px; height: 52px; border-radius: 13px; background: var(--accent); display: flex; align-items: center; justify-content: center; font-family: var(--head); font-size: .82rem; color: #fff; flex-shrink: 0; overflow: hidden; border: 2px solid var(--bor); }
+.avatar-preview img { width: 100%; height: 100%; object-fit: cover; border-radius: 11px; }
+.avatar-upload-btn { flex: 1; display: flex; flex-direction: column; gap: 3px; }
+.avatar-upload-lbl { font-size: .68rem; font-weight: 800; color: var(--tx2); text-transform: uppercase; letter-spacing: .07em; }
+.avatar-upload-hint { font-size: .71rem; color: var(--tx3); }
+.avatar-file-inp { display: none; }
+.avatar-choose-btn { display: inline-flex; align-items: center; gap: 5px; padding: 7px 13px; border-radius: var(--r); border: 1.5px solid var(--bor); background: var(--sur2); color: var(--tx2); font-family: var(--font); font-size: .76rem; font-weight: 700; cursor: pointer; transition: all .15s; }
+.avatar-choose-btn:hover { border-color: var(--accent); color: var(--accent); }
+.avatar-progress { font-size: .72rem; color: var(--accent); margin-top: 3px; }
 .profile-since { font-size: .72rem; color: var(--tx2); }
 
 .info-strip { background: var(--sur2); border: 1px solid var(--bor); border-radius: var(--r); padding: 11px 14px; display: flex; gap: 10px; align-items: flex-start; }
@@ -411,8 +427,49 @@ select.inp { cursor: pointer; }
         </div>
         <div id="li-err" class="auth-err"></div>
         <button class="btn btn-a btn-full btn-lg" onclick="doLogin()">Войти →</button>
+        <div style="display:flex;justify-content:center">
+          <div class="auth-switch" onclick="showResetForm()" style="font-size:.78rem">
+            Забыли пароль? <em>Сбросить</em>
+          </div>
+        </div>
         <div class="auth-switch" onclick="toggleForm()">
           Нет аккаунта? <em>Зарегистрироваться</em>
+        </div>
+      </div>
+
+      <!-- НОВЫЙ ПАРОЛЬ (после перехода по ссылке из письма) -->
+      <div id="form-newpwd" class="auth-form hidden">
+        <div class="auth-form-ttl">Новый пароль</div>
+        <div style="font-size:.78rem;color:var(--tx2);line-height:1.55;margin-bottom:2px">
+          Придумайте новый пароль для вашего аккаунта.
+        </div>
+        <div class="field">
+          <label class="lbl">Новый пароль</label>
+          <input id="np-pwd" class="inp" type="password" placeholder="Минимум 6 символов" autocomplete="new-password" onkeydown="if(event.key==='Enter')doNewPassword()">
+        </div>
+        <div class="field">
+          <label class="lbl">Повторите пароль</label>
+          <input id="np-pwd2" class="inp" type="password" placeholder="Повторите пароль" autocomplete="new-password" onkeydown="if(event.key==='Enter')doNewPassword()">
+        </div>
+        <div id="np-err" class="auth-err"></div>
+        <button class="btn btn-a btn-full btn-lg" id="btn-newpwd" onclick="doNewPassword()">Сохранить новый пароль →</button>
+      </div>
+
+      <!-- СБРОС ПАРОЛЯ -->
+      <div id="form-reset" class="auth-form hidden">
+        <div class="auth-form-ttl">Сброс пароля</div>
+        <div style="font-size:.78rem;color:var(--tx2);line-height:1.55;margin-bottom:2px">
+          Введите email вашего аккаунта. Мы отправим ссылку для создания нового пароля.
+        </div>
+        <div class="field">
+          <label class="lbl">Email</label>
+          <input id="rs-email" class="inp" type="email" placeholder="judge@example.com" autocomplete="email" onkeydown="if(event.key==='Enter')doReset()">
+        </div>
+        <div id="rs-err" class="auth-err"></div>
+        <div id="rs-ok" class="auth-err" style="display:none;color:var(--green);background:rgba(34,197,94,.08);border-color:rgba(34,197,94,.2)"></div>
+        <button class="btn btn-a btn-full btn-lg" id="btn-reset" onclick="doReset()">Отправить ссылку →</button>
+        <div class="auth-switch" onclick="showLoginForm()">
+          ← <em>Вернуться к входу</em>
         </div>
       </div>
 
@@ -474,7 +531,7 @@ select.inp { cursor: pointer; }
       <div class="profile-foot">
         <div class="profile-since" id="prof-since">—</div>
         <span id="prof-blocked-badge" class="badge br hidden">Заблокирован</span>
-        <button class="btn btn-s btn-sm" onclick="openProfileEdit()">✏️ Редактировать</button>
+        <button class="btn-edit-profile" onclick="openProfileEdit()">✏️ Редактировать</button>
       </div>
     </div>
 
@@ -501,7 +558,7 @@ select.inp { cursor: pointer; }
         <div class="app-card ac-blue" onclick="openApp('jumpscore')">
           <div class="app-icon">🪢</div>
           <div class="app-name">JumpScore</div>
-          <div class="app-desc">ССД судейство соревнований с отаброжением в реальном времени</div>
+          <div class="app-desc">ССД судейство соревнований с отображение результата в реальном времени</div>
           <div class="app-badge-pos"><span class="badge bb">Открыто</span></div>
         </div>
         <div class="app-card ac-purple locked soon">
@@ -640,6 +697,67 @@ select.inp { cursor: pointer; }
   </div>
 </div>
 
+<!-- МОДАЛКА ПРОФИЛЯ -->
+<div id="modal-profile" class="modal-ov">
+  <div class="modal anim pf-modal" style="max-width:440px">
+    <div class="modal-ttl">✏️ Редактировать профиль</div>
+
+    <!-- Аватар -->
+    <div class="avatar-upload-row">
+      <div class="avatar-preview" id="pf-ava-preview">ЮД</div>
+      <div class="avatar-upload-btn">
+        <div class="avatar-upload-lbl">Фото профиля</div>
+        <div class="avatar-upload-hint">JPG, PNG · до 2 МБ</div>
+        <label class="avatar-choose-btn">
+          📷 Выбрать фото
+          <input id="pf-avatar-file" class="avatar-file-inp" type="file" accept="image/jpeg,image/png,image/webp" onchange="onAvatarSelected(this)">
+        </label>
+        <div class="avatar-progress" id="pf-avatar-progress">Загрузка...</div>
+      </div>
+    </div>
+
+    <div class="pf-fields">
+      <div class="field">
+        <label class="lbl">ФИО</label>
+        <input id="pf-name" class="inp" type="text" placeholder="Иванов Иван Иванович">
+      </div>
+      <div class="pf-row2">
+        <div class="field">
+          <label class="lbl">Дата рождения</label>
+          <input id="pf-birth" class="inp" type="date">
+        </div>
+        <div class="field">
+          <label class="lbl">Город</label>
+          <input id="pf-city" class="inp" type="text" placeholder="Москва">
+        </div>
+      </div>
+      <div class="field">
+        <label class="lbl">Клуб / Организация</label>
+        <input id="pf-club" class="inp" type="text" placeholder="Точка Отрыва">
+      </div>
+      <div class="pf-row2">
+        <div class="field">
+          <label class="lbl">Спортивный разряд</label>
+          <input id="pf-athlete-rank" class="inp" type="text" placeholder="КМС, МС...">
+        </div>
+        <div class="field">
+          <label class="lbl">Категория судьи</label>
+          <input id="pf-judge-cat" class="inp" type="text" placeholder="1, 2, 3 категория">
+        </div>
+      </div>
+      <div class="field">
+        <label class="lbl">Тренерский стаж</label>
+        <input id="pf-coach-exp" class="inp" type="text" placeholder="5 лет, с 2019 года...">
+      </div>
+    </div>
+
+    <div class="modal-act">
+      <button class="btn btn-g btn-sm" onclick="closeProfileEdit()">Отмена</button>
+      <button class="btn btn-a btn-sm" id="btn-save-profile" onclick="saveProfile()">Сохранить →</button>
+    </div>
+  </div>
+</div>
+
 <!-- МОДАЛКА PRO -->
 <div id="modal-pro" class="modal-ov">
   <div class="modal anim">
@@ -649,15 +767,15 @@ select.inp { cursor: pointer; }
     <div class="pro-grant-form">
       <div class="pro-grant-title">Срок Pro доступа</div>
       <div class="days-row">
-        <div class="day-chip on" onclick="selDays(1,this)">1 день</div>
-        <div class="day-chip" onclick="selDays(7,this)">7 дней</div>
+        <div class="day-chip on" onclick="selDays(30,this)">30 дней</div>
+        <div class="day-chip" onclick="selDays(90,this)">3 месяца</div>
+        <div class="day-chip" onclick="selDays(180,this)">6 месяцев</div>
         <div class="day-chip" onclick="selDays(365,this)">1 год</div>
         <div class="day-chip" onclick="selDays(3650,this)">Навсегда</div>
       </div>
     </div>
     <div class="modal-act" style="margin-top:14px">
       <button class="btn btn-g btn-sm" onclick="closeProModal()">Отмена</button>
-      <button class="btn btn-d btn-sm" onclick="removePro()">❌ Отключить</button>
       <button class="btn btn-a btn-sm" onclick="grantPro()">✓ Открыть Pro</button>
     </div>
   </div>
@@ -794,6 +912,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   setTheme(_theme);
   _sb = window.supabase.createClient(SB_URL, SB_KEY);
 
+  /* Обработка ссылки сброса пароля из письма */
+  const hash = window.location.hash;
+  if (hash.includes('type=recovery')) {
+    showScreen('screen-auth');
+    showNewPasswordForm();
+    return;
+  }
+
   const { data: { session } } = await _sb.auth.getSession();
   if (session) {
     _user = session.user;
@@ -805,6 +931,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   _sb.auth.onAuthStateChange(async (ev, session) => {
+    if (ev === 'PASSWORD_RECOVERY') {
+      showScreen('screen-auth');
+      showNewPasswordForm();
+      return;
+    }
     if (ev === 'SIGNED_IN' && session) {
       _user = session.user;
       await loadProfile();
@@ -871,6 +1002,24 @@ async function checkDevice() {
 window.toggleForm = function () {
   document.getElementById('form-login').classList.toggle('hidden');
   document.getElementById('form-reg').classList.toggle('hidden');
+  document.getElementById('form-reset').classList.add('hidden');
+};
+
+window.showResetForm = function () {
+  document.getElementById('form-login').classList.add('hidden');
+  document.getElementById('form-reg').classList.add('hidden');
+  document.getElementById('form-reset').classList.remove('hidden');
+  const email = document.getElementById('li-email').value;
+  if (email) document.getElementById('rs-email').value = email;
+  document.getElementById('rs-err').classList.remove('show');
+  document.getElementById('rs-ok').style.display = 'none';
+  setTimeout(() => document.getElementById('rs-email').focus(), 80);
+};
+
+window.showLoginForm = function () {
+  document.getElementById('form-login').classList.remove('hidden');
+  document.getElementById('form-reg').classList.add('hidden');
+  document.getElementById('form-reset').classList.add('hidden');
 };
 
 let _authBusy = false;
@@ -918,7 +1067,66 @@ window.doRegister = async function () {
   }
 };
 
-window.confirmLogout = function () {
+window.showNewPasswordForm = function () {
+  ['form-login','form-reg','form-reset'].forEach(id => document.getElementById(id).classList.add('hidden'));
+  document.getElementById('form-newpwd').classList.remove('hidden');
+  setTimeout(() => document.getElementById('np-pwd').focus(), 100);
+};
+
+window.doNewPassword = async function () {
+  const pwd = document.getElementById('np-pwd').value;
+  const pwd2 = document.getElementById('np-pwd2').value;
+  const err = document.getElementById('np-err');
+  const btn = document.getElementById('btn-newpwd');
+  err.classList.remove('show');
+  if (pwd.length < 6) { err.textContent = 'Пароль минимум 6 символов'; err.classList.add('show'); return; }
+  if (pwd !== pwd2) { err.textContent = 'Пароли не совпадают'; err.classList.add('show'); return; }
+  btn.disabled = true; btn.textContent = '...';
+  try {
+    const { error } = await _sb.auth.updateUser({ password: pwd });
+    if (error) {
+      err.textContent = 'Ошибка: ' + error.message;
+      err.classList.add('show');
+      btn.disabled = false; btn.textContent = 'Сохранить новый пароль →';
+    } else {
+      toast('✓ Пароль успешно изменён');
+      /* Убираем токен из URL и входим в кабинет */
+      window.history.replaceState({}, document.title, window.location.pathname);
+      _user = (await _sb.auth.getUser()).data.user;
+      await loadProfile();
+      await checkDevice();
+      goDash();
+    }
+  } catch(e) {
+    btn.disabled = false; btn.textContent = 'Сохранить новый пароль →';
+  }
+};
+
+window.doReset = async function () {
+  const email = document.getElementById('rs-email').value.trim();
+  const err = document.getElementById('rs-err');
+  const ok = document.getElementById('rs-ok');
+  const btn = document.getElementById('btn-reset');
+  err.classList.remove('show');
+  ok.style.display = 'none';
+  if (!email) { err.textContent = 'Введите email'; err.classList.add('show'); return; }
+  btn.disabled = true; btn.textContent = '...';
+  try {
+    const { error } = await _sb.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + window.location.pathname
+    });
+    if (error) {
+      err.textContent = 'Ошибка: ' + error.message;
+      err.classList.add('show');
+    } else {
+      ok.style.display = 'block';
+      ok.textContent = '✓ Ссылка отправлена на ' + email + '. Проверьте почту (и папку «Спам»).';
+      btn.textContent = 'Отправлено';
+    }
+  } finally {
+    if (btn.textContent === '...') { btn.disabled = false; btn.textContent = 'Отправить ссылку →'; }
+  }
+};
   modal('🚪', 'Выйти из аккаунта?', 'Вам нужно будет войти снова.', 'Выйти', () => _sb.auth.signOut(), false);
 };
 
@@ -955,15 +1163,18 @@ window.goDash = function () {
   const isBlocked = _profile?.is_blocked;
   const proUntil = _profile?.pro_until;
 
-  if (_profile?.avatar_url) {
-      document.getElementById('prof-ava').innerHTML =
-        `<img src="${_profile.avatar_url}" style="width:100%;height:100%;border-radius:13px;object-fit:cover">`;
-    } else {
-      document.getElementById('prof-ava').textContent = initials(name);
-  }
+  document.getElementById('prof-ava').textContent = initials(name);
   document.getElementById('prof-name').textContent = name;
   document.getElementById('prof-email').textContent = email;
   document.getElementById('prof-since').textContent = 'С нами с ' + since;
+
+  /* Аватар — фото или инициалы */
+  const profAva = document.getElementById('prof-ava');
+  if (_profile?.avatar_url) {
+    profAva.innerHTML = `<img src="${_profile.avatar_url}" alt="фото" style="width:100%;height:100%;object-fit:cover;border-radius:13px">`;
+  } else {
+    profAva.textContent = initials(name);
+  }
 
   const planBadge = document.getElementById('prof-plan');
   if (isPro) { planBadge.textContent = proUntil && proUntil !== '9999-12-31' ? `Pro · до ${fmtDate(proUntil)}` : 'Pro'; }
@@ -1132,19 +1343,6 @@ window.grantPro = async function () {
   await loadAdminUsers();
 };
 
-window.removePro = async function () {
-  if (!_proUserId) return;
-
-  await _sb.from('profiles').update({
-    is_pro: false,
-    pro_until: null
-  }).eq('id', _proUserId);
-
-  closeProModal();
-  toast('❌ Pro доступ отключён');
-  await loadAdminUsers();
-};
-
 /* СОБЫТИЯ */
 window.loadAdminEvents = async function () {
   const el = document.getElementById('admin-ev-list');
@@ -1219,84 +1417,124 @@ async function loadAdminStats() {
     </div>`).join('') || '<div class="empty">Нет данных</div>';
 }
 window.loadAdminStats = loadAdminStats;
+
+/* ══ РЕДАКТИРОВАНИЕ ПРОФИЛЯ ══════════════════════════════ */
+
 window.openProfileEdit = function () {
-  document.getElementById('pf-name').value = _profile?.full_name || '';
-  document.getElementById('pf-birth').value = _profile?.birth_date || '';
-  document.getElementById('pf-city').value = _profile?.city || '';
-  document.getElementById('pf-club').value = _profile?.club || '';
-  document.getElementById('pf-athlete-rank').value = _profile?.athlete_rank || '';
-  document.getElementById('pf-judge-cat').value = _profile?.judge_category || '';
-  document.getElementById('pf-coach-exp').value = _profile?.coach_experience || '';
+  const p = _profile || {};
+  document.getElementById('pf-name').value        = p.full_name      || '';
+  document.getElementById('pf-birth').value       = p.birth_date     || '';
+  document.getElementById('pf-city').value        = p.city           || '';
+  document.getElementById('pf-club').value        = p.club           || '';
+  document.getElementById('pf-athlete-rank').value= p.athlete_rank   || '';
+  document.getElementById('pf-judge-cat').value   = p.judge_category || '';
+  document.getElementById('pf-coach-exp').value   = p.coach_experience || '';
+  document.getElementById('pf-avatar-progress').style.display = 'none';
+
+  /* Превью текущего фото */
+  const prev = document.getElementById('pf-ava-preview');
+  if (p.avatar_url) {
+    prev.innerHTML = `<img src="${p.avatar_url}" alt="фото">`;
+  } else {
+    prev.textContent = initials(p.full_name || _user?.email || '?');
+    prev.style.backgroundImage = '';
+  }
 
   document.getElementById('modal-profile').classList.add('open');
 };
 
-window.closeProfile = function () {
+window.closeProfileEdit = function () {
   document.getElementById('modal-profile').classList.remove('open');
 };
 
-window.saveProfile = async function () {
-  await _sb.from('profiles').update({
-    full_name: document.getElementById('pf-name').value,
-    birth_date: document.getElementById('pf-birth').value,
-    city: document.getElementById('pf-city').value,
-    club: document.getElementById('pf-club').value,
-    athlete_rank: document.getElementById('pf-athlete-rank').value,
-    judge_category: document.getElementById('pf-judge-cat').value,
-    coach_experience: document.getElementById('pf-coach-exp').value
-  }).eq('id', _user.id);
+/* Предпросмотр фото при выборе файла */
+window.onAvatarSelected = async function (input) {
+  const file = input.files?.[0];
+  if (!file) return;
 
-  await loadProfile();
-  closeProfile();
-  goDash();
-  toast('✓ Профиль обновлён');
+  /* Проверка размера */
+  if (file.size > 2 * 1024 * 1024) {
+    toast('❌ Файл слишком большой (макс. 2 МБ)');
+    input.value = '';
+    return;
+  }
+
+  /* Локальный предпросмотр */
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    document.getElementById('pf-ava-preview').innerHTML = `<img src="${e.target.result}" alt="фото">`;
+  };
+  reader.readAsDataURL(file);
+
+  /* Загрузка в Supabase Storage */
+  const progress = document.getElementById('pf-avatar-progress');
+  progress.textContent = 'Загружаю...';
+  progress.style.display = 'block';
+
+  try {
+    const ext = file.name.split('.').pop().toLowerCase();
+    const path = `avatars/${_user.id}.${ext}`;
+
+    const { error: upErr } = await _sb.storage
+      .from('avatars')
+      .upload(path, file, { upsert: true, contentType: file.type });
+
+    if (upErr) throw upErr;
+
+    const { data: urlData } = _sb.storage.from('avatars').getPublicUrl(path);
+    const url = urlData.publicUrl + '?t=' + Date.now();
+
+    await _sb.from('profiles').update({ avatar_url: url }).eq('id', _user.id);
+    _profile = { ..._profile, avatar_url: url };
+
+    progress.textContent = '✓ Фото загружено';
+    setTimeout(() => { progress.style.display = 'none'; }, 2000);
+  } catch (e) {
+    console.error('Avatar upload error:', e);
+    progress.textContent = '❌ Ошибка загрузки';
+    setTimeout(() => { progress.style.display = 'none'; }, 3000);
+  }
+};
+
+window.saveProfile = async function () {
+  const btn = document.getElementById('btn-save-profile');
+  btn.disabled = true; btn.textContent = '...';
+  try {
+    await _sb.from('profiles').update({
+      full_name:         document.getElementById('pf-name').value.trim(),
+      birth_date:        document.getElementById('pf-birth').value || null,
+      city:              document.getElementById('pf-city').value.trim() || null,
+      club:              document.getElementById('pf-club').value.trim() || null,
+      athlete_rank:      document.getElementById('pf-athlete-rank').value.trim() || null,
+      judge_category:    document.getElementById('pf-judge-cat').value.trim() || null,
+      coach_experience:  document.getElementById('pf-coach-exp').value.trim() || null,
+    }).eq('id', _user.id);
+
+    await loadProfile();
+    closeProfileEdit();
+    goDash();
+    toast('✓ Профиль обновлён');
+  } catch(e) {
+    toast('❌ Ошибка сохранения');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Сохранить →';
+  }
 };
 </script>
-  <div id="modal-profile" class="modal-ov">
-    <div class="modal anim" style="max-width:420px">
-      <div class="modal-ttl">Профиль</div>
 
-      <div class="field">
-        <label class="lbl">ФИО</label>
-        <input id="pf-name" class="inp">
-      </div>
+<!--
+  SQL для Supabase — выполните один раз в SQL Editor:
 
-      <div class="field">
-        <label class="lbl">Дата рождения</label>
-        <input id="pf-birth" type="date" class="inp">
-      </div>
+  ALTER TABLE profiles ADD COLUMN IF NOT EXISTS is_blocked BOOLEAN DEFAULT FALSE;
+  ALTER TABLE profiles ADD COLUMN IF NOT EXISTS is_pro BOOLEAN DEFAULT FALSE;
+  ALTER TABLE profiles ADD COLUMN IF NOT EXISTS pro_until DATE;
+  ALTER TABLE profiles ADD COLUMN IF NOT EXISTS device_fingerprint TEXT;
+  ALTER TABLE profiles ADD COLUMN IF NOT EXISTS device_count INT DEFAULT 0;
+  ALTER TABLE profiles ADD COLUMN IF NOT EXISTS suspicious BOOLEAN DEFAULT FALSE;
+  ALTER TABLE profiles ADD COLUMN IF NOT EXISTS last_seen TIMESTAMPTZ;
 
-      <div class="field">
-        <label class="lbl">Город</label>
-        <input id="pf-city" class="inp">
-      </div>
-
-      <div class="field">
-        <label class="lbl">Клуб</label>
-        <input id="pf-club" class="inp">
-      </div>
-
-      <div class="field">
-        <label class="lbl">Спортсмен</label>
-        <input id="pf-athlete-rank" class="inp" placeholder="Разряд">
-      </div>
-
-      <div class="field">
-        <label class="lbl">Судья</label>
-        <input id="pf-judge-cat" class="inp" placeholder="Категория">
-      </div>
-
-      <div class="field">
-        <label class="lbl">Тренер</label>
-        <input id="pf-coach-exp" class="inp" placeholder="Стаж">
-      </div>
-
-      <div class="modal-act">
-        <button class="btn btn-g btn-sm" onclick="closeProfile()">Отмена</button>
-        <button class="btn btn-a btn-sm" onclick="saveProfile()">Сохранить</button>
-      </div>
-    </div>
-  </div>
-  
+  Для выдачи прав администратора:
+  UPDATE profiles SET is_admin = true WHERE id = 'ВАШ_UUID';
+-->
 </body>
 </html>
