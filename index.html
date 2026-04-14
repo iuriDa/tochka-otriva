@@ -502,7 +502,7 @@ select.inp { cursor: pointer; }
 <div id="screen-dash" class="screen">
   <div class="topbar">
     <div class="tb-l">
-      <div class="tb-title">Личный кабинет</div>
+      <div class="tb-title" id="dash-tb-name">Кабинет</div>
       <div class="tb-sub">Точка Отрыва</div>
     </div>
     <div class="tb-r">
@@ -531,15 +531,7 @@ select.inp { cursor: pointer; }
       <div class="profile-foot">
         <div class="profile-since" id="prof-since">—</div>
         <span id="prof-blocked-badge" class="badge br hidden">Заблокирован</span>
-        <button class="btn-edit-profile" onclick="openProfileEdit()">✏️ Редактировать</button>
-      </div>
-    </div>
-
-    <!-- Единый аккаунт -->
-    <div class="info-strip">
-      <div class="info-strip-ico">🔗</div>
-      <div class="info-strip-txt">
-        <strong>Один аккаунт — все приложения.</strong> Войдите под одним email в любом приложении Точки Отрыва — данные синхронизированы автоматически.
+        <button class="btn-edit-profile" onclick="openProfileEdit()">✏️ Редактировать профиль</button>
       </div>
     </div>
 
@@ -558,7 +550,7 @@ select.inp { cursor: pointer; }
         <div class="app-card ac-blue" onclick="openApp('jumpscore')">
           <div class="app-icon">🪢</div>
           <div class="app-name">JumpScore</div>
-          <div class="app-desc">ССД судейство соревнований с отабражением результатов в реальном времени</div>
+          <div class="app-desc">Судейство соревнований с отображением результатов в реальном времени</div>
           <div class="app-badge-pos"><span class="badge bb">Открыто</span></div>
         </div>
         <div class="app-card ac-purple locked soon">
@@ -748,6 +740,22 @@ select.inp { cursor: pointer; }
       <div class="field">
         <label class="lbl">Тренерский стаж</label>
         <input id="pf-coach-exp" class="inp" type="text" placeholder="5 лет, с 2019 года...">
+      </div>
+
+      <!-- Смена пароля -->
+      <div style="border-top:1px solid var(--bor);padding-top:13px;margin-top:2px">
+        <div class="lbl" style="margin-bottom:9px">Сменить пароль</div>
+        <div class="pf-fields" style="margin-bottom:0">
+          <div class="field">
+            <label class="lbl">Новый пароль</label>
+            <input id="pf-pwd-new" class="inp" type="password" placeholder="Минимум 6 символов" autocomplete="new-password">
+          </div>
+          <div class="field">
+            <label class="lbl">Повторите новый пароль</label>
+            <input id="pf-pwd-rep" class="inp" type="password" placeholder="Повторите пароль" autocomplete="new-password">
+          </div>
+          <div id="pf-pwd-err" style="font-size:.76rem;color:var(--red);display:none"></div>
+        </div>
       </div>
     </div>
 
@@ -1149,12 +1157,12 @@ window.goDash = function () {
     document.getElementById('prof-admin-badge').style.display = 'none';
     document.getElementById('btn-admin').classList.add('hidden');
     /* Скрыть приложения и план */
-    document.querySelectorAll('.app-grid, .plan-card, .info-strip').forEach(el => el.style.display = 'none');
+    document.querySelectorAll('.app-grid, .plan-card').forEach(el => el.style.display = 'none');
     return;
   }
 
   /* Восстановить видимость если был заблокирован ранее */
-  document.querySelectorAll('.app-grid, .plan-card, .info-strip').forEach(el => el.style.display = '');
+  document.querySelectorAll('.app-grid, .plan-card').forEach(el => el.style.display = '');
   showScreen('screen-dash');
 
   const name = _profile?.full_name || _user.email;
@@ -1164,6 +1172,10 @@ window.goDash = function () {
   const isAdmin = _profile?.is_admin;
   const isBlocked = _profile?.is_blocked;
   const proUntil = _profile?.pro_until;
+
+  /* Имя в заголовке топбара */
+  const dashTbName = document.getElementById('dash-tb-name');
+  if (dashTbName) dashTbName.textContent = name.split(' ')[0] || 'Кабинет';
 
   document.getElementById('prof-ava').textContent = initials(name);
   document.getElementById('prof-name').textContent = name;
@@ -1500,8 +1512,24 @@ window.onAvatarSelected = async function (input) {
 
 window.saveProfile = async function () {
   const btn = document.getElementById('btn-save-profile');
+  const pwdNew = document.getElementById('pf-pwd-new').value;
+  const pwdRep = document.getElementById('pf-pwd-rep').value;
+  const pwdErr = document.getElementById('pf-pwd-err');
+  pwdErr.style.display = 'none';
+
+  /* Валидация пароля если заполнен */
+  if (pwdNew || pwdRep) {
+    if (pwdNew.length < 6) {
+      pwdErr.textContent = 'Пароль минимум 6 символов'; pwdErr.style.display = 'block'; return;
+    }
+    if (pwdNew !== pwdRep) {
+      pwdErr.textContent = 'Пароли не совпадают'; pwdErr.style.display = 'block'; return;
+    }
+  }
+
   btn.disabled = true; btn.textContent = '...';
   try {
+    /* Обновляем профиль */
     await _sb.from('profiles').update({
       full_name:         document.getElementById('pf-name').value.trim(),
       birth_date:        document.getElementById('pf-birth').value || null,
@@ -1512,10 +1540,25 @@ window.saveProfile = async function () {
       coach_experience:  document.getElementById('pf-coach-exp').value.trim() || null,
     }).eq('id', _user.id);
 
+    /* Меняем пароль если заполнен */
+    if (pwdNew) {
+      const { error: pwdError } = await _sb.auth.updateUser({ password: pwdNew });
+      if (pwdError) {
+        pwdErr.textContent = 'Ошибка смены пароля: ' + pwdError.message;
+        pwdErr.style.display = 'block';
+        btn.disabled = false; btn.textContent = 'Сохранить →';
+        return;
+      }
+    }
+
+    /* Сбросить поля пароля */
+    document.getElementById('pf-pwd-new').value = '';
+    document.getElementById('pf-pwd-rep').value = '';
+
     await loadProfile();
     closeProfileEdit();
     goDash();
-    toast('✓ Профиль обновлён');
+    toast(pwdNew ? '✓ Профиль и пароль обновлены' : '✓ Профиль обновлён');
   } catch(e) {
     toast('❌ Ошибка сохранения');
   } finally {
