@@ -406,7 +406,7 @@ select.inp { cursor: pointer; }
       <div class="auth-brand">
         <div class="brand-logo">ТОЧКА<br>ОТРЫВА</div>
         <div class="brand-name">Точка Отрыва</div>
-        <div class="brand-sub">Профессиональная экосистема судьи</div>
+        <div class="brand-sub">Профессиональная экосистема по Спортивной Скакалке</div>
         <div class="brand-apps">
           <div class="brand-app"><span>🧮</span> Точка Подсчёта</div>
           <div class="brand-app"><span>🪢</span> JumpScore</div>
@@ -503,7 +503,7 @@ select.inp { cursor: pointer; }
   <div class="topbar">
     <div class="tb-l">
       <div class="tb-title">Личный кабинет</div>
-      <div class="tb-sub">Точка Отрыва · Экосистема</div>
+      <div class="tb-sub">Точка Отрыва</div>
     </div>
     <div class="tb-r">
       <div class="pill" id="tp-dash">
@@ -558,7 +558,7 @@ select.inp { cursor: pointer; }
         <div class="app-card ac-blue" onclick="openApp('jumpscore')">
           <div class="app-icon">🪢</div>
           <div class="app-name">JumpScore</div>
-          <div class="app-desc">ССД судейство соревнований с отображение результата в реальном времени</div>
+          <div class="app-desc">ССД судейство соревнований с отабражением результатов в реальном времени</div>
           <div class="app-badge-pos"><span class="badge bb">Открыто</span></div>
         </div>
         <div class="app-card ac-purple locked soon">
@@ -1127,6 +1127,8 @@ window.doReset = async function () {
     if (btn.textContent === '...') { btn.disabled = false; btn.textContent = 'Отправить ссылку →'; }
   }
 };
+
+window.confirmLogout = function () {
   modal('🚪', 'Выйти из аккаунта?', 'Вам нужно будет войти снова.', 'Выйти', () => _sb.auth.signOut(), false);
 };
 
