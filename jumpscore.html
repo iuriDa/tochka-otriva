@@ -290,8 +290,8 @@ select.inp { cursor: pointer; }
 .tv-rdy  { position: absolute; top: 12px; right: 14px; background: var(--green); color: #fff; font-size: .66rem; font-weight: 800; padding: 3px 9px; border-radius: 6px; text-transform: uppercase; letter-spacing: .04em; }
 .tv-ath  { font-family: var(--head); font-size: clamp(1rem, 3vw, 2.2rem); font-weight: 700; color: rgba(255,255,255,.78); letter-spacing: .04em; margin-bottom: 4px; text-align: center; padding: 0 18px; }
 .tv-sc   { font-family: var(--mono); font-size: clamp(4.5rem, 14vw, 11rem); font-weight: 800; color: #fff; line-height: .9; }
-.tv-jn   { position: absolute; bottom: 12px; font-size: .68rem; color: rgba(255,255,255,.28); font-family: var(--head); }
-.tv-prelim{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(245,158,11,.7);white-space:nowrap}
+.tv-jn   { position: absolute; bottom: 12px; font-size: 2.2rem; font-weight: 800; letter-spacing: 0.5px; color: rgba(255,255,255,.28); font-family: var(--head); }
+.tv-prelim{position:absolute; bottom:10px; left:50%; transform:translateX(-50%); font-size: 0.9rem; opacity: 0.7; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:rgba(245,158,11,.7); white-space:nowrap}
 .tv-exit { position: fixed; bottom: 14px; right: 14px; z-index: 10; }
 .tv-empty { color: rgba(255,255,255,.08); font-family: var(--head); font-size: 1.4rem; margin: auto; }
 
@@ -1058,8 +1058,9 @@ async function _renderTV() {
       <div class="tv-ath">${esc(st.athlete_name || '')}</div>
       <div class="tv-sc">${st.score}</div>
       <div class="tv-jn">${esc(st.judge_name)}</div>
-      <div class="tv-prelim">⏱ Предварительный счёт</div>
-    </div>`).join('') || '<div class="tv-empty">Ожидание судей...</div>';
+      <div class="tv-jn">${esc(st.judge_name)}</div>
+      <div class="tv-prelim">⏱ ${lang === 'ru' ? 'Предварительный счёт' : 'Preliminary score'}</div>
+      </div>`).join('') || '<div class="tv-empty">Ожидание судей...</div>';
 }
 
 /* ══ FLOOR JUDGE ══════════════════════════════════════════ */
