@@ -1053,7 +1053,7 @@ async function _renderTV() {
   grid.innerHTML = active.map(st => `
     <div class="tv-cell">
       ${st.flag_code ? `<div class="tv-fbg" style="background-image:url('https://flagcdn.com/w320/${st.flag_code}.png')"></div>` : ''}
-      <div class="tv-sn">Станция${st.station_num}</div>
+      <div class="tv-sn">${lang.startsWith('ru') ? 'Площадка' : 'Station'} ${st.station_num}</div>
       ${st.ready ? '<div class="tv-rdy">✓ Готово</div>' : ''}
       <div class="tv-ath">${esc(st.athlete_name || '')}</div>
       <div class="tv-sc">${st.score}</div>
