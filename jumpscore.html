@@ -1056,7 +1056,7 @@ async function _renderTV() {
       ${st.ready ? '<div class="tv-rdy">✓ Готово</div>' : ''}
       <div class="tv-ath">${esc(st.athlete_name || '')}</div>
       <div class="tv-sc">${st.score}</div>
-      <div class="tv-jn">Судья ${esc(st.judge_name)}</div>
+      <div class="tv-jn">${esc(st.judge_name)}</div>
     </div>`).join('') || '<div class="tv-empty">Ожидание судей...</div>';
 }
 
