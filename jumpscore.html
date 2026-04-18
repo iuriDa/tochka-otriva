@@ -291,6 +291,7 @@ select.inp { cursor: pointer; }
 .tv-ath  { font-family: var(--head); font-size: clamp(1rem, 3vw, 2.2rem); font-weight: 700; color: rgba(255,255,255,.78); letter-spacing: .04em; margin-bottom: 4px; text-align: center; padding: 0 18px; }
 .tv-sc   { font-family: var(--mono); font-size: clamp(4.5rem, 14vw, 11rem); font-weight: 800; color: #fff; line-height: .9; }
 .tv-jn   { position: absolute; bottom: 12px; font-size: .68rem; color: rgba(255,255,255,.28); font-family: var(--head); }
+.tv-prelim{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(245,158,11,.7);white-space:nowrap}
 .tv-exit { position: fixed; bottom: 14px; right: 14px; z-index: 10; }
 .tv-empty { color: rgba(255,255,255,.08); font-family: var(--head); font-size: 1.4rem; margin: auto; }
 
@@ -1052,11 +1053,12 @@ async function _renderTV() {
   grid.innerHTML = active.map(st => `
     <div class="tv-cell">
       ${st.flag_code ? `<div class="tv-fbg" style="background-image:url('https://flagcdn.com/w320/${st.flag_code}.png')"></div>` : ''}
-      <div class="tv-sn">Станция${st.station_num}</div>
+      <div class="tv-sn">Станция ${st.station_num}</div>
       ${st.ready ? '<div class="tv-rdy">✓ Готово</div>' : ''}
       <div class="tv-ath">${esc(st.athlete_name || '')}</div>
       <div class="tv-sc">${st.score}</div>
-      <div class="tv-jn">Судья:${esc(st.judge_name)}</div>
+      <div class="tv-prelim">⏱ Предварительный счёт</div>
+      <div class="tv-jn">Судья: ${esc(st.judge_name)}</div>
     </div>`).join('') || '<div class="tv-empty">Ожидание судей...</div>';
 }
 
