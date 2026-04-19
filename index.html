@@ -386,6 +386,28 @@ select.inp { cursor: pointer; }
 .day-chip.on { background: var(--accent); border-color: var(--accent); color: #fff; }
 
 .device-warning { background: rgba(245,158,11,.08); border: 1px solid rgba(245,158,11,.25); border-radius: var(--r); padding: 10px 12px; font-size: .76rem; color: var(--amber); display: flex; gap: 8px; align-items: flex-start; }
+
+/* ── Event Detail Modal ── */
+.ev-detail-modal { max-width: 480px; max-height: 88dvh; overflow-y: auto; }
+.ev-detail-header { margin-bottom: 14px; }
+.ev-detail-name { font-family: var(--head); font-size: 1.05rem; margin-bottom: 4px; }
+.ev-detail-meta { font-size: .74rem; color: var(--tx2); display: flex; flex-wrap: wrap; gap: 8px; }
+.ev-detail-meta span { display: flex; align-items: center; gap: 4px; }
+.ev-section-ttl { font-size: .66rem; font-weight: 800; text-transform: uppercase; letter-spacing: .09em; color: var(--tx2); margin: 14px 0 7px; }
+.ev-stn-list { display: flex; flex-direction: column; gap: 6px; }
+.ev-stn-row { background: var(--sur2); border: 1px solid var(--bor); border-radius: var(--r); padding: 9px 12px; display: flex; align-items: center; gap: 10px; }
+.ev-stn-num { font-family: var(--mono); font-size: .8rem; font-weight: 700; color: var(--accent); width: 28px; flex-shrink: 0; }
+.ev-stn-info { flex: 1; min-width: 0; }
+.ev-stn-judge { font-size: .82rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ev-stn-ath { font-size: .7rem; color: var(--tx2); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ev-stn-score { font-family: var(--mono); font-size: 1.1rem; font-weight: 700; color: var(--tx); flex-shrink: 0; min-width: 36px; text-align: right; }
+.ev-stn-row.vacant .ev-stn-judge { color: var(--tx3); font-weight: 400; font-style: italic; }
+.ev-judges-list { display: flex; flex-direction: column; gap: 5px; }
+.ev-judge-row { display: flex; align-items: center; gap: 9px; background: var(--sur2); border: 1px solid var(--bor); border-radius: var(--r); padding: 8px 12px; }
+.ev-judge-ava { width: 28px; height: 28px; border-radius: 8px; background: var(--sur3); display: flex; align-items: center; justify-content: center; font-family: var(--head); font-size: .6rem; color: var(--tx2); flex-shrink: 0; }
+.ev-judge-name { font-size: .82rem; font-weight: 700; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ev-judge-stn { font-size: .67rem; color: var(--tx2); flex-shrink: 0; }
+.ev-detail-loading { text-align: center; color: var(--tx2); padding: 18px; font-size: .82rem; }
 </style>
 </head>
 <body>
@@ -785,6 +807,19 @@ select.inp { cursor: pointer; }
     <div class="modal-act" style="margin-top:14px">
       <button class="btn btn-g btn-sm" onclick="closeProModal()">Отмена</button>
       <button class="btn btn-a btn-sm" onclick="grantPro()">✓ Открыть Pro</button>
+    </div>
+  </div>
+</div>
+
+<!-- МОДАЛКА ДЕТАЛИ СОБЫТИЯ (Админ) -->
+<div id="modal-ev-detail" class="modal-ov">
+  <div class="modal anim ev-detail-modal">
+    <div class="modal-ttl" style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+      <span>🏆 Детали события</span>
+      <button class="btn btn-s btn-sm" onclick="document.getElementById('modal-ev-detail').classList.remove('open')">✕</button>
+    </div>
+    <div id="ev-detail-body">
+      <div class="ev-detail-loading">Загрузка...</div>
     </div>
   </div>
 </div>
@@ -1364,17 +1399,99 @@ window.loadAdminEvents = async function () {
   const { data } = await _sb.from('events').select('*').order('created_at', { ascending: false });
   if (!data || !data.length) { el.innerHTML = '<div class="empty">Событий нет</div>'; return; }
   el.innerHTML = data.map(ev => `
-    <div class="ev-row">
+    <div class="ev-row" style="cursor:pointer" onclick="showEventDetail('${ev.id}')">
       <div class="ev-ico">${ev.closed ? '🔒' : '🏆'}</div>
       <div class="ev-info">
         <div class="ev-name">${esc(ev.name)}</div>
         <div class="ev-meta">${ev.station_count} ст. · Код: <span class="mono">${ev.floor_code}</span> · ${fmtDate(ev.created_at)}</div>
       </div>
-      <div class="ev-acts">
+      <div class="ev-acts" onclick="event.stopPropagation()">
         <span class="badge ${ev.closed ? 'br' : 'bg'}">${ev.closed ? 'Закрыто' : 'Активно'}</span>
         ${!ev.closed ? `<button class="btn btn-d btn-sm" onclick="adminCloseEvent('${ev.id}','${esc(ev.name)}')">✕</button>` : ''}
       </div>
     </div>`).join('');
+};
+
+window.showEventDetail = async function (evId) {
+  const body = document.getElementById('ev-detail-body');
+  body.innerHTML = '<div class="ev-detail-loading">Загрузка...</div>';
+  document.getElementById('modal-ev-detail').classList.add('open');
+
+  /* Параллельные запросы: событие + станции + участники с профилями */
+  const [evRes, stnsRes, partsRes] = await Promise.all([
+    _sb.from('events').select('*').eq('id', evId).single(),
+    _sb.from('stations').select('*').eq('event_id', evId).order('station_num'),
+    _sb.from('event_participations')
+       .select('user_id, role, joined_at, profiles(full_name)')
+       .eq('event_id', evId).eq('role', 'floor_judge')
+  ]);
+
+  const ev   = evRes.data;
+  const stns = stnsRes.data || [];
+  const parts = partsRes.data || [];
+
+  if (!ev) { body.innerHTML = '<div class="ev-detail-loading">Ошибка загрузки</div>'; return; }
+
+  /* Карта: judge_id → station_num (для отображения у кого какая площадка) */
+  const judgeStation = {};
+  stns.forEach(s => { if (s.judge_id) judgeStation[s.judge_id] = s.station_num; });
+
+  /* Считаем: занятых площадок, активных судей */
+  const occupiedCount = stns.filter(s => !!s.judge_id).length;
+  const totalScore    = stns.reduce((a, s) => a + (s.score || 0), 0);
+
+  body.innerHTML = `
+    <div class="ev-detail-header">
+      <div class="ev-detail-name">${esc(ev.name)}</div>
+      <div class="ev-detail-meta">
+        <span class="badge ${ev.closed ? 'br' : 'bg'}">${ev.closed ? 'Закрыто' : 'Активно'}</span>
+        <span>🗓 ${fmtDate(ev.created_at)}</span>
+        <span>🔑 Код зала: <span class="mono" style="color:var(--accent)">${ev.floor_code}</span></span>
+        <span>📊 Площадок: ${stns.length} · Занято: ${occupiedCount}</span>
+        <span>🏅 Итого счёт: <b>${totalScore}</b></span>
+      </div>
+    </div>
+
+    <div class="ev-section-ttl">Площадки (${stns.length})</div>
+    <div class="ev-stn-list">
+      ${stns.length ? stns.map(s => {
+        const has = !!s.judge_name;
+        const flagHtml = s.flag_code
+          ? `<img src="https://flagcdn.com/w40/${s.flag_code}.png" height="14" style="border-radius:2px;vertical-align:middle;margin-right:4px" alt="${s.flag_code}">`
+          : '';
+        return `<div class="ev-stn-row ${has ? '' : 'vacant'}">
+          <div class="ev-stn-num">${s.station_num}</div>
+          <div class="ev-stn-info">
+            <div class="ev-stn-judge">${has ? esc(s.judge_name) : 'Свободно'}</div>
+            ${has && s.athlete_name ? `<div class="ev-stn-ath">${flagHtml}${esc(s.athlete_name)}</div>` : ''}
+          </div>
+          ${has ? `<div class="ev-stn-score">${s.score}</div>` : ''}
+          ${has ? `<span class="badge bg" style="font-size:.55rem">✓</span>` : `<span class="badge bgy" style="font-size:.55rem">—</span>`}
+        </div>`;
+      }).join('') : '<div class="ev-detail-loading">Площадок нет</div>'}
+    </div>
+
+    <div class="ev-section-ttl">Судьи зарегистрированы (${parts.length})</div>
+    <div class="ev-judges-list">
+      ${parts.length ? parts.map(p => {
+        const name    = p.profiles?.full_name || '—';
+        const stnNum  = judgeStation[p.user_id];
+        const stnLbl  = stnNum ? `Площадка ${stnNum}` : 'Не на площадке';
+        const isActive = !!stnNum;
+        return `<div class="ev-judge-row">
+          <div class="ev-judge-ava">${esc(initials(name))}</div>
+          <div class="ev-judge-name">${esc(name)}</div>
+          <div class="ev-judge-stn">
+            <span class="badge ${isActive ? 'bg' : 'bgy'}">${stnLbl}</span>
+          </div>
+        </div>`;
+      }).join('') : '<div class="ev-detail-loading">Никто не присоединялся</div>'}
+    </div>
+
+    <div class="modal-act" style="margin-top:16px">
+      ${!ev.closed ? `<button class="btn btn-d btn-sm" onclick="adminCloseEvent('${ev.id}','${esc(ev.name)}');document.getElementById('modal-ev-detail').classList.remove('open')">Закрыть событие</button>` : ''}
+      <button class="btn btn-a btn-sm" onclick="document.getElementById('modal-ev-detail').classList.remove('open')">Закрыть</button>
+    </div>`;
 };
 
 window.adminCloseEvent = function (id, name) {
