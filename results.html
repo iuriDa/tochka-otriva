@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Результаты · Точка Отрыва</title>
+<meta name="description" content="Публичная турнирная таблица результатов соревнований по спортивной скакалке.">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Mulish:wght@400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ══ TOKENS ══════════════════════════════════════════════════ */
+:root {
+  --accent: #FF6B2B; --accent-s: rgba(255,107,43,.14);
+  --gold: #F59E0B; --silver: #94A3B8; --bronze: #CD7F32;
+  --green: #22C55E; --red: #EF4444; --blue: #3B82F6;
+  --font: 'Mulish', system-ui, sans-serif;
+  --head: 'Russo One', sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+  --r: 10px; --r-lg: 16px; --r-xl: 22px; --r-pill: 999px;
+}
+[data-theme="dark"] {
+  --bg: #0B0C10; --sur: #14161E; --sur2: #1A1D28; --sur3: #20243A;
+  --bor: #252A3D; --bor2: #2E344F;
+  --tx: #E8ECFF; --tx2: #7880A0; --tx3: #3D4460;
+  --sh: 0 2px 8px rgba(0,0,0,.4); --sh2: 0 6px 24px rgba(0,0,0,.55);
+}
+[data-theme="light"] {
+  --bg: #F0F2FA; --sur: #FFFFFF; --sur2: #F4F6FF; --sur3: #ECEFFE;
+  --bor: #DDE1F0; --bor2: #C8CEEA;
+  --tx: #0D1026; --tx2: #5E6685; --tx3: #A0A8C0;
+  --sh: 0 2px 8px rgba(0,0,0,.06); --sh2: 0 6px 24px rgba(0,0,0,.08);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html { font-size: 16px; }
+body { min-height: 100dvh; background: var(--bg); color: var(--tx); font-family: var(--font); line-height: 1.5; transition: background .2s, color .2s; }
+
+.screen { display: none; flex-direction: column; min-height: 100dvh; }
+.screen.active { display: flex; }
+
+/* ══ TOPBAR ══════════════════════════════════════════════════ */
+.topbar {
+  position: sticky; top: 0; z-index: 50;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 14px; height: 52px; flex-shrink: 0;
+  background: var(--sur); border-bottom: 1px solid var(--bor);
+}
+.tb-l { display: flex; flex-direction: column; gap: 1px; }
+.tb-title { font-family: var(--head); font-size: .88rem; }
+.tb-sub   { font-size: .65rem; color: var(--tx2); }
+.tb-r { display: flex; align-items: center; gap: 7px; }
+
+/* ══ BUTTONS & UTILS ═════════════════════════════════════════ */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 5px; padding: 0 13px; height: 36px; border-radius: var(--r); border: none; cursor: pointer; font-family: var(--font); font-size: .8rem; font-weight: 700; transition: all .14s; user-select: none; white-space: nowrap; }
+.btn:active { transform: scale(.96); }
+.btn-a { background: var(--accent); color: #fff; }
+.btn-a:hover { background: #D4521A; }
+.btn-g { background: transparent; color: var(--tx); border: 1.5px solid var(--bor); }
+.btn-g:hover { border-color: var(--accent); color: var(--accent); }
+.btn-s { background: var(--sur2); color: var(--tx2); border: 1px solid var(--bor); }
+.btn-sm { height: 30px; padding: 0 10px; font-size: .72rem; border-radius: 7px; }
+
+.pill { display: flex; align-items: center; background: var(--sur2); border: 1px solid var(--bor); border-radius: var(--r-pill); padding: 3px; gap: 2px; }
+.pill button { border: none; background: transparent; cursor: pointer; font-size: .68rem; font-weight: 800; color: var(--tx2); padding: 3px 9px; border-radius: var(--r-pill); transition: all .15s; font-family: var(--font); }
+.pill button.on { background: var(--accent); color: #fff; }
+
+.badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: var(--r-pill); font-size: .63rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
+.bg  { background: rgba(34,197,94,.1);  color: var(--green); border: 1px solid rgba(34,197,94,.22); }
+.br  { background: rgba(239,68,68,.1);  color: var(--red);   border: 1px solid rgba(239,68,68,.22); }
+.ba  { background: rgba(255,107,43,.1); color: var(--accent);border: 1px solid rgba(255,107,43,.22); }
+.bgy { background: var(--sur2); color: var(--tx2); border: 1px solid var(--bor); }
+
+.hidden { display: none !important; }
+.mono { font-family: var(--mono); }
+
+@keyframes anim-up { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.45} }
+
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--bor2); border-radius: 2px; }
+
+/* ══ LOADING ═════════════════════════════════════════════════ */
+.loading-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; }
+.loading-logo { font-family: var(--head); font-size: .82rem; width: 52px; height: 52px; border-radius: 16px; background: var(--accent); display: flex; align-items: center; justify-content: center; color: #fff; line-height: 1.2; text-align: center; box-shadow: 0 6px 22px rgba(255,107,43,.35); animation: pulse 1.4s ease-in-out infinite; }
+.loading-txt { font-size: .8rem; color: var(--tx2); }
+
+/* ══ EVENTS LIST ═════════════════════════════════════════════ */
+.page-body { flex: 1; padding: 14px; display: flex; flex-direction: column; gap: 14px; }
+
+.search-bar { position: relative; }
+.search-bar input { width: 100%; padding: 0 14px 0 40px; height: 44px; background: var(--sur2); border: 1.5px solid var(--bor); border-radius: var(--r); color: var(--tx); font-family: var(--font); font-size: .9rem; outline: none; transition: border-color .2s; }
+.search-bar input:focus { border-color: var(--accent); }
+.search-bar .ico { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--tx3); font-size: .9rem; pointer-events: none; }
+
+.filter-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.fchip { background: var(--sur2); border: 1px solid var(--bor); border-radius: var(--r-pill); padding: 5px 12px; font-size: .72rem; font-weight: 700; color: var(--tx2); cursor: pointer; transition: all .15s; white-space: nowrap; }
+.fchip.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+.ev-grid { display: flex; flex-direction: column; gap: 8px; }
+.ev-card {
+  background: var(--sur); border: 1px solid var(--bor); border-radius: var(--r-lg);
+  padding: 13px 14px; cursor: pointer; transition: all .18s; box-shadow: var(--sh);
+  display: flex; flex-direction: column; gap: 6px;
+}
+.ev-card:hover { box-shadow: var(--sh2); border-color: var(--bor2); transform: translateY(-1px); }
+.ev-card:active { transform: scale(.98); }
+.ev-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.ev-card-name { font-family: var(--head); font-size: .88rem; flex: 1; min-width: 0; }
+.ev-card-tags { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 3px; }
+.ev-card-tag { font-size: .65rem; font-weight: 700; color: var(--tx2); background: var(--sur2); border: 1px solid var(--bor); border-radius: var(--r-pill); padding: 2px 8px; white-space: nowrap; }
+.ev-card-tag.accent { color: var(--accent); border-color: rgba(255,107,43,.3); background: rgba(255,107,43,.07); }
+.ev-card-meta { font-size: .7rem; color: var(--tx3); }
+.ev-card-stats { display: flex; gap: 10px; font-size: .71rem; color: var(--tx2); }
+
+.empty-state { text-align: center; color: var(--tx2); padding: 28px 14px; font-size: .84rem; }
+
+/* ══ RESULTS VIEW ════════════════════════════════════════════ */
+.results-header { background: var(--sur); border: 1px solid var(--bor); border-radius: var(--r-xl); padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; }
+.res-hd-name  { font-family: var(--head); font-size: 1rem; }
+.res-hd-tags  { display: flex; gap: 6px; flex-wrap: wrap; }
+.res-hd-tag   { font-size: .73rem; font-weight: 700; color: var(--tx2); background: var(--sur2); border: 1px solid var(--bor); border-radius: var(--r-pill); padding: 3px 10px; }
+.res-hd-tag.accent { color: var(--accent); border-color: rgba(255,107,43,.3); background: rgba(255,107,43,.07); }
+
+.result-table { display: flex; flex-direction: column; gap: 6px; }
+
+/* Place 1/2/3 get special treatment */
+.res-row {
+  background: var(--sur); border: 1px solid var(--bor); border-radius: var(--r-lg);
+  padding: 11px 13px; display: flex; align-items: center; gap: 11px;
+  animation: anim-up .2s ease; box-shadow: var(--sh);
+  transition: box-shadow .15s;
+}
+.res-row:hover { box-shadow: var(--sh2); }
+.res-row.p1 { border-color: var(--gold);   background: linear-gradient(to right, rgba(245,158,11,.06), var(--sur)); }
+.res-row.p2 { border-color: var(--silver); background: linear-gradient(to right, rgba(148,163,184,.06), var(--sur)); }
+.res-row.p3 { border-color: var(--bronze); background: linear-gradient(to right, rgba(205,127,50,.06), var(--sur)); }
+
+.res-place { min-width: 36px; text-align: center; flex-shrink: 0; }
+.res-place-num { font-family: var(--mono); font-size: 1.3rem; font-weight: 800; line-height: 1; }
+.res-place-num.gold   { color: var(--gold); }
+.res-place-num.silver { color: var(--silver); }
+.res-place-num.bronze { color: var(--bronze); }
+.res-place-num.other  { color: var(--tx2); font-size: 1rem; }
+.res-place-medal { font-size: 1.1rem; }
+
+.res-info { flex: 1; min-width: 0; }
+.res-name { font-weight: 800; font-size: .92rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.res-club { font-size: .7rem; color: var(--tx2); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.res-score { flex-shrink: 0; text-align: right; }
+.res-score-num { font-family: var(--mono); font-size: 1.5rem; font-weight: 800; color: var(--tx); }
+.res-score-lbl { font-size: .6rem; color: var(--tx3); text-transform: uppercase; letter-spacing: .06em; }
+
+/* Speed mode: show individual counts */
+.res-spd-chips { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 3px; }
+.res-spd-chip  { font-family: var(--mono); font-size: .64rem; color: var(--tx3); background: var(--sur2); border: 1px solid var(--bor); border-radius: var(--r-pill); padding: 1px 6px; }
+
+.live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); animation: pulse .9s ease-in-out infinite; flex-shrink: 0; }
+
+/* ══ TV MODE ═════════════════════════════════════════════════ */
+#screen-tv-res { background: #060709; }
+.tv-res-topbar { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; flex-shrink: 0; }
+.tv-res-title  { font-family: var(--head); font-size: clamp(1rem, 3vw, 2rem); color: #fff; letter-spacing: .02em; }
+.tv-res-sub    { font-size: clamp(.7rem, 1.5vw, 1rem); color: rgba(255,255,255,.4); margin-top: 4px; }
+
+.tv-res-body { flex: 1; padding: 0 24px 24px; overflow: hidden; display: flex; flex-direction: column; gap: 8px; }
+
+.tv-row { display: flex; align-items: center; gap: 16px; padding: 14px 18px; border-radius: 14px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.06); }
+.tv-row.top1 { background: linear-gradient(135deg, rgba(245,158,11,.18), rgba(245,158,11,.06)); border-color: rgba(245,158,11,.3); }
+.tv-row.top2 { background: linear-gradient(135deg, rgba(148,163,184,.12), rgba(148,163,184,.04)); border-color: rgba(148,163,184,.2); }
+.tv-row.top3 { background: linear-gradient(135deg, rgba(205,127,50,.12), rgba(205,127,50,.04)); border-color: rgba(205,127,50,.2); }
+
+.tv-row-place { font-family: var(--mono); font-size: clamp(1.6rem, 4vw, 3rem); font-weight: 800; color: rgba(255,255,255,.2); min-width: 60px; }
+.tv-row.top1 .tv-row-place { color: var(--gold); }
+.tv-row.top2 .tv-row-place { color: var(--silver); }
+.tv-row.top3 .tv-row-place { color: var(--bronze); }
+
+.tv-row-name  { font-family: var(--head); font-size: clamp(.9rem, 2.5vw, 2rem); color: #fff; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tv-row-club  { font-size: clamp(.7rem, 1.5vw, 1rem); color: rgba(255,255,255,.35); margin-top: 3px; }
+.tv-row-score { font-family: var(--mono); font-size: clamp(1.8rem, 5vw, 4rem); font-weight: 800; color: #fff; flex-shrink: 0; }
+.tv-row.top1 .tv-row-score { color: var(--gold); }
+
+.tv-exit { position: fixed; bottom: 16px; right: 16px; z-index: 10; }
+</style>
+</head>
+<body>
+
+<!-- ══ LOADING ═══════════════════════════════════════════ -->
+<div id="screen-loading" class="screen active">
+  <div class="topbar">
+    <div class="tb-l">
+      <div class="tb-title">Результаты</div>
+      <div class="tb-sub">Точка Отрыва</div>
+    </div>
+    <div class="tb-r">
+      <div class="pill" id="tp-load">
+        <button onclick="setTheme('dark')">🌙</button>
+        <button onclick="setTheme('light')">☀️</button>
+      </div>
+    </div>
+  </div>
+  <div class="loading-wrap">
+    <div class="loading-logo">ТОЧКА<br>ОТРЫВА</div>
+    <div class="loading-txt">Загрузка результатов...</div>
+  </div>
+</div>
+
+<!-- ══ EVENTS LIST ════════════════════════════════════════ -->
+<div id="screen-events" class="screen">
+  <div class="topbar">
+    <div class="tb-l">
+      <div class="tb-title">Результаты</div>
+      <div class="tb-sub">Точка Отрыва · Таблица соревнований</div>
+    </div>
+    <div class="tb-r">
+      <div class="pill" id="tp-ev">
+        <button onclick="setTheme('dark')">🌙</button>
+        <button onclick="setTheme('light')">☀️</button>
+      </div>
+      <button class="btn btn-s btn-sm" onclick="loadEvents()">↺</button>
+    </div>
+  </div>
+  <div class="page-body">
+    <!-- Search -->
+    <div class="search-bar">
+      <span class="ico">🔍</span>
+      <input id="ev-search" type="text" placeholder="Поиск по названию, дисциплине..."
+        oninput="filterEvents(this.value)">
+    </div>
+
+    <!-- Discipline filter chips -->
+    <div class="filter-chips" id="disc-filters">
+      <div class="fchip on" onclick="setDiscFilter('', this)">Все</div>
+    </div>
+
+    <!-- Events -->
+    <div class="ev-grid" id="ev-grid">
+      <div class="empty-state">Загрузка...</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ RESULTS VIEW ═══════════════════════════════════════ -->
+<div id="screen-results" class="screen">
+  <div class="topbar">
+    <div class="tb-l">
+      <div class="tb-title" id="res-title">Результаты</div>
+      <div class="tb-sub"   id="res-sub"></div>
+    </div>
+    <div class="tb-r">
+      <div class="pill" id="tp-res">
+        <button onclick="setTheme('dark')">🌙</button>
+        <button onclick="setTheme('light')">☀️</button>
+      </div>
+      <button class="btn btn-s btn-sm" onclick="toggleTVRes()">📺 TV</button>
+      <button class="btn btn-s btn-sm" onclick="loadResults(_currentEvId)">↺</button>
+      <button class="btn btn-g btn-sm" onclick="goEvents()">← Назад</button>
+    </div>
+  </div>
+  <div class="page-body">
+    <div class="results-header" id="res-header"></div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <div class="live-dot" id="live-dot"></div>
+      <span style="font-size:.72rem;font-weight:700;color:var(--green)" id="live-lbl">Обновляется в реальном времени</span>
+      <span style="font-size:.7rem;color:var(--tx3);margin-left:auto" id="res-count"></span>
+    </div>
+    <div class="result-table" id="res-table">
+      <div class="empty-state">Загрузка...</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TV RESULTS VIEW ════════════════════════════════════ -->
+<div id="screen-tv-res" class="screen">
+  <div class="tv-res-topbar">
+    <div>
+      <div class="tv-res-title" id="tv-res-title">Результаты</div>
+      <div class="tv-res-sub"   id="tv-res-sub"></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <div class="live-dot"></div>
+      <span style="font-size:.8rem;color:rgba(255,255,255,.4)">LIVE</span>
+    </div>
+  </div>
+  <div class="tv-res-body" id="tv-res-rows"></div>
+  <button class="btn btn-g btn-sm tv-exit" onclick="toggleTVRes()">← Выйти из TV</button>
+</div>
+
+<script>
+/*
+ * results.html · Публичная турнирная таблица
+ * Точка Отрыва · 2025
+ * Автор: Данильченко Юрий Леонидович
+ *
+ * Публичная страница — авторизация НЕ требуется.
+ * Читает данные из events + stations через Supabase anon key.
+ * Realtime подписка: таблица обновляется без перезагрузки.
+ *
+ * RLS ТРЕБОВАНИЯ (выполнить в Supabase SQL Editor):
+ *   CREATE POLICY "public_read_events"   ON events   FOR SELECT TO anon USING (true);
+ *   CREATE POLICY "public_read_stations" ON stations FOR SELECT TO anon USING (true);
+ */
+
+const SB_URL = 'https://anuapnxrwqcsucisehrr.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFudWFwbnhyd3Fjc3VjaXNlaHJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE3ODQzMjEsImV4cCI6MjA4NzM2MDMyMX0.U1TKmw6KtHmNnhnzwRfbfVERPl6ybSsayUWkM6Whqn4';
+
+let _sb;
+let _allEvents   = [];
+let _discFilter  = '';
+let _searchQ     = '';
+let _currentEvId = null;
+let _tvResMode   = false;
+let _resSub      = null;
+let _theme       = localStorage.getItem('to_theme') || 'dark';
+
+/* ══ UTILS ══════════════════════════════════════════════ */
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function setTheme(t) {
+  _theme = t;
+  localStorage.setItem('to_theme', t);
+  document.documentElement.setAttribute('data-theme', t);
+  document.querySelectorAll('[id^="tp-"]').forEach(p => {
+    p.querySelectorAll('button').forEach((b, i) => b.classList.toggle('on', i === (t === 'dark' ? 0 : 1)));
+  });
+}
+
+function esc(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function fmtDate(d) {
+  return new Date(d).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+function placeMedal(n) {
+  if (n === 1) return '🥇';
+  if (n === 2) return '🥈';
+  if (n === 3) return '🥉';
+  return '';
+}
+
+function placeClass(n) {
+  if (n === 1) return 'gold';
+  if (n === 2) return 'silver';
+  if (n === 3) return 'bronze';
+  return 'other';
+}
+
+/* ══ INIT ══════════════════════════════════════════════ */
+window.onerror = (msg) => { console.error('[Results]', msg); return false; };
+
+document.addEventListener('DOMContentLoaded', async () => {
+  setTheme(_theme);
+  _sb = window.supabase.createClient(SB_URL, SB_KEY);
+  await loadEvents();
+});
+
+/* ══ EVENTS LIST ═══════════════════════════════════════ */
+async function loadEvents() {
+  showScreen('screen-loading');
+
+  const { data, error } = await _sb.from('events')
+    .select('id, name, discipline, age_category, scoring_mode, station_count, closed, created_at')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    showScreen('screen-events');
+    document.getElementById('ev-grid').innerHTML =
+      '<div class="empty-state">Ошибка загрузки. Проверьте подключение.</div>';
+    return;
+  }
+
+  _allEvents = data || [];
+
+  /* Build discipline filter chips */
+  const discs = [...new Set(_allEvents.map(e => e.discipline).filter(Boolean))];
+  const filtersEl = document.getElementById('disc-filters');
+  filtersEl.innerHTML = `<div class="fchip on" onclick="setDiscFilter('', this)">Все</div>`;
+  discs.forEach(d => {
+    const chip = document.createElement('div');
+    chip.className = 'fchip';
+    chip.textContent = d;
+    chip.onclick = () => setDiscFilter(d, chip);
+    filtersEl.appendChild(chip);
+  });
+
+  renderEvents();
+  showScreen('screen-events');
+}
+
+function renderEvents() {
+  let list = _allEvents;
+
+  if (_discFilter) list = list.filter(e => e.discipline === _discFilter);
+  if (_searchQ) {
+    const q = _searchQ.toLowerCase();
+    list = list.filter(e =>
+      (e.name || '').toLowerCase().includes(q) ||
+      (e.discipline || '').toLowerCase().includes(q) ||
+      (e.age_category || '').toLowerCase().includes(q)
+    );
+  }
+
+  const grid = document.getElementById('ev-grid');
+
+  if (!list.length) {
+    grid.innerHTML = '<div class="empty-state">События не найдены</div>';
+    return;
+  }
+
+  grid.innerHTML = list.map(ev => {
+    const isLive = !ev.closed;
+    const stLabel = ev.scoring_mode === 'speed' ? '🔢 Ручной ввод' : '👆 Тап-счётчик';
+    return `<div class="ev-card" onclick="loadResults('${ev.id}')">
+      <div class="ev-card-top">
+        <div>
+          <div class="ev-card-name">${esc(ev.name)}</div>
+          <div class="ev-card-tags">
+            ${ev.discipline  ? `<span class="ev-card-tag accent">${esc(ev.discipline)}</span>` : ''}
+            ${ev.age_category ? `<span class="ev-card-tag">${esc(ev.age_category)}</span>` : ''}
+            <span class="ev-card-tag">${stLabel}</span>
+          </div>
+        </div>
+        <span class="badge ${isLive ? 'bg' : 'bgy'}">${isLive ? 'Live' : 'Завершено'}</span>
+      </div>
+      <div class="ev-card-stats">
+        <span>🏟 ${ev.station_count} площадок</span>
+        <span>📅 ${fmtDate(ev.created_at)}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+window.setDiscFilter = function (disc, btn) {
+  _discFilter = disc;
+  document.querySelectorAll('#disc-filters .fchip').forEach(c => c.classList.remove('on'));
+  btn.classList.add('on');
+  renderEvents();
+};
+
+window.filterEvents = function (q) {
+  _searchQ = q;
+  renderEvents();
+};
+
+window.goEvents = function () {
+  /* Remove realtime subscription when leaving results */
+  if (_resSub) { try { _sb.removeChannel(_resSub); } catch(e) {} _resSub = null; }
+  _currentEvId = null;
+  _tvResMode = false;
+  showScreen('screen-events');
+};
+
+/* ══ RESULTS VIEW ══════════════════════════════════════ */
+async function loadResults(evId) {
+  _currentEvId = evId;
+
+  /* Remove old subscription */
+  if (_resSub) { try { _sb.removeChannel(_resSub); } catch(e) {} _resSub = null; }
+
+  /* Load event metadata */
+  const { data: ev } = await _sb.from('events').select('*').eq('id', evId).single();
+  if (!ev) { alert('Событие не найдено'); return; }
+
+  /* Update header */
+  document.getElementById('res-title').textContent = ev.name;
+  document.getElementById('res-sub').textContent   = [ev.discipline, ev.age_category].filter(Boolean).join(' · ') || 'Турнирная таблица';
+
+  const isSpeedMode = ev.scoring_mode === 'speed';
+
+  document.getElementById('res-header').innerHTML = `
+    <div class="res-hd-name">${esc(ev.name)}</div>
+    <div class="res-hd-tags">
+      ${ev.discipline   ? `<span class="res-hd-tag accent">${esc(ev.discipline)}</span>` : ''}
+      ${ev.age_category ? `<span class="res-hd-tag">${esc(ev.age_category)}</span>` : ''}
+      <span class="res-hd-tag">📅 ${fmtDate(ev.created_at)}</span>
+      <span class="badge ${ev.closed ? 'bgy' : 'bg'}">${ev.closed ? 'Завершено' : 'Идут соревнования'}</span>
+    </div>`;
+
+  const liveEl  = document.getElementById('live-dot');
+  const liveLbl = document.getElementById('live-lbl');
+  if (ev.closed) {
+    liveEl.style.display = 'none';
+    liveLbl.textContent  = 'Соревнование завершено · Финальные результаты';
+    liveLbl.style.color  = 'var(--tx2)';
+  } else {
+    liveEl.style.display = '';
+    liveLbl.textContent  = 'Обновляется в реальном времени';
+    liveLbl.style.color  = 'var(--green)';
+  }
+
+  showScreen('screen-results');
+  await _fetchAndRenderResults(evId, ev, isSpeedMode);
+
+  /* Realtime subscription — обновляет таблицу без перезагрузки */
+  if (!ev.closed) {
+    _resSub = _sb.channel('res-' + evId)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'stations', filter: `event_id=eq.${evId}` }, async () => {
+        await _fetchAndRenderResults(evId, ev, isSpeedMode);
+        if (_tvResMode) await _renderTVResults(ev, isSpeedMode);
+      })
+      .subscribe();
+  }
+}
+window.loadResults = loadResults;
+
+async function _fetchAndRenderResults(evId, ev, isSpeedMode) {
+  const { data: stns } = await _sb.from('stations')
+    .select('station_num, score, athlete_name, judge_name, flag_code, ready, spd_c1, spd_c2, spd_c3')
+    .eq('event_id', evId)
+    .order('score', { ascending: false });
+
+  /* Only show stations that have a score or athlete name */
+  const rows = (stns || []).filter(s => !!s.athlete_name || s.score > 0);
+  /* Sort: highest score first, then by station_num */
+  rows.sort((a, b) => b.score - a.score || a.station_num - b.station_num);
+
+  document.getElementById('res-count').textContent = `${rows.length} участников`;
+
+  const table = document.getElementById('res-table');
+
+  if (!rows.length) {
+    table.innerHTML = '<div class="empty-state">Результатов пока нет. Ожидайте выступлений...</div>';
+    return;
+  }
+
+  table.innerHTML = rows.map((st, idx) => {
+    const place = idx + 1;
+    const hasSpeedCounts = isSpeedMode && st.spd_c1 !== null;
+    const pClass = place <= 3 ? `p${place}` : '';
+    const flag = st.flag_code
+      ? `<img src="https://flagcdn.com/w40/${st.flag_code}.png" height="16" style="border-radius:2px;vertical-align:middle;margin-right:4px" alt="${st.flag_code}">`
+      : '';
+    const spdChips = hasSpeedCounts
+      ? `<div class="res-spd-chips">
+          <span class="res-spd-chip">С1: ${st.spd_c1}</span>
+          <span class="res-spd-chip">С2: ${st.spd_c2}</span>
+          <span class="res-spd-chip">С3: ${st.spd_c3}</span>
+        </div>` : '';
+    const medal = placeMedal(place);
+    const pColor = placeClass(place);
+
+    return `<div class="res-row ${pClass}">
+      <div class="res-place">
+        ${medal
+          ? `<div class="res-place-medal">${medal}</div>`
+          : `<div class="res-place-num other">${place}</div>`}
+      </div>
+      <div class="res-info">
+        <div class="res-name">${flag}${esc(st.athlete_name || '—')}</div>
+        ${st.judge_name ? `<div class="res-club">Судья: ${esc(st.judge_name)}</div>` : ''}
+        ${spdChips}
+      </div>
+      <div class="res-score">
+        <div class="res-score-num">${st.score}</div>
+        ${st.ready ? '<div class="res-score-lbl">✓ Финал</div>' : '<div class="res-score-lbl">В процессе</div>'}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ══ TV RESULTS MODE ═══════════════════════════════════ */
+window.toggleTVRes = async function () {
+  _tvResMode = !_tvResMode;
+  if (_tvResMode) {
+    const { data: ev } = await _sb.from('events').select('*').eq('id', _currentEvId).single();
+    const isSpeedMode = ev?.scoring_mode === 'speed';
+    document.getElementById('tv-res-title').textContent = ev?.name || 'Результаты';
+    document.getElementById('tv-res-sub').textContent   =
+      [ev?.discipline, ev?.age_category].filter(Boolean).join(' · ');
+    await _renderTVResults(ev, isSpeedMode);
+    showScreen('screen-tv-res');
+  } else {
+    showScreen('screen-results');
+  }
+};
+
+async function _renderTVResults(ev, isSpeedMode) {
+  const { data: stns } = await _sb.from('stations')
+    .select('station_num, score, athlete_name, flag_code, ready, spd_c1, spd_c2, spd_c3')
+    .eq('event_id', ev.id)
+    .order('score', { ascending: false });
+
+  const rows = (stns || []).filter(s => !!s.athlete_name || s.score > 0);
+  rows.sort((a, b) => b.score - a.score || a.station_num - b.station_num);
+
+  const container = document.getElementById('tv-res-rows');
+
+  /* Adaptive font: show fewer rows on smaller screens */
+  const maxRows = window.innerHeight < 700 ? 6 : 8;
+  const visible = rows.slice(0, maxRows);
+
+  container.innerHTML = visible.map((st, idx) => {
+    const place = idx + 1;
+    const topClass = place <= 3 ? `top${place}` : '';
+    const flag = st.flag_code
+      ? `<img src="https://flagcdn.com/w40/${st.flag_code}.png" height="20" style="border-radius:3px;vertical-align:middle;margin-right:8px" alt="${st.flag_code}">`
+      : '';
+    return `<div class="tv-row ${topClass}">
+      <div class="tv-row-place">${place}</div>
+      <div style="flex:1;min-width:0">
+        <div class="tv-row-name">${flag}${esc(st.athlete_name || '—')}</div>
+      </div>
+      <div class="tv-row-score">${st.score}</div>
+    </div>`;
+  }).join('') || `<div style="color:rgba(255,255,255,.1);font-family:var(--head);font-size:1.4rem;margin:auto;text-align:center">
+    Ожидаем результатов...</div>`;
+}
+</script>
+</body>
+</html>
