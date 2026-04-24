@@ -922,31 +922,94 @@ let _selFlag = null;
 /* ══ INIT ══════════════════════════════════════════════════ */
 window.onerror = function(msg) { console.error('[JumpScore]', msg); return false; };
 
+/*
+ * withTimeout: обёртка для любого Promise с таймаутом.
+ * Критично: без этого любой зависший запрос к Supabase блокирует весь init.
+ */
+function withTimeout(promise, ms = 6000, label = 'запрос') {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => setTimeout(() => reject(new Error(`Таймаут: ${label} (${ms}ms)`)), ms))
+  ]);
+}
+
+/* Показывает экран ошибки загрузки с кнопкой "Повторить" */
+function showInitError(message) {
+  const bodyHTML = `
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;text-align:center">
+      <div style="font-size:3rem">⚠️</div>
+      <div style="font-family:var(--head);font-size:1.1rem">Ошибка загрузки</div>
+      <div style="font-size:.84rem;color:var(--tx2);max-width:320px;line-height:1.6">${message || 'Проверьте подключение к интернету и попробуйте перезагрузить страницу.'}</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
+        <button class="btn btn-a" onclick="location.reload()">↺ Перезагрузить</button>
+        <button class="btn btn-g" onclick="localStorage.removeItem('js_sess');location.reload()">Сбросить сессию</button>
+        <button class="btn btn-g" onclick="window.location.href='./index.html'">← В кабинет</button>
+      </div>
+    </div>`;
+  const loader = document.getElementById('screen-loading');
+  if (loader) loader.innerHTML = bodyHTML;
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   setTheme(_theme);
-  _sb = window.supabase.createClient(SB_URL, SB_KEY);
+  try {
+    _sb = window.supabase.createClient(SB_URL, SB_KEY);
+  } catch (e) {
+    console.error('[Supabase init]', e);
+    showInitError('Не удалось подключиться к серверу.');
+    return;
+  }
 
   /*
    * КРИТИЧНО: Не дублируем логику входа.
    * Если сессии нет — немедленный редирект на index.html
    * Это единственная точка проверки авторизации в этом файле.
+   *
+   * Таймаут 5 секунд: auth.getSession() иногда зависает при проблемах с токеном.
    */
-  const { data: { session } } = await _sb.auth.getSession();
+  let session = null;
+  try {
+    const res = await withTimeout(_sb.auth.getSession(), 5000, 'проверка сессии');
+    session = res?.data?.session || null;
+  } catch (e) {
+    console.error('[getSession]', e);
+    /* При таймауте — пробуем одну попытку через localStorage напрямую */
+    const hasLocalToken = Object.keys(localStorage).some(k => k.includes('auth-token'));
+    if (!hasLocalToken) { window.location.href = './index.html'; return; }
+    showInitError('Медленный ответ сервера. Возможно, проблемы с интернетом.');
+    return;
+  }
+
   if (!session) {
     window.location.href = './index.html';
     return;
   }
 
   _user = session.user;
-  await _loadProfile();
+
+  try {
+    await withTimeout(_loadProfile(), 6000, 'загрузка профиля');
+  } catch (e) {
+    console.error('[loadProfile]', e);
+    showInitError('Не удалось загрузить профиль.');
+    return;
+  }
 
   if (_profile?.is_blocked) {
     showScreen('screen-blocked');
     return;
   }
 
-  showScreen('screen-loading'); // держим loading пока не восстановим сессию
-  await _restoreSession();
+  try {
+    await withTimeout(_restoreSession(), 8000, 'восстановление сессии');
+  } catch (e) {
+    console.error('[restoreSession]', e);
+    /* При ошибке восстановления — чистим сохранённую сессию и показываем дашборд */
+    localStorage.removeItem('js_sess');
+    _hjEvId = null; _fjEvId = null; _fjSt = null;
+    goDash();
+    return;
+  }
 
   /* Если токен истёк — редирект на index */
   _sb.auth.onAuthStateChange((ev) => {
@@ -968,49 +1031,96 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 async function _loadProfile() {
-  const { data, error } = await _sb.from('profiles').select('*').eq('id', _user.id).single();
-  if (error || !data) {
-    const name = _user.user_metadata?.full_name || _user.email.split('@')[0];
-    await _sb.from('profiles').upsert({ id: _user.id, full_name: name });
-    const { data: fresh } = await _sb.from('profiles').select('*').eq('id', _user.id).single();
-    _profile = fresh;
-    return;
+  /*
+   * Хардинг: если первый запрос провалился — пробуем upsert без await-retry.
+   * Критично: все запросы имеют свой таймаут через withTimeout выше.
+   */
+  try {
+    const { data, error } = await _sb.from('profiles')
+      .select('id, full_name, is_admin, is_pro, is_blocked, pro_until, avatar_url, judge_category, city, club')
+      .eq('id', _user.id).maybeSingle();
+    if (data) { _profile = data; return; }
+    if (error) console.warn('[loadProfile] select:', error.message);
+  } catch (e) {
+    console.warn('[loadProfile] fetch failed:', e);
   }
-  _profile = data;
+
+  /* Профиля нет → пробуем создать */
+  const name = _user.user_metadata?.full_name || _user.email.split('@')[0];
+  try {
+    await _sb.from('profiles').upsert({ id: _user.id, full_name: name });
+    const { data: fresh } = await _sb.from('profiles').select('*').eq('id', _user.id).maybeSingle();
+    _profile = fresh || { id: _user.id, full_name: name };
+  } catch (e) {
+    /* Даже если upsert не прошёл — ставим минимальный локальный профиль */
+    console.warn('[loadProfile] upsert failed:', e);
+    _profile = { id: _user.id, full_name: name };
+  }
 }
 
 async function _restoreSession() {
   const raw = localStorage.getItem('js_sess');
-  if (raw) {
-    try {
-      const s = JSON.parse(raw);
-      const { data: ev } = await _sb.from('events').select('*')
-        .eq('id', s.evId).eq('closed', false).single();
-      if (ev) {
-        if (s.role === 'hj') {
-          _hjEvId = s.evId;
-          await _openHJ();
-          return;
-        }
-        if (s.role === 'fj') {
-          _fjEvId = s.evId;
-          if (s.stNum) {
-            const { data: st } = await _sb.from('stations').select('*')
-              .eq('event_id', s.evId).eq('station_num', s.stNum)
-              .eq('judge_id', _user.id).single();
-            if (st) {
-              _fjSt = s.stNum;
-              await _openFJScoring(st);
-              return;
-            }
-          }
-          await _showFJStations();
+  if (!raw) { goDash(); return; }
+
+  let s;
+  try { s = JSON.parse(raw); }
+  catch { localStorage.removeItem('js_sess'); goDash(); return; }
+
+  if (!s?.evId) { localStorage.removeItem('js_sess'); goDash(); return; }
+
+  /* Проверяем событие с таймаутом */
+  let ev = null;
+  try {
+    const { data } = await withTimeout(
+      _sb.from('events').select('id, name, closed, scoring_mode, floor_code, discipline, age_category, station_count')
+        .eq('id', s.evId).eq('closed', false).maybeSingle(),
+      4000, 'поиск события'
+    );
+    ev = data;
+  } catch (e) {
+    console.warn('[restoreSession] event check failed:', e.message);
+    localStorage.removeItem('js_sess');
+    goDash();
+    return;
+  }
+
+  if (!ev) { localStorage.removeItem('js_sess'); goDash(); return; }
+
+  try {
+    if (s.role === 'hj') {
+      _hjEvId = s.evId;
+      await _openHJ();
+      return;
+    }
+    if (s.role === 'fj') {
+      _fjEvId = s.evId;
+      if (s.stNum) {
+        const { data: st } = await withTimeout(
+          _sb.from('stations').select('*')
+            .eq('event_id', s.evId).eq('station_num', s.stNum)
+            .eq('judge_id', _user.id).maybeSingle(),
+          4000, 'поиск станции'
+        );
+        if (st) {
+          _fjSt = s.stNum;
+          _fjScoringMode = ev.scoring_mode || 'tap';
+          if (_fjScoringMode === 'speed') await _openSpeedFJScoring(st);
+          else                            await _openFJScoring(st);
           return;
         }
       }
-    } catch(e) {}
+      await _showFJStations();
+      return;
+    }
+  } catch (e) {
+    console.error('[restoreSession] open failed:', e);
     localStorage.removeItem('js_sess');
+    goDash();
+    return;
   }
+
+  /* Неизвестная роль — сбрасываем */
+  localStorage.removeItem('js_sess');
   goDash();
 }
 
@@ -1136,11 +1246,21 @@ window.loadDash = async function () {
   /* Загружаем события как HJ */
   const hjList = document.getElementById('hj-ev-list');
   hjList.innerHTML = '<div class="empty-state">Загрузка...</div>';
-  const { data: hjEvs } = await _sb.from('events').select('*')
-    .eq('created_by', _user.id).order('created_at', { ascending: false });
+  let hjEvs = [];
+  try {
+    const res = await withTimeout(
+      _sb.from('events').select('id, name, closed, station_count, floor_code, created_at')
+        .eq('created_by', _user.id).order('created_at', { ascending: false }).limit(20),
+      4000, 'события HJ'
+    );
+    hjEvs = res.data || [];
+  } catch (e) {
+    console.warn('[loadDash HJ]', e.message);
+    hjList.innerHTML = '<div class="empty-state">Не удалось загрузить список событий</div>';
+  }
 
-  hjList.innerHTML = (hjEvs || []).length
-    ? (hjEvs || []).map(ev => `
+  if (hjEvs.length) {
+    hjList.innerHTML = hjEvs.map(ev => `
       <div class="ev-card ${ev.closed ? 'closed' : ''}" onclick="${!ev.closed ? `resumeHJ('${ev.id}')` : ''}">
         <div class="ev-ico ev-ico-hj">👁️</div>
         <div class="ev-info">
@@ -1151,18 +1271,32 @@ window.loadDash = async function () {
           <span class="badge ${ev.closed ? 'br' : 'bg'}">${ev.closed ? 'Закрыто' : 'Активно'}</span>
           ${!ev.closed ? '<span style="color:var(--accent);font-size:1rem">›</span>' : ''}
         </div>
-      </div>`).join('')
-    : '<div class="empty-state">Вы ещё не проводили событий как главный судья</div>';
+      </div>`).join('');
+  } else if (hjList.innerHTML.includes('Загрузка')) {
+    hjList.innerHTML = '<div class="empty-state">Вы ещё не проводили событий как главный судья</div>';
+  }
 
   /* Загружаем события как FJ */
   const fjList = document.getElementById('fj-ev-list');
   fjList.innerHTML = '<div class="empty-state">Загрузка...</div>';
-  const { data: parts } = await _sb.from('event_participations')
-    .select('*, events(*)').eq('user_id', _user.id).eq('role', 'floor_judge')
-    .order('joined_at', { ascending: false });
+  let parts = [];
+  try {
+    const res = await withTimeout(
+      _sb.from('event_participations')
+        .select('event_id, joined_at, events(id, name, closed, station_count, created_at)')
+        .eq('user_id', _user.id).eq('role', 'floor_judge')
+        .order('joined_at', { ascending: false }).limit(30),
+      4000, 'события FJ'
+    );
+    parts = res.data || [];
+  } catch (e) {
+    console.warn('[loadDash FJ]', e.message);
+    fjList.innerHTML = '<div class="empty-state">Не удалось загрузить список событий</div>';
+    return;
+  }
 
   const seen = new Set(), uniq = [];
-  (parts || []).forEach(p => { if (!seen.has(p.event_id)) { seen.add(p.event_id); uniq.push(p); }});
+  parts.forEach(p => { if (!seen.has(p.event_id)) { seen.add(p.event_id); uniq.push(p); }});
 
   fjList.innerHTML = uniq.length
     ? uniq.map(p => {
@@ -1278,19 +1412,32 @@ window.hjCreate = async function () {
 
 /* ══ HEAD JUDGE — DASHBOARD ═══════════════════════════════ */
 async function _openHJ() {
-  const { data: ev } = await _sb.from('events').select('*').eq('id', _hjEvId).single();
-  _hjScoringMode = ev?.scoring_mode || 'tap';
+  let ev;
+  try {
+    const res = await withTimeout(
+      _sb.from('events').select('id, name, floor_code, scoring_mode, discipline, age_category, closed')
+        .eq('id', _hjEvId).maybeSingle(),
+      5000, 'загрузка события'
+    );
+    ev = res.data;
+  } catch (e) {
+    console.error('[openHJ]', e);
+    toast('❌ Не удалось загрузить событие');
+    goDash();
+    return;
+  }
+  if (!ev) { toast('Событие не найдено'); goDash(); return; }
+
+  _hjScoringMode = ev.scoring_mode || 'tap';
   document.getElementById('hj-title').textContent = ev.name;
   document.getElementById('hj-fc').textContent    = ev.floor_code;
   document.getElementById('tv-event-title').textContent =
     [ev.name, ev.discipline, ev.age_category].filter(Boolean).join(' · ');
-  /* Show discipline · category in topbar subtitle */
   const hjSub = document.getElementById('hj-sub');
   if (hjSub) {
     const parts = [ev.discipline, ev.age_category].filter(Boolean);
     hjSub.textContent = parts.length ? parts.join(' · ') : 'Главный судья';
   }
-  /* Load roster if it was previously saved for this event */
   _loadRoster(_hjEvId);
   _saveSession('hj', _hjEvId);
   _clearSubs();
@@ -1300,9 +1447,8 @@ async function _openHJ() {
 
   /*
    * НАДЁЖНОСТЬ: Realtime + polling fallback.
-   * Realtime может не доставить событие при слабом соединении.
-   * Polling каждые 300ms — достаточно быстро чтобы казаться live,
-   * достаточно редко чтобы не создавать нагрузку.
+   * Интервал 800мс (было 300мс) — достаточно для "живого" ощущения,
+   * но в ~3 раза меньше нагрузка на клиент и сервер.
    */
   const ch = _sb.channel('hj-' + _hjEvId)
     .on('postgres_changes', { event: '*', schema: 'public', table: 'stations', filter: `event_id=eq.${_hjEvId}` }, () => {
@@ -1325,7 +1471,7 @@ async function _openHJ() {
         else _renderTVStandings();
       }
     }
-  }, 300);
+  }, 800);
 }
 
 /* Render guard: предотвращает UI-мерцание когда realtime + polling срабатывают одновременно */
@@ -2472,5 +2618,56 @@ document.addEventListener('click', e => {
 });
 </script>
 
+<!--
+╔══════════════════════════════════════════════════════════════╗
+║            SQL: RPC ФУНКЦИЯ increment_score                  ║
+║   ОБЯЗАТЕЛЬНО выполнить в Supabase SQL Editor перед         ║
+║   использованием системы подсчёта очков!                     ║
+╠══════════════════════════════════════════════════════════════╣
+
+-- Атомарная функция инкремента счёта.
+-- Использует delta-подход: score = score + delta
+-- Это исключает race condition при одновременных запросах
+-- от нескольких устройств или быстрых тапах.
+
+CREATE OR REPLACE FUNCTION increment_score(ev_id uuid, st_num int, delta int)
+RETURNS void LANGUAGE plpgsql SECURITY DEFINER AS $$
+BEGIN
+  UPDATE stations
+  SET score = GREATEST(0, score + delta)
+  WHERE event_id = ev_id AND station_num = st_num;
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION increment_score(uuid, int, int) TO authenticated;
+
+-- GREATEST(0, ...) гарантирует что счёт не уйдёт в минус
+-- даже при быстром нажатии −1
+
+╠══════════════════════════════════════════════════════════════╣
+║            SQL: profiles — нужные столбцы                   ║
+╠══════════════════════════════════════════════════════════════╣
+
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS is_pro BOOLEAN DEFAULT FALSE;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS is_blocked BOOLEAN DEFAULT FALSE;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS avatar_url TEXT;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS pro_until DATE;
+
+-- Новые колонки для дисциплин и режима подсчёта:
+ALTER TABLE events ADD COLUMN IF NOT EXISTS discipline    TEXT;
+ALTER TABLE events ADD COLUMN IF NOT EXISTS age_category  TEXT;
+ALTER TABLE events ADD COLUMN IF NOT EXISTS scoring_mode  TEXT DEFAULT 'tap';
+
+-- Показания трёх судей для скоростных дисциплин:
+ALTER TABLE stations ADD COLUMN IF NOT EXISTS spd_c1 INT DEFAULT NULL;
+ALTER TABLE stations ADD COLUMN IF NOT EXISTS spd_c2 INT DEFAULT NULL;
+ALTER TABLE stations ADD COLUMN IF NOT EXISTS spd_c3 INT DEFAULT NULL;
+
+-- Публичный доступ на чтение для results.html (анонимные пользователи):
+CREATE POLICY IF NOT EXISTS "public_read_events"   ON events   FOR SELECT TO anon USING (true);
+CREATE POLICY IF NOT EXISTS "public_read_stations" ON stations FOR SELECT TO anon USING (true);
+
+╚══════════════════════════════════════════════════════════════╝
+-->
 </body>
 </html>
