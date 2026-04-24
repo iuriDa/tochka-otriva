@@ -387,64 +387,6 @@ select.inp { cursor: pointer; }
 
 .device-warning { background: rgba(245,158,11,.08); border: 1px solid rgba(245,158,11,.25); border-radius: var(--r); padding: 10px 12px; font-size: .76rem; color: var(--amber); display: flex; gap: 8px; align-items: flex-start; }
 
-/* ── Sort & filter controls ── */
-.sort-row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
-.sort-lbl { font-size: .66rem; font-weight: 800; text-transform: uppercase; letter-spacing: .07em; color: var(--tx3); flex-shrink: 0; }
-.sort-chip { background: var(--sur2); border: 1px solid var(--bor); border-radius: var(--r-pill); padding: 4px 11px; font-size: .7rem; font-weight: 700; color: var(--tx2); cursor: pointer; transition: all .15s; white-space: nowrap; }
-.sort-chip.on { background: var(--blue); border-color: var(--blue); color: #fff; }
-
-/* ── Judge detail modal ── */
-.judge-modal { max-width: 480px; max-height: 90dvh; overflow-y: auto; }
-.judge-modal-hero { display: flex; align-items: center; gap: 13px; margin-bottom: 16px; }
-.judge-modal-ava  { width: 56px; height: 56px; border-radius: 15px; background: var(--accent); display: flex; align-items: center; justify-content: center; font-family: var(--head); font-size: .88rem; color: #fff; flex-shrink: 0; overflow: hidden; }
-.judge-modal-ava img { width: 100%; height: 100%; object-fit: cover; border-radius: 15px; }
-.judge-modal-name { font-family: var(--head); font-size: 1rem; }
-.judge-modal-email { font-size: .72rem; color: var(--tx2); margin-top: 2px; }
-.judge-modal-tags  { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 6px; }
-
-.jd-section { margin-bottom: 14px; }
-.jd-section-ttl { font-size: .66rem; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: var(--tx2); margin-bottom: 8px; }
-.jd-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-.jd-field { background: var(--sur2); border: 1px solid var(--bor); border-radius: var(--r); padding: 8px 11px; }
-.jd-field-lbl { font-size: .62rem; font-weight: 800; text-transform: uppercase; letter-spacing: .07em; color: var(--tx3); }
-.jd-field-val { font-size: .82rem; font-weight: 700; color: var(--tx); margin-top: 2px; }
-.jd-field-val.empty { color: var(--tx3); font-style: italic; font-weight: 400; }
-
-.verify-row { display: flex; flex-direction: column; gap: 7px; }
-.verify-item { display: flex; align-items: center; justify-content: space-between; background: var(--sur2); border: 1px solid var(--bor); border-radius: var(--r); padding: 10px 13px; }
-.verify-label { font-size: .82rem; font-weight: 700; }
-.verify-sub   { font-size: .7rem; color: var(--tx2); margin-top: 1px; }
-.verify-toggle { display: flex; align-items: center; gap: 7px; }
-.vtoggle { width: 42px; height: 24px; border-radius: 12px; background: var(--bor2); border: none; cursor: pointer; position: relative; transition: background .2s; flex-shrink: 0; }
-.vtoggle::after { content: ''; position: absolute; width: 18px; height: 18px; border-radius: 50%; background: #fff; top: 3px; left: 3px; transition: transform .2s; }
-.vtoggle.on { background: var(--green); }
-.vtoggle.on::after { transform: translateX(18px); }
-
-.danger-zone { border: 1px solid rgba(239,68,68,.25); border-radius: var(--r); padding: 12px 14px; background: rgba(239,68,68,.04); }
-.dz-ttl { font-size: .7rem; font-weight: 800; text-transform: uppercase; letter-spacing: .07em; color: var(--red); margin-bottom: 10px; }
-.dz-actions { display: flex; gap: 7px; flex-wrap: wrap; }
-
-/* ── Rating board ── */
-.rating-board { display: flex; flex-direction: column; gap: 8px; }
-.rating-row { background: var(--sur); border: 1px solid var(--bor); border-radius: var(--r-lg); padding: 11px 13px; display: flex; align-items: center; gap: 11px; }
-.rating-place { font-family: var(--mono); font-size: 1.1rem; font-weight: 800; min-width: 32px; text-align: center; }
-.rating-place.p1 { color: #F59E0B; }
-.rating-place.p2 { color: #94A3B8; }
-.rating-place.p3 { color: #CD7F32; }
-.rating-place.pn { color: var(--tx3); font-size: .9rem; }
-.rating-info { flex: 1; min-width: 0; }
-.rating-name { font-weight: 800; font-size: .88rem; }
-.rating-sub  { font-size: .68rem; color: var(--tx2); margin-top: 2px; }
-.rating-score-wrap { text-align: right; flex-shrink: 0; }
-.rating-score { font-family: var(--mono); font-size: 1.2rem; font-weight: 800; color: var(--accent); }
-.rating-score-lbl { font-size: .6rem; color: var(--tx3); text-transform: uppercase; letter-spacing: .05em; }
-.rating-bar-bg { height: 4px; background: var(--bor); border-radius: 2px; margin-top: 5px; overflow: hidden; }
-.rating-bar-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width .4s ease; }
-.rating-legend { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-.rating-legend-item { background: var(--sur2); border: 1px solid var(--bor); border-radius: var(--r); padding: 8px 11px; }
-.rating-legend-lbl { font-size: .64rem; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: var(--tx2); }
-.rating-legend-val { font-size: .76rem; color: var(--tx); margin-top: 2px; }
-
 /* ── Event Detail Modal ── */
 .ev-detail-modal { max-width: 480px; max-height: 88dvh; overflow-y: auto; }
 .ev-detail-header { margin-bottom: 14px; }
@@ -708,24 +650,13 @@ select.inp { cursor: pointer; }
       <div id="apanel-users" class="apanel on">
         <div class="search-inp-wrap">
           <span class="search-ico">🔍</span>
-          <input class="inp" type="text" placeholder="Поиск по имени, email, городу, клубу..." oninput="filterUsers(this.value)" id="user-search">
-        </div>
-        <div class="sort-row">
-          <span class="sort-lbl">Сортировка:</span>
-          <div class="sort-chip on" onclick="setUserSort('newest', this)">Новые</div>
-          <div class="sort-chip" onclick="setUserSort('oldest', this)">Старые</div>
-          <div class="sort-chip" onclick="setUserSort('name', this)">А–Я</div>
-          <div class="sort-chip" onclick="setUserSort('activity', this)">Активность</div>
+          <input class="inp" type="text" placeholder="Поиск по имени или email..." oninput="filterUsers(this.value)" id="user-search">
         </div>
         <div class="filter-row">
           <div class="filter-chip on" onclick="setUserFilter('all', this)">Все</div>
           <div class="filter-chip" onclick="setUserFilter('pro', this)">Pro</div>
-          <div class="filter-chip" onclick="setUserFilter('cat3', this)">Кат. 3</div>
-          <div class="filter-chip" onclick="setUserFilter('cat2', this)">Кат. 2</div>
-          <div class="filter-chip" onclick="setUserFilter('cat1', this)">Кат. 1</div>
-          <div class="filter-chip" onclick="setUserFilter('vseross', this)">Всеросс.</div>
-          <div class="filter-chip" onclick="setUserFilter('suspicious', this)">⚠️ Подозр.</div>
-          <div class="filter-chip" onclick="setUserFilter('blocked', this)">🔒 Заблок.</div>
+          <div class="filter-chip" onclick="setUserFilter('suspicious', this)">⚠️ Подозрительные</div>
+          <div class="filter-chip" onclick="setUserFilter('blocked', this)">🔒 Заблокированные</div>
         </div>
         <div class="stat-row" id="users-stats">
           <div class="stat-box"><div class="stat-val" id="st-total">—</div><div class="stat-lbl">Всего</div></div>
@@ -739,14 +670,8 @@ select.inp { cursor: pointer; }
 
       <!-- ВКЛАДКА: СОБЫТИЯ (JumpScore) -->
       <div id="apanel-events" class="apanel">
-        <div class="row-b" style="flex-wrap:wrap;gap:8px">
-          <div class="sort-row">
-            <span class="sort-lbl">Сортировка:</span>
-            <div class="sort-chip on" id="ev-sort-newest" onclick="setEvSort('newest', this)">Новые</div>
-            <div class="sort-chip" id="ev-sort-oldest" onclick="setEvSort('oldest', this)">Старые</div>
-            <div class="sort-chip" id="ev-sort-active" onclick="setEvSort('active', this)">Активные</div>
-            <div class="sort-chip" id="ev-sort-closed" onclick="setEvSort('closed', this)">Закрытые</div>
-          </div>
+        <div class="row-b">
+          <div class="sec-ttl">Все события JumpScore</div>
           <button class="btn btn-s btn-sm" onclick="loadAdminEvents()">↺ Обновить</button>
         </div>
         <div class="ev-list" id="admin-ev-list">
@@ -776,24 +701,6 @@ select.inp { cursor: pointer; }
           <div class="stat-box"><div class="stat-val" id="adm-st-events">—</div><div class="stat-lbl">Событий</div></div>
           <div class="stat-box"><div class="stat-val" id="adm-st-pro">—</div><div class="stat-lbl">Pro аккаунтов</div></div>
         </div>
-        <!-- Rating criteria legend -->
-        <div class="card" style="padding:12px 14px">
-          <div class="sec-ttl" style="margin-bottom:8px">Как считается рейтинг (макс. 100 баллов)</div>
-          <div class="rating-legend">
-            <div class="rating-legend-item"><div class="rating-legend-lbl">Активность</div><div class="rating-legend-val">0–30 · кол-во мероприятий</div></div>
-            <div class="rating-legend-item"><div class="rating-legend-lbl">Категория судьи</div><div class="rating-legend-val">0–20 · 3 кат/2 кат/1 кат/Всеросс.</div></div>
-            <div class="rating-legend-item"><div class="rating-legend-lbl">Полнота профиля</div><div class="rating-legend-val">0–10 · 2 балла за поле</div></div>
-            <div class="rating-legend-item"><div class="rating-legend-lbl">Недавний вход</div><div class="rating-legend-val">0–20 · 7 дн = 20, 30 дн = 10</div></div>
-            <div class="rating-legend-item"><div class="rating-legend-lbl">Pro статус</div><div class="rating-legend-val">+10 если активен</div></div>
-            <div class="rating-legend-item"><div class="rating-legend-lbl">Стаж</div><div class="rating-legend-val">0–10 · мес./12 × 10</div></div>
-          </div>
-        </div>
-        <!-- Rating list -->
-        <div class="card" style="padding:14px">
-          <div class="sec-ttl" style="margin-bottom:10px">🏆 Рейтинг судей</div>
-          <div id="rating-board" class="rating-board"><div class="empty">Загрузка...</div></div>
-        </div>
-        <!-- Recent registrations -->
         <div class="card" style="padding:14px">
           <div class="sec-ttl" style="margin-bottom:10px">Последние регистрации</div>
           <div id="recent-users" class="user-list"></div>
@@ -904,17 +811,6 @@ select.inp { cursor: pointer; }
   </div>
 </div>
 
-<!-- МОДАЛКА ДЕТАЛИ СУДЬИ (Админ) -->
-<div id="modal-judge-detail" class="modal-ov">
-  <div class="modal anim judge-modal">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-      <span style="font-family:var(--head);font-size:.9rem">👤 Профиль судьи</span>
-      <button class="btn btn-s btn-sm" onclick="document.getElementById('modal-judge-detail').classList.remove('open')">✕</button>
-    </div>
-    <div id="judge-detail-body"><div style="text-align:center;color:var(--tx2);padding:18px">Загрузка...</div></div>
-  </div>
-</div>
-
 <!-- МОДАЛКА ДЕТАЛИ СОБЫТИЯ (Админ) -->
 <div id="modal-ev-detail" class="modal-ov">
   <div class="modal anim ev-detail-modal">
@@ -979,8 +875,6 @@ const APP_URLS = {
 let _sb, _user = null, _profile = null;
 let _theme = localStorage.getItem('to_theme') || 'dark';
 let _allUsers = [], _userFilter = 'all', _userSearch = '';
-let _userSort = 'newest';
-let _evSort   = 'newest';
 let _proUserId = null, _proDays = 30;
 let _codeTimer = null;
 
@@ -1057,39 +951,9 @@ window.onerror = function(msg) {
   return false;
 };
 
-/*
- * withTimeout: защита от зависших запросов к Supabase.
- * Без этого медленный ответ сервера блокирует всю загрузку приложения.
- */
-function withTimeout(promise, ms = 6000, label = 'запрос') {
-  return Promise.race([
-    promise,
-    new Promise((_, reject) => setTimeout(() => reject(new Error(`Таймаут: ${label} (${ms}ms)`)), ms))
-  ]);
-}
-
-function showInitError(message) {
-  document.body.innerHTML = `
-    <div style="min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;text-align:center;background:#0B0C10;color:#E8ECFF;font-family:system-ui,sans-serif">
-      <div style="font-size:3rem">⚠️</div>
-      <div style="font-size:1.1rem;font-weight:700">Ошибка загрузки</div>
-      <div style="font-size:.86rem;color:#7880A0;max-width:360px;line-height:1.6">${message || 'Проверьте подключение к интернету.'}</div>
-      <div style="display:flex;gap:8px">
-        <button onclick="location.reload()" style="padding:10px 20px;border-radius:10px;border:none;background:#FF6B2B;color:#fff;font-weight:700;cursor:pointer">↺ Перезагрузить</button>
-        <button onclick="Object.keys(localStorage).forEach(k=>{if(k.includes('supabase')||k.includes('auth'))localStorage.removeItem(k)});location.reload()" style="padding:10px 20px;border-radius:10px;border:1.5px solid #252A3D;background:transparent;color:#E8ECFF;font-weight:700;cursor:pointer">Сбросить и войти заново</button>
-      </div>
-    </div>`;
-}
-
 document.addEventListener('DOMContentLoaded', async () => {
   setTheme(_theme);
-  try {
-    _sb = window.supabase.createClient(SB_URL, SB_KEY);
-  } catch (e) {
-    console.error('[Supabase]', e);
-    showInitError('Не удалось подключиться к серверу');
-    return;
-  }
+  _sb = window.supabase.createClient(SB_URL, SB_KEY);
 
   /* Обработка ссылки сброса пароля из письма */
   const hash = window.location.hash;
@@ -1099,28 +963,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
-  /* Проверка сессии с таймаутом */
-  let session = null;
-  try {
-    const res = await withTimeout(_sb.auth.getSession(), 5000, 'проверка сессии');
-    session = res?.data?.session || null;
-  } catch (e) {
-    console.error('[getSession]', e);
-    /* Не блокируем — показываем форму входа */
-    showScreen('screen-auth');
-    return;
-  }
-
+  const { data: { session } } = await _sb.auth.getSession();
   if (session) {
     _user = session.user;
-    try {
-      await withTimeout(loadProfile(), 6000, 'загрузка профиля');
-      await withTimeout(checkDevice(), 5000, 'проверка устройства');
-    } catch (e) {
-      console.warn('[init]', e.message);
-      /* Даже если не удалось загрузить профиль — всё равно идём в кабинет */
-      /* Пользователь увидит пустые данные, но сможет нажать "Выход" */
-    }
+    await loadProfile();
+    await checkDevice();
     goDash();
   } else {
     showScreen('screen-auth');
@@ -1134,10 +981,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     if (ev === 'SIGNED_IN' && session) {
       _user = session.user;
-      try {
-        await withTimeout(loadProfile(), 6000, 'загрузка профиля');
-        await withTimeout(checkDevice(), 5000, 'проверка устройства');
-      } catch (e) { console.warn('[signIn]', e.message); }
+      await loadProfile();
+      await checkDevice();
       goDash();
     }
     if (ev === 'SIGNED_OUT') {
@@ -1148,24 +993,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 async function loadProfile() {
-  try {
-    const { data } = await _sb.from('profiles')
-      .select('id, full_name, is_admin, is_pro, is_blocked, suspicious, pro_until, avatar_url, birth_date, city, club, athlete_rank, judge_category, coach_experience, device_fingerprint, device_count, last_seen, verified_judge, verified_trainer, verified_coach, created_at')
-      .eq('id', _user.id).maybeSingle();
-    if (data) { _profile = data; return; }
-  } catch (e) {
-    console.warn('[loadProfile] select:', e);
-  }
-
-  /* Создаём минимальный профиль */
-  const name = _user.user_metadata?.full_name || _user.email.split('@')[0];
-  try {
+  const { data, error } = await _sb.from('profiles').select('*').eq('id', _user.id).single();
+  if (error || !data) {
+    const name = _user.user_metadata?.full_name || _user.email.split('@')[0];
     await _sb.from('profiles').upsert({ id: _user.id, full_name: name });
-    const { data: fresh } = await _sb.from('profiles').select('*').eq('id', _user.id).maybeSingle();
-    _profile = fresh || { id: _user.id, full_name: name };
-  } catch (e) {
-    _profile = { id: _user.id, full_name: name };
+    const { data: fresh } = await _sb.from('profiles').select('*').eq('id', _user.id).single();
+    _profile = fresh;
+    return;
   }
+  _profile = data;
 }
 
 /* ПРОВЕРКА УСТРОЙСТВА */
@@ -1231,60 +1067,6 @@ window.showLoginForm = function () {
 
 let _authBusy = false;
 
-/*
- * Переводит технические ошибки Supabase/сети в понятные пользователю тексты.
- * Без этого все ошибки показывались как "Неверный email или пароль" — это сбивало
- * с толку пользователей с реальными сетевыми проблемами.
- */
-function translateAuthError(err) {
-  const msg = (err?.message || String(err) || '').toLowerCase();
-
-  /* Сетевые ошибки — самое частое при неудачной загрузке */
-  if (msg.includes('load failed') || msg.includes('failed to fetch') ||
-      msg.includes('network') || msg.includes('networkerror') ||
-      msg.includes('timeout') || msg.includes('таймаут')) {
-    return '🌐 Нет связи с сервером. Проверьте интернет и попробуйте снова.';
-  }
-
-  /* Учётные данные */
-  if (msg.includes('invalid login') || msg.includes('invalid_grant') ||
-      msg.includes('invalid credentials')) {
-    return 'Неверный email или пароль';
-  }
-  if (msg.includes('email not confirmed')) {
-    return 'Email не подтверждён. Проверьте почту.';
-  }
-  if (msg.includes('user not found')) {
-    return 'Аккаунт с таким email не найден';
-  }
-
-  /* Регистрация */
-  if (msg.includes('already registered') || msg.includes('user already') ||
-      msg.includes('already exists')) {
-    return 'Этот email уже зарегистрирован';
-  }
-  if (msg.includes('weak password') || msg.includes('password should')) {
-    return 'Пароль слишком простой (минимум 6 символов)';
-  }
-  if (msg.includes('invalid email')) {
-    return 'Некорректный формат email';
-  }
-
-  /* Rate limit */
-  if (msg.includes('rate limit') || msg.includes('too many')) {
-    return 'Слишком много попыток. Подождите минуту.';
-  }
-
-  /* Supabase сервер проблемы */
-  if (msg.includes('502') || msg.includes('503') || msg.includes('504') ||
-      msg.includes('gateway') || msg.includes('unavailable')) {
-    return '⚠️ Сервер временно недоступен. Попробуйте через минуту.';
-  }
-
-  /* Неизвестная ошибка — показываем реальный текст для диагностики */
-  return 'Ошибка: ' + (err?.message || String(err));
-}
-
 window.doLogin = async function () {
   if (_authBusy) return;
   const email = document.getElementById('li-email').value.trim();
@@ -1297,15 +1079,7 @@ window.doLogin = async function () {
   if (btn) { btn.disabled = true; btn.textContent = '...'; }
   try {
     const { error } = await _sb.auth.signInWithPassword({ email, password: pwd });
-    if (error) {
-      console.error('[login]', error);
-      err.textContent = translateAuthError(error);
-      err.classList.add('show');
-    }
-  } catch (e) {
-    console.error('[login exception]', e);
-    err.textContent = translateAuthError(e);
-    err.classList.add('show');
+    if (error) { err.textContent = 'Неверный email или пароль'; err.classList.add('show'); }
   } finally {
     _authBusy = false;
     if (btn) { btn.disabled = false; btn.textContent = 'Войти →'; }
@@ -1321,32 +1095,15 @@ window.doRegister = async function () {
   const btn = document.querySelector('#form-reg .btn-a');
   err.classList.remove('show');
   if (!name) { err.textContent = 'Введите ваше полное имя'; err.classList.add('show'); return; }
-  if (!email) { err.textContent = 'Введите email'; err.classList.add('show'); return; }
   if (pwd.length < 6) { err.textContent = 'Пароль минимум 6 символов'; err.classList.add('show'); return; }
   _authBusy = true;
   if (btn) { btn.disabled = true; btn.textContent = '...'; }
   try {
-    const { data, error } = await _sb.auth.signUp({
-      email, password: pwd, options: { data: { full_name: name } }
-    });
-    if (error) {
-      console.error('[register]', error);
-      err.textContent = translateAuthError(error);
-      err.classList.add('show');
-      return;
-    }
+    const { data, error } = await _sb.auth.signUp({ email, password: pwd, options: { data: { full_name: name } } });
+    if (error) { err.textContent = 'Ошибка регистрации: ' + error.message; err.classList.add('show'); return; }
     if (data.user) {
-      /* Профиль создастся автоматически через триггер handle_new_user,
-       * но страхуемся через upsert. Если upsert упадёт (сеть) — не критично,
-       * профиль всё равно создастся при следующем входе */
-      try {
-        await _sb.from('profiles').upsert({ id: data.user.id, full_name: name });
-      } catch (e) { console.warn('[register] profile upsert:', e); }
+      await _sb.from('profiles').upsert({ id: data.user.id, full_name: name });
     }
-  } catch (e) {
-    console.error('[register exception]', e);
-    err.textContent = translateAuthError(e);
-    err.classList.add('show');
   } finally {
     _authBusy = false;
     if (btn) { btn.disabled = false; btn.textContent = 'Создать аккаунт →'; }
@@ -1371,7 +1128,7 @@ window.doNewPassword = async function () {
   try {
     const { error } = await _sb.auth.updateUser({ password: pwd });
     if (error) {
-      err.textContent = translateAuthError(error);
+      err.textContent = 'Ошибка: ' + error.message;
       err.classList.add('show');
       btn.disabled = false; btn.textContent = 'Сохранить новый пароль →';
     } else {
@@ -1383,10 +1140,7 @@ window.doNewPassword = async function () {
       await checkDevice();
       goDash();
     }
-  } catch (e) {
-    console.error('[newPassword]', e);
-    err.textContent = translateAuthError(e);
-    err.classList.add('show');
+  } catch(e) {
     btn.disabled = false; btn.textContent = 'Сохранить новый пароль →';
   }
 };
@@ -1405,17 +1159,13 @@ window.doReset = async function () {
       redirectTo: window.location.origin + window.location.pathname
     });
     if (error) {
-      err.textContent = translateAuthError(error);
+      err.textContent = 'Ошибка: ' + error.message;
       err.classList.add('show');
     } else {
       ok.style.display = 'block';
       ok.textContent = '✓ Ссылка отправлена на ' + email + '. Проверьте почту (и папку «Спам»).';
       btn.textContent = 'Отправлено';
     }
-  } catch (e) {
-    console.error('[reset]', e);
-    err.textContent = translateAuthError(e);
-    err.classList.add('show');
   } finally {
     if (btn.textContent === '...') { btn.disabled = false; btn.textContent = 'Отправить ссылку →'; }
   }
@@ -1541,67 +1291,39 @@ function renderUserStats() {
 }
 
 function renderUsers() {
-  let list = [..._allUsers];
+  let list = _allUsers;
 
-  /* Category filter */
-  const catMap = { cat3: '3', cat2: '2', cat1: '1', vseross: 'вс' };
-  if (_userFilter === 'pro')        list = list.filter(u => u.is_pro);
+  if (_userFilter === 'pro') list = list.filter(u => u.is_pro);
   else if (_userFilter === 'suspicious') list = list.filter(u => u.suspicious && !u.is_blocked);
-  else if (_userFilter === 'blocked')    list = list.filter(u => u.is_blocked);
-  else if (catMap[_userFilter]) {
-    const cat = catMap[_userFilter];
-    list = list.filter(u => (u.judge_category || '').toLowerCase().includes(cat));
-  }
+  else if (_userFilter === 'blocked') list = list.filter(u => u.is_blocked);
 
-  /* Search: name, id (email proxy), city, club */
   if (_userSearch) {
     const q = _userSearch.toLowerCase();
-    list = list.filter(u =>
-      (u.full_name    || '').toLowerCase().includes(q) ||
-      (u.city         || '').toLowerCase().includes(q) ||
-      (u.club         || '').toLowerCase().includes(q) ||
-      (u.judge_category || '').toLowerCase().includes(q) ||
-      (u.id           || '').toLowerCase().includes(q)
-    );
+    list = list.filter(u => (u.full_name || '').toLowerCase().includes(q) || (u.id || '').toLowerCase().includes(q));
   }
-
-  /* Sort */
-  if (_userSort === 'newest')   list.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-  else if (_userSort === 'oldest') list.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-  else if (_userSort === 'name')   list.sort((a, b) => (a.full_name || '').localeCompare(b.full_name || '', 'ru'));
-  else if (_userSort === 'activity') list.sort((a, b) => new Date(b.last_seen || 0) - new Date(a.last_seen || 0));
 
   const container = document.getElementById('user-list');
   if (!list.length) { container.innerHTML = '<div class="empty">Пользователи не найдены</div>'; return; }
 
   container.innerHTML = list.map(u => {
-    const name      = u.full_name || '—';
-    const av        = initials(name);
-    const isPro     = u.is_pro;
+    const name = u.full_name || '—';
+    const av = initials(name);
+    const isPro = u.is_pro;
     const isBlocked = u.is_blocked;
-    const isSusp    = u.suspicious && !isBlocked;
-    const proLabel  = isPro ? (u.pro_until && u.pro_until !== '9999-12-31' ? `Pro до ${fmtDate(u.pro_until)}` : 'Pro') : 'Free';
-    const lastSeen  = u.last_seen ? fmtDateTime(u.last_seen) : 'не входил';
-    const devCount  = u.device_count || 0;
-    const judgeCat  = u.judge_category ? `· Кат. ${u.judge_category}` : '';
-    const cityClub  = [u.city, u.club].filter(Boolean).join(', ');
-    const rowClass  = isBlocked ? 'user-row blocked' : isSusp ? 'user-row suspicious' : 'user-row';
+    const isSusp = u.suspicious && !isBlocked;
+    const proLabel = isPro ? (u.pro_until && u.pro_until !== '9999-12-31' ? `Pro до ${fmtDate(u.pro_until)}` : 'Pro') : 'Free';
+    const lastSeen = u.last_seen ? fmtDateTime(u.last_seen) : 'не входил';
+    const devCount = u.device_count || 0;
+    const rowClass = isBlocked ? 'user-row blocked' : isSusp ? 'user-row suspicious' : 'user-row';
 
-    return `<div class="${rowClass}" style="cursor:pointer" onclick="showJudgeDetail('${u.id}')">
-      <div class="user-ava">${u.avatar_url
-        ? `<img src="${esc(u.avatar_url)}" style="width:100%;height:100%;object-fit:cover;border-radius:10px" alt="">`
-        : esc(av)}</div>
+    return `<div class="${rowClass}">
+      <div class="user-ava">${esc(av)}</div>
       <div class="user-info">
-        <div class="user-name">${esc(name)}
-          ${isSusp ? ' <span class="badge bam">⚠️</span>' : ''}
-          ${isBlocked ? ' <span class="badge br">🔒</span>' : ''}
-          ${u.verified_judge ? ' <span class="badge bg" style="font-size:.55rem">✓ Судья</span>' : ''}
-        </div>
-        <div class="user-meta">${judgeCat} ${cityClub ? '· ' + cityClub : ''}</div>
+        <div class="user-name">${esc(name)}${isSusp ? ' <span class="badge bam">⚠️ Подозр.</span>' : ''}${isBlocked ? ' <span class="badge br">🔒</span>' : ''}</div>
         <div class="user-meta">Был: ${lastSeen} · Устройств: ${devCount}</div>
       </div>
       <div style="flex-shrink:0;margin-right:4px"><span class="badge ${isPro ? 'ba' : 'bgy'}">${proLabel}</span></div>
-      <div class="user-acts" onclick="event.stopPropagation()">
+      <div class="user-acts">
         ${!isBlocked ? `<button class="btn btn-a btn-sm" onclick="openProModal('${u.id}','${esc(name)}')">⭐</button>` : ''}
         ${!isBlocked
           ? `<button class="btn btn-d btn-sm" onclick="blockUser('${u.id}','${esc(name)}')">🔒</button>`
@@ -1617,136 +1339,6 @@ window.setUserFilter = function (f, btn) {
   document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('on'));
   btn.classList.add('on');
   renderUsers();
-};
-window.setUserSort = function (s, btn) {
-  _userSort = s;
-  document.querySelectorAll('.sort-chip').forEach(c => c.classList.remove('on'));
-  btn.classList.add('on');
-  renderUsers();
-};
-
-/* ══ JUDGE DETAIL MODAL ══════════════════════════════════ */
-window.showJudgeDetail = async function (uid) {
-  const body = document.getElementById('judge-detail-body');
-  body.innerHTML = '<div style="text-align:center;color:var(--tx2);padding:18px">Загрузка...</div>';
-  document.getElementById('modal-judge-detail').classList.add('open');
-
-  const [profRes, partsRes] = await Promise.all([
-    _sb.from('profiles').select('*').eq('id', uid).single(),
-    _sb.from('event_participations').select('event_id').eq('user_id', uid).eq('role', 'floor_judge')
-  ]);
-
-  const p = profRes.data;
-  if (!p) { body.innerHTML = '<div style="text-align:center;color:var(--tx2);padding:18px">Ошибка загрузки</div>'; return; }
-
-  const evCount  = (partsRes.data || []).length;
-  const isPro    = p.is_pro;
-  const isBlocked = p.is_blocked;
-  const isSusp   = p.suspicious && !isBlocked;
-  const name     = p.full_name || '—';
-
-  const f = (val, fallback = '—') => val ? esc(val) : `<span style="color:var(--tx3);font-style:italic">${fallback}</span>`;
-
-  body.innerHTML = `
-    <div class="judge-modal-hero">
-      <div class="judge-modal-ava">${p.avatar_url
-        ? `<img src="${esc(p.avatar_url)}" alt="">`
-        : esc(initials(name))}</div>
-      <div>
-        <div class="judge-modal-name">${esc(name)}</div>
-        <div class="judge-modal-email">${esc(p.id.slice(0, 8))}...</div>
-        <div class="judge-modal-tags">
-          <span class="badge ${isPro ? 'ba' : 'bgy'}">${isPro ? 'Pro' : 'Free'}</span>
-          ${isBlocked ? '<span class="badge br">🔒 Заблокирован</span>' : ''}
-          ${isSusp    ? '<span class="badge bam">⚠️ Подозрительный</span>' : ''}
-          ${p.verified_judge   ? '<span class="badge bg">✓ Судья</span>' : ''}
-          ${p.verified_trainer ? '<span class="badge bb">✓ Тренер</span>' : ''}
-          ${p.verified_coach   ? '<span class="badge bpu">✓ Наставник</span>' : ''}
-        </div>
-      </div>
-    </div>
-
-    <div class="jd-section">
-      <div class="jd-section-ttl">Личные данные</div>
-      <div class="jd-fields">
-        <div class="jd-field"><div class="jd-field-lbl">Дата рождения</div><div class="jd-field-val">${f(p.birth_date, 'не указана')}</div></div>
-        <div class="jd-field"><div class="jd-field-lbl">Город</div><div class="jd-field-val">${f(p.city, 'не указан')}</div></div>
-        <div class="jd-field"><div class="jd-field-lbl">Клуб / Организация</div><div class="jd-field-val">${f(p.club, 'не указан')}</div></div>
-        <div class="jd-field"><div class="jd-field-lbl">Спортивный разряд</div><div class="jd-field-val">${f(p.athlete_rank, 'не указан')}</div></div>
-        <div class="jd-field"><div class="jd-field-lbl">Категория судьи</div><div class="jd-field-val">${f(p.judge_category, 'не указана')}</div></div>
-        <div class="jd-field"><div class="jd-field-lbl">Тренерский стаж</div><div class="jd-field-val">${f(p.coach_experience, 'не указан')}</div></div>
-        <div class="jd-field"><div class="jd-field-lbl">Регистрация</div><div class="jd-field-val">${fmtDate(p.created_at)}</div></div>
-        <div class="jd-field"><div class="jd-field-lbl">Последний вход</div><div class="jd-field-val">${p.last_seen ? fmtDateTime(p.last_seen) : '—'}</div></div>
-        <div class="jd-field"><div class="jd-field-lbl">Мероприятий (судья)</div><div class="jd-field-val">${evCount}</div></div>
-        <div class="jd-field"><div class="jd-field-lbl">Устройств</div><div class="jd-field-val">${p.device_count || 0}</div></div>
-      </div>
-    </div>
-
-    <div class="jd-section">
-      <div class="jd-section-ttl">Подтверждение статусов</div>
-      <div class="verify-row">
-        <div class="verify-item">
-          <div><div class="verify-label">✓ Статус судьи</div><div class="verify-sub">Подтверждает право судейства</div></div>
-          <div class="verify-toggle">
-            <button class="vtoggle ${p.verified_judge ? 'on' : ''}" id="vt-judge"
-              onclick="toggleVerified('${uid}','verified_judge',${!p.verified_judge})"></button>
-          </div>
-        </div>
-        <div class="verify-item">
-          <div><div class="verify-label">✓ Статус тренера</div><div class="verify-sub">Подтверждает тренерскую квалификацию</div></div>
-          <div class="verify-toggle">
-            <button class="vtoggle ${p.verified_trainer ? 'on' : ''}" id="vt-trainer"
-              onclick="toggleVerified('${uid}','verified_trainer',${!p.verified_trainer})"></button>
-          </div>
-        </div>
-        <div class="verify-item">
-          <div><div class="verify-label">✓ Статус наставника</div><div class="verify-sub">Наставник / методист</div></div>
-          <div class="verify-toggle">
-            <button class="vtoggle ${p.verified_coach ? 'on' : ''}" id="vt-coach"
-              onclick="toggleVerified('${uid}','verified_coach',${!p.verified_coach})"></button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="danger-zone">
-      <div class="dz-ttl">Управление аккаунтом</div>
-      <div class="dz-actions">
-        ${isSusp ? `<button class="btn btn-s btn-sm" onclick="clearSuspicious('${uid}')">✓ Снять подозрение</button>` : ''}
-        ${!isPro ? `<button class="btn btn-a btn-sm" onclick="closeJudgeDetail();openProModal('${uid}','${esc(name)}')">⭐ Открыть Pro</button>` : ''}
-        ${!isBlocked
-          ? `<button class="btn btn-d btn-sm" onclick="closeJudgeDetail();blockUser('${uid}','${esc(name)}')">🔒 Заблокировать</button>`
-          : `<button class="btn btn-s btn-sm" onclick="closeJudgeDetail();unblockUser('${uid}','${esc(name)}')">🔓 Разблокировать</button>`}
-      </div>
-    </div>`;
-};
-
-window.closeJudgeDetail = function () {
-  document.getElementById('modal-judge-detail').classList.remove('open');
-};
-
-window.toggleVerified = async function (uid, field, val) {
-  await _sb.from('profiles').update({ [field]: val }).eq('id', uid);
-  const btn = document.getElementById('vt-' + field.replace('verified_', ''));
-  if (btn) btn.classList.toggle('on', val);
-  const idx = _allUsers.findIndex(u => u.id === uid);
-  if (idx >= 0) _allUsers[idx][field] = val;
-  toast(val ? '✓ Статус подтверждён' : 'Статус снят');
-};
-
-window.clearSuspicious = async function (uid) {
-  await _sb.from('profiles').update({ suspicious: false, device_count: 1 }).eq('id', uid);
-  toast('✓ Подозрительная активность снята');
-  closeJudgeDetail();
-  await loadAdminUsers();
-};
-
-/* ══ EVENTS SORT ═════════════════════════════════════════ */
-window.setEvSort = function (s, btn) {
-  _evSort = s;
-  document.querySelectorAll('#apanel-events .sort-chip').forEach(c => c.classList.remove('on'));
-  if (btn) btn.classList.add('on');
-  loadAdminEvents();
 };
 
 /* УПРАВЛЕНИЕ ПОЛЬЗОВАТЕЛЯМИ */
@@ -1806,18 +1398,12 @@ window.loadAdminEvents = async function () {
   el.innerHTML = '<div class="empty">Загрузка...</div>';
   const { data } = await _sb.from('events').select('*').order('created_at', { ascending: false });
   if (!data || !data.length) { el.innerHTML = '<div class="empty">Событий нет</div>'; return; }
-
-  let list = [...data];
-  if (_evSort === 'oldest')  list.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-  if (_evSort === 'active')  list.sort((a, b) => (a.closed ? 1 : 0) - (b.closed ? 1 : 0));
-  if (_evSort === 'closed')  list.sort((a, b) => (b.closed ? 1 : 0) - (a.closed ? 1 : 0));
-
-  el.innerHTML = list.map(ev => `
+  el.innerHTML = data.map(ev => `
     <div class="ev-row" style="cursor:pointer" onclick="showEventDetail('${ev.id}')">
       <div class="ev-ico">${ev.closed ? '🔒' : '🏆'}</div>
       <div class="ev-info">
         <div class="ev-name">${esc(ev.name)}</div>
-        <div class="ev-meta">${ev.station_count} ст. · Код: <span class="mono">${ev.floor_code}</span> · ${fmtDate(ev.created_at)}${ev.discipline ? ' · ' + esc(ev.discipline) : ''}</div>
+        <div class="ev-meta">${ev.station_count} ст. · Код: <span class="mono">${ev.floor_code}</span> · ${fmtDate(ev.created_at)}</div>
       </div>
       <div class="ev-acts" onclick="event.stopPropagation()">
         <span class="badge ${ev.closed ? 'br' : 'bg'}">${ev.closed ? 'Закрыто' : 'Активно'}</span>
@@ -1941,91 +1527,18 @@ function startCodeCountdown() {
   _codeTimer = setInterval(tick, 1000);
 }
 
-/* СТАТИСТИКА + РЕЙТИНГ СУДЕЙ */
+/* СТАТИСТИКА */
 async function loadAdminStats() {
-  const { data: users } = await _sb.from('profiles').select('*').order('created_at', { ascending: false });
+  const { data: users } = await _sb.from('profiles').select('id, full_name, is_pro, created_at').order('created_at', { ascending: false });
   const { data: events } = await _sb.from('events').select('id');
-  const { data: parts }  = await _sb.from('event_participations').select('user_id, role').eq('role', 'floor_judge');
-
   const total = (users || []).length;
-  const pro   = (users || []).filter(u => u.is_pro).length;
-  document.getElementById('adm-st-users').textContent  = total;
+  const pro = (users || []).filter(u => u.is_pro).length;
+  document.getElementById('adm-st-users').textContent = total;
   document.getElementById('adm-st-events').textContent = (events || []).length;
-  document.getElementById('adm-st-pro').textContent    = pro;
-
-  /* Count events per user */
-  const evCountByUser = {};
-  (parts || []).forEach(p => { evCountByUser[p.user_id] = (evCountByUser[p.user_id] || 0) + 1; });
-
-  /* Calculate rating for each user */
-  const now = Date.now();
-  const rated = (users || []).map(u => {
-    let score = 0;
-
-    /* 1. Активность: мероприятий (0–30, capped) */
-    const evs = evCountByUser[u.id] || 0;
-    score += Math.min(30, evs * 5);
-
-    /* 2. Категория судьи (0–20) */
-    const cat = (u.judge_category || '').toLowerCase();
-    if (cat.includes('всеросс') || cat.includes('всерос'))       score += 20;
-    else if (cat.includes('1') || cat === '1')                    score += 15;
-    else if (cat.includes('2') || cat === '2')                    score += 10;
-    else if (cat.includes('3') || cat === '3')                    score += 5;
-
-    /* 3. Полнота профиля (0–10, 2pt per field) */
-    ['city','club','birth_date','coach_experience','athlete_rank'].forEach(f => {
-      if (u[f]) score += 2;
-    });
-
-    /* 4. Недавний вход (0–20) */
-    if (u.last_seen) {
-      const daysSince = (now - new Date(u.last_seen).getTime()) / 86400000;
-      if (daysSince <= 7) score += 20;
-      else if (daysSince <= 30) score += 10;
-    }
-
-    /* 5. Pro статус (0–10) */
-    if (u.is_pro) score += 10;
-
-    /* 6. Стаж (0–10) */
-    if (u.created_at) {
-      const months = (now - new Date(u.created_at).getTime()) / (86400000 * 30);
-      score += Math.min(10, Math.round(months / 12 * 10));
-    }
-
-    return { ...u, rating: Math.min(100, score), evCount: evs };
-  });
-
-  /* Sort by rating descending */
-  rated.sort((a, b) => b.rating - a.rating);
-
-  /* Render rating board */
-  const board = document.getElementById('rating-board');
-  board.innerHTML = rated.slice(0, 20).map((u, i) => {
-    const place = i + 1;
-    const placeClass = place <= 3 ? `p${place}` : 'pn';
-    const medal = place === 1 ? '🥇' : place === 2 ? '🥈' : place === 3 ? '🥉' : '';
-    const catLabel = u.judge_category ? `Кат. ${u.judge_category}` : '';
-    const details = [catLabel, u.city, `${u.evCount} мероп.`].filter(Boolean).join(' · ');
-    return `<div class="rating-row">
-      <div class="rating-place ${placeClass}">${medal || place}</div>
-      <div class="rating-info">
-        <div class="rating-name">${esc(u.full_name || '—')}</div>
-        <div class="rating-sub">${details}</div>
-        <div class="rating-bar-bg"><div class="rating-bar-fill" style="width:${u.rating}%"></div></div>
-      </div>
-      <div class="rating-score-wrap">
-        <div class="rating-score">${u.rating}</div>
-        <div class="rating-score-lbl">из 100</div>
-      </div>
-    </div>`;
-  }).join('') || '<div class="empty">Нет данных</div>';
-
-  /* Recent registrations */
+  document.getElementById('adm-st-pro').textContent = pro;
   const recent = document.getElementById('recent-users');
   recent.innerHTML = (users || []).slice(0, 5).map(u => `
-    <div class="user-row" style="cursor:pointer" onclick="showJudgeDetail('${u.id}')">
+    <div class="user-row">
       <div class="user-ava">${esc(initials(u.full_name || ''))}</div>
       <div class="user-info">
         <div class="user-name">${esc(u.full_name || '—')}</div>
@@ -2181,11 +1694,6 @@ window.saveProfile = async function () {
   ALTER TABLE profiles ADD COLUMN IF NOT EXISTS device_count INT DEFAULT 0;
   ALTER TABLE profiles ADD COLUMN IF NOT EXISTS suspicious BOOLEAN DEFAULT FALSE;
   ALTER TABLE profiles ADD COLUMN IF NOT EXISTS last_seen TIMESTAMPTZ;
-
-  -- Верификация статусов (судья / тренер / наставник):
-  ALTER TABLE profiles ADD COLUMN IF NOT EXISTS verified_judge   BOOLEAN DEFAULT FALSE;
-  ALTER TABLE profiles ADD COLUMN IF NOT EXISTS verified_trainer BOOLEAN DEFAULT FALSE;
-  ALTER TABLE profiles ADD COLUMN IF NOT EXISTS verified_coach   BOOLEAN DEFAULT FALSE;
 
   Для выдачи прав администратора:
   UPDATE profiles SET is_admin = true WHERE id = 'ВАШ_UUID';
