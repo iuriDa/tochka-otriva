@@ -354,9 +354,38 @@ function placeClass(n) {
 /* ══ INIT ══════════════════════════════════════════════ */
 window.onerror = (msg) => { console.error('[Results]', msg); return false; };
 
+/*
+ * withTimeout: защита от зависших запросов к Supabase.
+ * Без таймаута медленный ответ сервера блокирует страницу на "Загрузка" навечно.
+ */
+function withTimeout(promise, ms = 6000, label = 'запрос') {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => setTimeout(() => reject(new Error(`Таймаут: ${label} (${ms}ms)`)), ms))
+  ]);
+}
+
+function showLoadError(container, message) {
+  const el = typeof container === 'string' ? document.getElementById(container) : container;
+  if (!el) return;
+  el.innerHTML = `
+    <div style="text-align:center;padding:28px 18px;font-size:.86rem;color:var(--tx2);line-height:1.6">
+      <div style="font-size:2rem;margin-bottom:8px">⚠️</div>
+      <div style="font-weight:700;color:var(--tx);margin-bottom:6px">Не удалось загрузить</div>
+      <div>${message || 'Проверьте подключение к интернету'}</div>
+      <button class="btn btn-a btn-sm" style="margin-top:12px" onclick="location.reload()">↺ Перезагрузить</button>
+    </div>`;
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   setTheme(_theme);
-  _sb = window.supabase.createClient(SB_URL, SB_KEY);
+  try {
+    _sb = window.supabase.createClient(SB_URL, SB_KEY);
+  } catch (e) {
+    console.error('[Supabase]', e);
+    showLoadError(document.querySelector('.loading-wrap'), 'Не удалось подключиться к серверу');
+    return;
+  }
   await loadEvents();
 });
 
@@ -364,14 +393,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 async function loadEvents() {
   showScreen('screen-loading');
 
-  const { data, error } = await _sb.from('events')
-    .select('id, name, discipline, age_category, scoring_mode, station_count, closed, created_at')
-    .order('created_at', { ascending: false });
-
-  if (error) {
+  let data = null;
+  try {
+    const res = await withTimeout(
+      _sb.from('events')
+        .select('id, name, discipline, age_category, scoring_mode, station_count, closed, created_at')
+        .order('created_at', { ascending: false })
+        .limit(100),
+      7000, 'загрузка событий'
+    );
+    data = res.data;
+  } catch (e) {
+    console.error('[loadEvents]', e);
     showScreen('screen-events');
-    document.getElementById('ev-grid').innerHTML =
-      '<div class="empty-state">Ошибка загрузки. Проверьте подключение.</div>';
+    showLoadError('ev-grid', 'Проверьте подключение или попробуйте позже');
     return;
   }
 
@@ -463,8 +498,19 @@ async function loadResults(evId) {
   /* Remove old subscription */
   if (_resSub) { try { _sb.removeChannel(_resSub); } catch(e) {} _resSub = null; }
 
-  /* Load event metadata */
-  const { data: ev } = await _sb.from('events').select('*').eq('id', evId).single();
+  /* Load event metadata with timeout */
+  let ev = null;
+  try {
+    const res = await withTimeout(
+      _sb.from('events').select('*').eq('id', evId).maybeSingle(),
+      5000, 'загрузка события'
+    );
+    ev = res.data;
+  } catch (e) {
+    console.error('[loadResults]', e);
+    alert('Не удалось загрузить событие: ' + e.message);
+    return;
+  }
   if (!ev) { alert('Событие не найдено'); return; }
 
   /* Update header */
