@@ -299,8 +299,8 @@ select.inp { cursor: pointer; }
 
 /* ══ TV MODE ════════════════════════════════════════════════ */
 #screen-tv { background: #060709; padding: 0; }
-.tv-grid { flex: 1; display: grid; gap: 2px; overflow: hidden; }
-.tv-cell { background: #090b12; position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.tv-grid { flex: 1; display: grid; gap: 2px; overflow: hidden; min-height: 0; grid-auto-rows: 1fr; }
+.tv-cell { background: #090b12; position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 120px; }
 .tv-fbg  { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: .12; }
 .tv-sn   { position: absolute; top: 12px; left: 14px; font-family: var(--head); font-size: .8rem; font-weight: 700; color: rgba(255,255,255,.2); }
 .tv-rdy  { position: absolute; top: 12px; right: 14px; background: var(--green); color: #fff; font-size: .66rem; font-weight: 800; padding: 3px 9px; border-radius: 6px; text-transform: uppercase; letter-spacing: .04em; }
@@ -1307,7 +1307,10 @@ async function _openHJ() {
   const ch = _sb.channel('hj-' + _hjEvId)
     .on('postgres_changes', { event: '*', schema: 'public', table: 'stations', filter: `event_id=eq.${_hjEvId}` }, () => {
       _renderHJ();
-      if (_tvMode) _renderTV();
+      if (_tvMode) {
+        if (_tvCurrentMode === 'live') _renderTV();
+        else _renderTVStandings();
+      }
     })
     .subscribe();
   _addSub(ch);
@@ -1542,7 +1545,9 @@ async function _renderTV() {
   const grid   = document.getElementById('tv-grid');
   const n      = active.length;
   const cols   = n <= 1 ? 1 : n <= 2 ? 2 : n <= 4 ? 2 : n <= 6 ? 3 : 4;
+  const rows   = Math.ceil(n / cols) || 1;
   grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+  grid.style.gridTemplateRows    = `repeat(${rows}, 1fr)`;
   grid.innerHTML = active.map(st => `
     <div class="tv-cell">
       ${st.flag_code ? `<div class="tv-fbg" style="background-image:url('https://flagcdn.com/w320/${st.flag_code}.png')"></div>` : ''}
@@ -1551,7 +1556,7 @@ async function _renderTV() {
       <div class="tv-ath">${esc(st.athlete_name || '')}</div>
       <div class="tv-sc">${st.score}</div>
       <div class="tv-jn">${esc(st.judge_name)}</div>
-    </div>`).join('') || '<div class="tv-empty">Ожидание судей...</div>';
+    </div>`).join('') || `<div style="color:rgba(255,255,255,.08);font-family:var(--head);font-size:1.4rem;grid-column:1/-1;display:flex;align-items:center;justify-content:center">Ожидание судей...</div>`;
 }
 
 /* ══ FLOOR JUDGE ══════════════════════════════════════════ */
@@ -2466,5 +2471,6 @@ document.addEventListener('click', e => {
   }
 });
 </script>
+
 </body>
 </html>
