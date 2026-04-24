@@ -7,7 +7,6 @@
 <meta name="description" content="Система реалтайм судейства соревнований по спортивной скакалке. Точка Отрыва.">
 <meta name="author" content="Данильченко Юрий Леонидович">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Mulish:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
@@ -299,122 +298,17 @@ select.inp { cursor: pointer; }
 
 /* ══ TV MODE ════════════════════════════════════════════════ */
 #screen-tv { background: #060709; padding: 0; }
-.tv-grid { flex: 1; display: grid; gap: 2px; overflow: hidden; min-height: 0; grid-auto-rows: 1fr; }
-.tv-cell { background: #090b12; position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 120px; }
+.tv-grid { flex: 1; display: grid; gap: 2px; overflow: hidden; }
+.tv-cell { background: #090b12; position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; }
 .tv-fbg  { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: .12; }
 .tv-sn   { position: absolute; top: 12px; left: 14px; font-family: var(--head); font-size: .8rem; font-weight: 700; color: rgba(255,255,255,.2); }
 .tv-rdy  { position: absolute; top: 12px; right: 14px; background: var(--green); color: #fff; font-size: .66rem; font-weight: 800; padding: 3px 9px; border-radius: 6px; text-transform: uppercase; letter-spacing: .04em; }
 .tv-ath  { font-family: var(--head); font-size: clamp(1rem, 3vw, 2.2rem); font-weight: 700; color: rgba(255,255,255,.78); letter-spacing: .04em; margin-bottom: 4px; text-align: center; padding: 0 18px; }
 .tv-sc   { font-family: var(--mono); font-size: clamp(4.5rem, 14vw, 11rem); font-weight: 800; color: #fff; line-height: .9; }
 .tv-jn   { position: absolute; bottom: 12px; font-size: .68rem; color: rgba(255,255,255,.28); font-family: var(--head); }
+.tv-prelim{position: absolute; top: 12px; left: 40%;font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(245,158,11,.7);white-space:nowrap}
 .tv-exit { position: fixed; bottom: 14px; right: 14px; z-index: 10; }
 .tv-empty { color: rgba(255,255,255,.08); font-family: var(--head); font-size: 1.4rem; margin: auto; }
-
-/* ══ SPEED SCORING MODE ════════════════════════════════════ */
-.speed-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; margin: 10px 0; }
-.spd-judge-box { display: flex; flex-direction: column; gap: 5px; align-items: center; }
-.spd-lbl { font-size: .72rem; font-weight: 800; color: var(--tx2); text-transform: uppercase; letter-spacing: .07em; }
-.spd-inp {
-  width: 100%; text-align: center; font-family: var(--mono); font-size: 2.2rem; font-weight: 800;
-  height: 82px; background: var(--sur2); border: 2px solid var(--bor); border-radius: var(--r-lg);
-  color: var(--tx); outline: none; padding: 0 6px;
-  transition: border-color .2s, box-shadow .2s; -webkit-appearance: none;
-}
-.spd-inp:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-s); }
-.spd-inp.ok   { border-color: var(--green); }
-.spd-inp.bad  { border-color: var(--amber); }
-
-.spd-result {
-  background: var(--score-bg); border: 3px solid var(--accent);
-  border-radius: 24px; padding: 18px 12px; text-align: center;
-  box-shadow: 0 0 0 5px var(--accent-s), var(--sh2); margin: 4px 0;
-}
-.spd-result-num { font-family: var(--mono); font-size: clamp(4rem, 16vw, 6rem); font-weight: 800; color: var(--tx); line-height: 1; }
-.spd-result-lbl { font-size: .62rem; color: var(--tx3); text-transform: uppercase; letter-spacing: .1em; margin-top: 5px; }
-.spd-breakdown  { display: flex; gap: 6px; justify-content: center; margin-top: 8px; flex-wrap: wrap; }
-.spd-chip { background: var(--sur2); border: 1px solid var(--bor); border-radius: var(--r-pill); padding: 3px 11px; font-family: var(--mono); font-size: .8rem; font-weight: 700; color: var(--tx2); }
-.spd-warn-box { background: rgba(245,158,11,.1); border: 1px solid rgba(245,158,11,.3); border-radius: var(--r); padding: 10px 13px; display: flex; align-items: center; gap: 8px; font-size: .8rem; font-weight: 700; color: var(--amber); }
-
-/* Speed badge in HJ station card */
-.st-spd-row   { display: flex; gap: 5px; justify-content: center; margin-top: 3px; flex-wrap: wrap; }
-.st-spd-chip  { font-family: var(--mono); font-size: .68rem; font-weight: 700; color: var(--tx2); background: var(--sur3); border-radius: var(--r-pill); padding: 1px 7px; }
-.st-spd-chip.warn { color: var(--amber); background: rgba(245,158,11,.12); }
-
-/* Mode toggle in setup */
-.mode-toggle { display: flex; gap: 8px; }
-.mode-btn {
-  flex: 1; padding: 10px 8px; border: 1.5px solid var(--bor); border-radius: var(--r);
-  background: var(--sur2); color: var(--tx2);
-  font-family: var(--font); font-size: .82rem; font-weight: 700;
-  cursor: pointer; transition: all .15s; text-align: center; line-height: 1.3;
-}
-.mode-btn.on { background: var(--accent); border-color: var(--accent); color: #fff; }
-
-/* ══ ROSTER UPLOAD ══════════════════════════════════════════ */
-.roster-modal { max-width: 500px; max-height: 90dvh; overflow-y: auto; }
-.roster-drop {
-  border: 2px dashed var(--bor2); border-radius: var(--r-lg); padding: 28px 18px;
-  text-align: center; cursor: pointer; transition: all .18s; background: var(--sur2);
-  position: relative;
-}
-.roster-drop:hover, .roster-drop.drag { border-color: var(--accent); background: var(--accent-s); }
-.roster-drop-ico { font-size: 2rem; margin-bottom: 6px; }
-.roster-drop-lbl { font-size: .85rem; font-weight: 700; color: var(--tx2); }
-.roster-drop-hint { font-size: .72rem; color: var(--tx3); margin-top: 4px; }
-.roster-file-inp { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
-.roster-preview { display: flex; flex-direction: column; gap: 5px; max-height: 260px; overflow-y: auto; margin: 10px 0; }
-.roster-row { display: flex; align-items: center; gap: 8px; background: var(--sur2); border: 1px solid var(--bor); border-radius: 8px; padding: 7px 11px; font-size: .78rem; }
-.roster-num { font-family: var(--mono); font-weight: 700; color: var(--accent); min-width: 30px; }
-.roster-name { flex: 1; font-weight: 700; }
-.roster-disc { font-size: .65rem; color: var(--tx2); font-weight: 600; }
-.roster-cols-help { background: var(--sur2); border: 1px solid var(--bor); border-radius: var(--r); padding: 10px 12px; font-size: .74rem; color: var(--tx2); line-height: 1.7; }
-.roster-cols-help b { color: var(--tx); }
-.roster-stats { display: flex; gap: 8px; flex-wrap: wrap; margin: 6px 0; }
-.roster-stat { background: var(--accent-s); border: 1px solid rgba(255,107,43,.25); border-radius: var(--r-pill); padding: 3px 11px; font-size: .72rem; font-weight: 700; color: var(--accent); }
-
-/* ══ ATHLETE SELECT IN FJ SCREEN ════════════════════════════ */
-.ath-sel-section { display: flex; flex-direction: column; gap: 8px; }
-.ath-sel-grid    { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.ath-card-list   { display: flex; flex-direction: column; gap: 5px; max-height: 200px; overflow-y: auto; }
-.ath-card {
-  display: flex; align-items: center; gap: 10px;
-  background: var(--sur2); border: 1.5px solid var(--bor);
-  border-radius: var(--r); padding: 8px 11px;
-  cursor: pointer; transition: all .15s;
-}
-.ath-card:hover        { border-color: var(--accent); }
-.ath-card.sel          { border-color: var(--green); background: rgba(34,197,94,.08); }
-.ath-card.done         { opacity: .5; }
-.ath-card.done .ath-card-score { color: var(--green); font-weight: 800; }
-.ath-num  { font-family: var(--mono); font-size: .82rem; font-weight: 700; color: var(--accent); min-width: 28px; }
-.ath-name { flex: 1; font-size: .84rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.ath-club { font-size: .67rem; color: var(--tx2); }
-.ath-card-score { font-family: var(--mono); font-size: .82rem; color: var(--tx2); flex-shrink: 0; }
-.ath-sel-info { background: var(--sur2); border: 1px solid var(--bor); border-radius: var(--r); padding: 9px 12px; display: flex; align-items: center; gap: 9px; }
-.ath-sel-num  { font-family: var(--mono); font-size: 1.1rem; font-weight: 800; color: var(--accent); }
-.ath-sel-name { font-size: .88rem; font-weight: 800; flex: 1; }
-.ath-sel-club { font-size: .7rem; color: var(--tx2); }
-
-/* ══ TV STANDINGS PANEL ═════════════════════════════════════ */
-.tv-topbar { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; flex-shrink: 0; background: rgba(0,0,0,.5); }
-.tv-topbar-title { font-family: var(--head); font-size: .82rem; color: rgba(255,255,255,.6); }
-.tv-topbar-btns  { display: flex; gap: 6px; }
-.tv-mode-btn { background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.15); color: rgba(255,255,255,.6); border-radius: 7px; padding: 4px 12px; font-family: var(--font); font-size: .72rem; font-weight: 700; cursor: pointer; transition: all .15s; }
-.tv-mode-btn.on { background: var(--accent); border-color: var(--accent); color: #fff; }
-.tv-standings { flex: 1; overflow-y: auto; padding: 10px 14px; display: flex; flex-direction: column; gap: 5px; }
-.tv-st-row { display: flex; align-items: center; gap: 14px; padding: 12px 16px; border-radius: 12px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.06); }
-.tv-st-row.p1 { background: linear-gradient(135deg, rgba(245,158,11,.2), rgba(245,158,11,.06)); border-color: rgba(245,158,11,.35); }
-.tv-st-row.p2 { background: linear-gradient(135deg, rgba(148,163,184,.14), rgba(148,163,184,.04)); border-color: rgba(148,163,184,.2); }
-.tv-st-row.p3 { background: linear-gradient(135deg, rgba(205,127,50,.14), rgba(205,127,50,.04)); border-color: rgba(205,127,50,.2); }
-.tv-st-place { font-family: var(--mono); font-size: clamp(1.2rem, 3vw, 2.4rem); font-weight: 800; min-width: 50px; color: rgba(255,255,255,.25); }
-.tv-st-row.p1 .tv-st-place { color: #F59E0B; }
-.tv-st-row.p2 .tv-st-place { color: #94A3B8; }
-.tv-st-row.p3 .tv-st-place { color: #CD7F32; }
-.tv-st-name  { font-family: var(--head); font-size: clamp(.82rem, 2.2vw, 1.8rem); color: rgba(255,255,255,.82); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.tv-st-club  { font-size: clamp(.62rem, 1.2vw, .9rem); color: rgba(255,255,255,.3); }
-.tv-st-score { font-family: var(--mono); font-size: clamp(1.4rem, 4vw, 3.2rem); font-weight: 800; color: #fff; flex-shrink: 0; }
-.tv-st-row.p1 .tv-st-score { color: #F59E0B; }
-.tv-st-pending { font-size: .72rem; color: rgba(255,255,255,.25); font-style: italic; }
 
 /* ══ BLOCKED ════════════════════════════════════════════════ */
 #screen-blocked { background: var(--bg); }
@@ -523,58 +417,12 @@ select.inp { cursor: pointer; }
           <input id="ev-name" class="inp" type="text" placeholder="Региональный чемпионат 2025">
         </div>
         <div class="field">
-          <label class="lbl">Количество площадок (1–8)</label>
+          <label class="lbl">Количество станций (1–8)</label>
           <select id="ev-st-cnt" class="inp">
             <option>1</option><option>2</option><option>3</option>
             <option selected>4</option><option>5</option>
             <option>6</option><option>7</option><option>8</option>
           </select>
-        </div>
-        <div class="field">
-          <label class="lbl">Дисциплина</label>
-          <select id="ev-discipline" class="inp">
-            <option value="">— не указана —</option>
-            <option>ВОЛЬНЫЕ УПРАЖНЕНИЯ</option>
-            <option>ВОЛЬНЫЕ УПРАЖНЕНИЯ — ГРУППА</option>
-            <option>ПРЫЖКИ ЗА 30с</option>
-            <option>ПРЫЖКИ ЗА 180с</option>
-            <option>ПРЫЖКИ ДВОЙНЫЕ</option>
-            <option>ПРЫЖКИ ТРОЙНЫЕ</option>
-            <option>ПРЫЖКИ 4 ЧЕЛОВЕКА</option>
-            <option>ПРЫЖКИ ЧЕРЕЗ ДВЕ СКАКАЛКИ — 1 ЧЕЛОВЕК</option>
-            <option>ПРЫЖКИ ЧЕРЕЗ ДВЕ СКАКАЛКИ — 2 ЧЕЛОВЕКА</option>
-            <option>ПРЫЖКИ ЧЕРЕЗ ДВЕ СКАКАЛКИ — 4 ЧЕЛОВЕКА</option>
-            <option>КОМАНДНЫЕ СОРЕВНОВАНИЯ</option>
-          </select>
-        </div>
-        <div class="field">
-          <label class="lbl">Возрастная группа</label>
-          <select id="ev-age-cat" class="inp">
-            <option value="">— не указана —</option>
-            <option>Мальчики / Девочки до 9 лет</option>
-            <option>Мальчики / Девочки 10–11 лет</option>
-            <option>Мальчики / Девочки 12–13 лет</option>
-            <option>Юноши / Девушки 12–14 лет</option>
-            <option>Юноши / Девушки 14–15 лет</option>
-            <option>Юниоры / Юниорки 15–17 лет</option>
-            <option>Мужчины / Женщины 18+</option>
-            <option>Студенты</option>
-            <option>Массовые — Дебют</option>
-            <option>Массовые — Начинающие</option>
-            <option>Массовые — Продолжающие</option>
-            <option>Массовые — Продвинутые</option>
-          </select>
-        </div>
-        <div class="field">
-          <label class="lbl">Режим подсчёта</label>
-          <div class="mode-toggle">
-            <button class="mode-btn on" id="mode-tap-btn" type="button" onclick="setMode('tap')">
-              👆 Тап-счётчик
-            </button>
-            <button class="mode-btn" id="mode-spd-btn" type="button" onclick="setMode('speed')">
-              🔢 3 судьи (ручной)
-            </button>
-          </div>
         </div>
         <button class="btn btn-a btn-full btn-lg" onclick="hjCreate()">Создать событие →</button>
       </div>
@@ -590,16 +438,14 @@ select.inp { cursor: pointer; }
   <div class="topbar">
     <div class="tb-l">
       <div class="tb-title" id="hj-title">Событие</div>
-      <div class="tb-sub" id="hj-sub">Главный судья</div>
+      <div class="tb-sub">Главный судья</div>
     </div>
     <div class="tb-r">
       <div class="hj-topbar-fc">
         <div class="hj-fc-lbl">Код</div>
         <div class="hj-fc-val" id="hj-fc">——</div>
       </div>
-      <button class="btn btn-s btn-icon" onclick="openRosterModal()" title="Загрузить список участников">📋</button>
       <button class="btn btn-s btn-icon" onclick="toggleTV()" title="TV режим">📺</button>
-      <button class="btn btn-s btn-icon" onclick="exportResultsXlsx()" title="Экспорт результатов в Excel">📥</button>
       <button class="btn btn-s btn-icon" onclick="confirmResetAll()" title="Сбросить">↺</button>
       <div class="pill" id="tp-hj">
         <button onclick="setTheme('dark')">🌙</button>
@@ -614,22 +460,9 @@ select.inp { cursor: pointer; }
 </div>
 
 <!-- ══ TV ════════════════════════════════════════════════ -->
-<div id="screen-tv" class="screen" style="background:#060709;flex-direction:column">
-  <!-- Top panel: event info + mode toggle + exit -->
-  <div class="tv-topbar">
-    <div>
-      <div class="tv-topbar-title" id="tv-event-title">Событие</div>
-    </div>
-    <div class="tv-topbar-btns">
-      <button class="tv-mode-btn on" id="tv-btn-live"       onclick="switchTVMode('live')">📡 Живой счёт</button>
-      <button class="tv-mode-btn"    id="tv-btn-standings"  onclick="switchTVMode('standings')">🏆 Таблица</button>
-      <button class="tv-mode-btn"    onclick="toggleTV()">✕ Выход</button>
-    </div>
-  </div>
-  <!-- Live score grid (default) -->
-  <div id="tv-grid" class="tv-grid" style="flex:1"></div>
-  <!-- Standings table (hidden by default) -->
-  <div id="tv-standings" class="tv-standings hidden"></div>
+<div id="screen-tv" class="screen">
+  <div id="tv-grid" class="tv-grid"></div>
+  <button class="btn btn-g btn-sm tv-exit" onclick="toggleTV()">← Выйти из TV</button>
 </div>
 
 <!-- ══ FJ STATION SELECT ══════════════════════════════════ -->
@@ -668,58 +501,26 @@ select.inp { cursor: pointer; }
     </div>
   </div>
   <div class="fj-body scroll">
-
-    <!-- Roster-based athlete selection (visible when roster loaded for this event) -->
-    <div id="fj-roster-section" class="ath-sel-section hidden">
-      <div class="ath-sel-grid">
-        <div class="field">
-          <label class="lbl">Дисциплина</label>
-          <select id="fj-disc-sel" class="inp" onchange="onFjDiscChange()">
-            <option value="">— выберите —</option>
-          </select>
-        </div>
-        <div class="field">
-          <label class="lbl">Категория</label>
-          <select id="fj-cat-sel" class="inp" onchange="onFjCatChange()">
-            <option value="">— выберите —</option>
-          </select>
-        </div>
+    <div class="ath-row">
+      <div class="field f1">
+        <label class="lbl">Имя спортсмена</label>
+        <input id="fj-ath" class="inp" type="text" placeholder="Имя спортсмена..." oninput="pushAthlete()">
       </div>
-      <div class="field" id="fj-ath-list-wrap" style="display:none">
-        <label class="lbl">Список спортсменов</label>
-        <div class="ath-card-list" id="fj-ath-list"></div>
-      </div>
-      <div id="fj-sel-ath-info" class="ath-sel-info hidden">
-        <div class="ath-sel-num" id="fj-sel-num">#—</div>
-        <div style="flex:1;min-width:0">
-          <div class="ath-sel-name" id="fj-sel-name">—</div>
-          <div class="ath-sel-club" id="fj-sel-club"></div>
-        </div>
-        <button class="btn btn-s btn-sm" onclick="clearFjAthSelection()">✕</button>
+      <div class="col gap2">
+        <label class="lbl">Флаг</label>
+        <div class="flag-btn" id="fj-flag-btn" onclick="toggleFlags()">🏳️</div>
       </div>
     </div>
-
-    <!-- Manual name + flag (fallback when no roster) -->
-    <div id="fj-manual-section">
-      <div class="ath-row">
-        <div class="field f1">
-          <label class="lbl">Имя спортсмена</label>
-          <input id="fj-ath" class="inp" type="text" placeholder="Имя спортсмена..." oninput="pushAthlete()">
-        </div>
-        <div class="col gap2">
-          <label class="lbl">Флаг</label>
-          <div class="flag-btn" id="fj-flag-btn" onclick="toggleFlags()">🏳️</div>
-        </div>
-      </div>
-    </div>
-
     <div id="flag-search-box" class="flag-search-box hidden">
       <input id="flag-search" class="inp" type="text" placeholder="Поиск страны..."
         oninput="filterFlags(this.value)" style="height:38px;font-size:.84rem">
       <div id="flag-list" class="flag-list"></div>
     </div>
-
     <div class="score-area">
+      <!--
+        score-ring: touch-action:none → pointerdown срабатывает немедленно без 300ms задержки
+        Визуальный отклик через класс .tapped (без transition = нет лага)
+      -->
       <div class="score-ring" id="score-ring">
         <span class="score-num" id="fj-score">0</span>
         <span class="score-hint">нажмите для счёта</span>
@@ -727,132 +528,8 @@ select.inp { cursor: pointer; }
       <button class="btn btn-s btn-sm" id="btn-sub-score" style="min-width:80px;height:38px">−1</button>
     </div>
     <div class="fj-bottom">
-      <button class="btn btn-s" onclick="confirmFjReset()">↺ Сбросить</button>
+      <button class="btn btn-s" onclick="confirmFjReset()">↺ Сбросить счёт</button>
       <button class="btn btn-s" onclick="fjClear()">✕ Очистить</button>
-    </div>
-    <button class="btn btn-a btn-full" id="btn-fj-done" onclick="submitFjResult()" style="margin-top:4px" disabled>
-      ✓ Готово — зафиксировать результат
-    </button>
-  </div>
-</div>
-
-<!-- ══ SPEED FJ SCORING — also roster-aware ═══════════════ -->
-<div id="screen-speed-fj" class="screen">
-  <div class="topbar">
-    <div class="tb-l">
-      <div class="tb-title" id="spd-st-lbl">Площадка 1</div>
-      <div class="tb-sub"   id="spd-judge-lbl"></div>
-    </div>
-    <div class="tb-r">
-      <div class="pill" id="tp-spd">
-        <button onclick="setTheme('dark')">🌙</button>
-        <button onclick="setTheme('light')">☀️</button>
-      </div>
-      <button class="btn btn-g btn-sm" onclick="confirmSpdExit()">Выход</button>
-    </div>
-  </div>
-  <div class="fj-body scroll">
-    <!-- Roster selection (same logic as FJ tap) -->
-    <div id="spd-roster-section" class="ath-sel-section hidden">
-      <div class="ath-sel-grid">
-        <div class="field">
-          <label class="lbl">Дисциплина</label>
-          <select id="spd-disc-sel" class="inp" onchange="onSpdDiscChange()">
-            <option value="">— выберите —</option>
-          </select>
-        </div>
-        <div class="field">
-          <label class="lbl">Категория</label>
-          <select id="spd-cat-sel" class="inp" onchange="onSpdCatChange()">
-            <option value="">— выберите —</option>
-          </select>
-        </div>
-      </div>
-      <div class="field" id="spd-ath-list-wrap" style="display:none">
-        <label class="lbl">Список спортсменов</label>
-        <div class="ath-card-list" id="spd-ath-list"></div>
-      </div>
-      <div id="spd-sel-ath-info" class="ath-sel-info hidden">
-        <div class="ath-sel-num" id="spd-sel-num">#—</div>
-        <div style="flex:1;min-width:0">
-          <div class="ath-sel-name" id="spd-sel-name">—</div>
-          <div class="ath-sel-club" id="spd-sel-club"></div>
-        </div>
-        <button class="btn btn-s btn-sm" onclick="clearSpdAthSelection()">✕</button>
-      </div>
-    </div>
-    <!-- Manual fallback -->
-    <div id="spd-manual-section">
-      <div class="field">
-        <label class="lbl">Имя спортсмена</label>
-        <input id="spd-ath" class="inp" type="text" placeholder="Имя спортсмена..." oninput="pushSpdAthlete()">
-      </div>
-    </div>
-    <div class="speed-grid">
-      <div class="spd-judge-box">
-        <div class="spd-lbl">Судья 1</div>
-        <input id="spd-c1" class="spd-inp" type="number" min="0" max="9999" inputmode="numeric" placeholder="—" oninput="calcSpeed()">
-      </div>
-      <div class="spd-judge-box">
-        <div class="spd-lbl">Судья 2</div>
-        <input id="spd-c2" class="spd-inp" type="number" min="0" max="9999" inputmode="numeric" placeholder="—" oninput="calcSpeed()">
-      </div>
-      <div class="spd-judge-box">
-        <div class="spd-lbl">Судья 3</div>
-        <input id="spd-c3" class="spd-inp" type="number" min="0" max="9999" inputmode="numeric" placeholder="—" oninput="calcSpeed()">
-      </div>
-    </div>
-    <div id="spd-warn-box" class="spd-warn-box hidden">⚠️ Расхождение &gt; 5 очков — требуется пересчёт судей</div>
-    <div class="spd-result">
-      <div class="spd-result-lbl">Средний результат (целое)</div>
-      <div class="spd-result-num" id="spd-avg">—</div>
-      <div class="spd-breakdown" id="spd-bdown"></div>
-    </div>
-    <div class="fj-bottom">
-      <button class="btn btn-s" onclick="confirmSpdReset()">↺ Сбросить</button>
-      <button class="btn btn-a" id="btn-spd-submit" onclick="submitSpdScore()" disabled>✓ Зафиксировать</button>
-    </div>
-  </div>
-</div>
-
-<!-- ══ ROSTER UPLOAD MODAL ═════════════════════════════════ -->
-<div id="modal-roster" class="modal-ov">
-  <div class="modal anim roster-modal">
-    <div class="modal-ttl" style="display:flex;align-items:center;justify-content:space-between">
-      <span>📋 Список участников</span>
-      <button class="btn btn-s btn-sm" onclick="closeRosterModal()">✕</button>
-    </div>
-    <div style="font-size:.78rem;color:var(--tx2);margin:6px 0 12px;line-height:1.55">
-      Загрузите Excel-файл (.xlsx / .xls) со списком участников. Система автоматически
-      распознает дисциплины, категории и ФИО спортсменов.
-    </div>
-
-    <!-- Drop zone -->
-    <div class="roster-drop" id="roster-drop"
-      ondragover="event.preventDefault();this.classList.add('drag')"
-      ondragleave="this.classList.remove('drag')"
-      ondrop="onRosterDrop(event)">
-      <div class="roster-drop-ico">📂</div>
-      <div class="roster-drop-lbl">Нажмите или перетащите файл</div>
-      <div class="roster-drop-hint">.xlsx · .xls · до 5 МБ</div>
-      <input type="file" accept=".xlsx,.xls" class="roster-file-inp" id="roster-file-inp"
-        onchange="onRosterFileSelected(this)">
-    </div>
-
-    <!-- Column mapping help -->
-    <div class="roster-cols-help" style="margin-top:10px">
-      <b>Ожидаемые колонки (любой порядок, названия распознаются автоматически):</b><br>
-      № · Фамилия / Имя (или ФИО) · Дисциплина · Категория / Возраст · Клуб / Организация
-    </div>
-
-    <!-- Preview -->
-    <div id="roster-preview-area" style="display:none">
-      <div class="roster-stats" id="roster-stats"></div>
-      <div class="roster-preview" id="roster-preview"></div>
-      <div class="modal-act" style="margin-top:12px">
-        <button class="btn btn-g btn-sm" onclick="clearRoster()">✕ Очистить</button>
-        <button class="btn btn-a btn-sm" onclick="saveRoster()">✓ Сохранить список</button>
-      </div>
     </div>
   </div>
 </div>
@@ -905,9 +582,6 @@ let _theme = localStorage.getItem('to_theme') || 'dark';
 let _hjEvId = null, _fjEvId = null, _fjSt = null;
 let _tvMode = false, _subs = [];
 let _hjPoll = null;
-let _hjScoringMode = 'tap'; // current event scoring mode (HJ side)
-let _fjScoringMode = 'tap'; // current event scoring mode (FJ side)
-let _setupMode     = 'tap'; // mode selected in setup form
 
 /* Scoring buffer state — ИСТОЧНИК ИСТИНЫ для UI */
 let _localScore      = 0;   // текущий счёт в интерфейсе
@@ -922,94 +596,31 @@ let _selFlag = null;
 /* ══ INIT ══════════════════════════════════════════════════ */
 window.onerror = function(msg) { console.error('[JumpScore]', msg); return false; };
 
-/*
- * withTimeout: обёртка для любого Promise с таймаутом.
- * Критично: без этого любой зависший запрос к Supabase блокирует весь init.
- */
-function withTimeout(promise, ms = 6000, label = 'запрос') {
-  return Promise.race([
-    promise,
-    new Promise((_, reject) => setTimeout(() => reject(new Error(`Таймаут: ${label} (${ms}ms)`)), ms))
-  ]);
-}
-
-/* Показывает экран ошибки загрузки с кнопкой "Повторить" */
-function showInitError(message) {
-  const bodyHTML = `
-    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;text-align:center">
-      <div style="font-size:3rem">⚠️</div>
-      <div style="font-family:var(--head);font-size:1.1rem">Ошибка загрузки</div>
-      <div style="font-size:.84rem;color:var(--tx2);max-width:320px;line-height:1.6">${message || 'Проверьте подключение к интернету и попробуйте перезагрузить страницу.'}</div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
-        <button class="btn btn-a" onclick="location.reload()">↺ Перезагрузить</button>
-        <button class="btn btn-g" onclick="localStorage.removeItem('js_sess');location.reload()">Сбросить сессию</button>
-        <button class="btn btn-g" onclick="window.location.href='./index.html'">← В кабинет</button>
-      </div>
-    </div>`;
-  const loader = document.getElementById('screen-loading');
-  if (loader) loader.innerHTML = bodyHTML;
-}
-
 document.addEventListener('DOMContentLoaded', async () => {
   setTheme(_theme);
-  try {
-    _sb = window.supabase.createClient(SB_URL, SB_KEY);
-  } catch (e) {
-    console.error('[Supabase init]', e);
-    showInitError('Не удалось подключиться к серверу.');
-    return;
-  }
+  _sb = window.supabase.createClient(SB_URL, SB_KEY);
 
   /*
    * КРИТИЧНО: Не дублируем логику входа.
    * Если сессии нет — немедленный редирект на index.html
    * Это единственная точка проверки авторизации в этом файле.
-   *
-   * Таймаут 5 секунд: auth.getSession() иногда зависает при проблемах с токеном.
    */
-  let session = null;
-  try {
-    const res = await withTimeout(_sb.auth.getSession(), 5000, 'проверка сессии');
-    session = res?.data?.session || null;
-  } catch (e) {
-    console.error('[getSession]', e);
-    /* При таймауте — пробуем одну попытку через localStorage напрямую */
-    const hasLocalToken = Object.keys(localStorage).some(k => k.includes('auth-token'));
-    if (!hasLocalToken) { window.location.href = './index.html'; return; }
-    showInitError('Медленный ответ сервера. Возможно, проблемы с интернетом.');
-    return;
-  }
-
+  const { data: { session } } = await _sb.auth.getSession();
   if (!session) {
     window.location.href = './index.html';
     return;
   }
 
   _user = session.user;
-
-  try {
-    await withTimeout(_loadProfile(), 6000, 'загрузка профиля');
-  } catch (e) {
-    console.error('[loadProfile]', e);
-    showInitError('Не удалось загрузить профиль.');
-    return;
-  }
+  await _loadProfile();
 
   if (_profile?.is_blocked) {
     showScreen('screen-blocked');
     return;
   }
 
-  try {
-    await withTimeout(_restoreSession(), 8000, 'восстановление сессии');
-  } catch (e) {
-    console.error('[restoreSession]', e);
-    /* При ошибке восстановления — чистим сохранённую сессию и показываем дашборд */
-    localStorage.removeItem('js_sess');
-    _hjEvId = null; _fjEvId = null; _fjSt = null;
-    goDash();
-    return;
-  }
+  showScreen('screen-loading'); // держим loading пока не восстановим сессию
+  await _restoreSession();
 
   /* Если токен истёк — редирект на index */
   _sb.auth.onAuthStateChange((ev) => {
@@ -1031,96 +642,49 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 async function _loadProfile() {
-  /*
-   * Хардинг: если первый запрос провалился — пробуем upsert без await-retry.
-   * Критично: все запросы имеют свой таймаут через withTimeout выше.
-   */
-  try {
-    const { data, error } = await _sb.from('profiles')
-      .select('id, full_name, is_admin, is_pro, is_blocked, pro_until, avatar_url, judge_category, city, club')
-      .eq('id', _user.id).maybeSingle();
-    if (data) { _profile = data; return; }
-    if (error) console.warn('[loadProfile] select:', error.message);
-  } catch (e) {
-    console.warn('[loadProfile] fetch failed:', e);
-  }
-
-  /* Профиля нет → пробуем создать */
-  const name = _user.user_metadata?.full_name || _user.email.split('@')[0];
-  try {
+  const { data, error } = await _sb.from('profiles').select('*').eq('id', _user.id).single();
+  if (error || !data) {
+    const name = _user.user_metadata?.full_name || _user.email.split('@')[0];
     await _sb.from('profiles').upsert({ id: _user.id, full_name: name });
-    const { data: fresh } = await _sb.from('profiles').select('*').eq('id', _user.id).maybeSingle();
-    _profile = fresh || { id: _user.id, full_name: name };
-  } catch (e) {
-    /* Даже если upsert не прошёл — ставим минимальный локальный профиль */
-    console.warn('[loadProfile] upsert failed:', e);
-    _profile = { id: _user.id, full_name: name };
+    const { data: fresh } = await _sb.from('profiles').select('*').eq('id', _user.id).single();
+    _profile = fresh;
+    return;
   }
+  _profile = data;
 }
 
 async function _restoreSession() {
   const raw = localStorage.getItem('js_sess');
-  if (!raw) { goDash(); return; }
-
-  let s;
-  try { s = JSON.parse(raw); }
-  catch { localStorage.removeItem('js_sess'); goDash(); return; }
-
-  if (!s?.evId) { localStorage.removeItem('js_sess'); goDash(); return; }
-
-  /* Проверяем событие с таймаутом */
-  let ev = null;
-  try {
-    const { data } = await withTimeout(
-      _sb.from('events').select('id, name, closed, scoring_mode, floor_code, discipline, age_category, station_count')
-        .eq('id', s.evId).eq('closed', false).maybeSingle(),
-      4000, 'поиск события'
-    );
-    ev = data;
-  } catch (e) {
-    console.warn('[restoreSession] event check failed:', e.message);
-    localStorage.removeItem('js_sess');
-    goDash();
-    return;
-  }
-
-  if (!ev) { localStorage.removeItem('js_sess'); goDash(); return; }
-
-  try {
-    if (s.role === 'hj') {
-      _hjEvId = s.evId;
-      await _openHJ();
-      return;
-    }
-    if (s.role === 'fj') {
-      _fjEvId = s.evId;
-      if (s.stNum) {
-        const { data: st } = await withTimeout(
-          _sb.from('stations').select('*')
-            .eq('event_id', s.evId).eq('station_num', s.stNum)
-            .eq('judge_id', _user.id).maybeSingle(),
-          4000, 'поиск станции'
-        );
-        if (st) {
-          _fjSt = s.stNum;
-          _fjScoringMode = ev.scoring_mode || 'tap';
-          if (_fjScoringMode === 'speed') await _openSpeedFJScoring(st);
-          else                            await _openFJScoring(st);
+  if (raw) {
+    try {
+      const s = JSON.parse(raw);
+      const { data: ev } = await _sb.from('events').select('*')
+        .eq('id', s.evId).eq('closed', false).single();
+      if (ev) {
+        if (s.role === 'hj') {
+          _hjEvId = s.evId;
+          await _openHJ();
+          return;
+        }
+        if (s.role === 'fj') {
+          _fjEvId = s.evId;
+          if (s.stNum) {
+            const { data: st } = await _sb.from('stations').select('*')
+              .eq('event_id', s.evId).eq('station_num', s.stNum)
+              .eq('judge_id', _user.id).single();
+            if (st) {
+              _fjSt = s.stNum;
+              await _openFJScoring(st);
+              return;
+            }
+          }
+          await _showFJStations();
           return;
         }
       }
-      await _showFJStations();
-      return;
-    }
-  } catch (e) {
-    console.error('[restoreSession] open failed:', e);
+    } catch(e) {}
     localStorage.removeItem('js_sess');
-    goDash();
-    return;
   }
-
-  /* Неизвестная роль — сбрасываем */
-  localStorage.removeItem('js_sess');
   goDash();
 }
 
@@ -1246,21 +810,11 @@ window.loadDash = async function () {
   /* Загружаем события как HJ */
   const hjList = document.getElementById('hj-ev-list');
   hjList.innerHTML = '<div class="empty-state">Загрузка...</div>';
-  let hjEvs = [];
-  try {
-    const res = await withTimeout(
-      _sb.from('events').select('id, name, closed, station_count, floor_code, created_at')
-        .eq('created_by', _user.id).order('created_at', { ascending: false }).limit(20),
-      4000, 'события HJ'
-    );
-    hjEvs = res.data || [];
-  } catch (e) {
-    console.warn('[loadDash HJ]', e.message);
-    hjList.innerHTML = '<div class="empty-state">Не удалось загрузить список событий</div>';
-  }
+  const { data: hjEvs } = await _sb.from('events').select('*')
+    .eq('created_by', _user.id).order('created_at', { ascending: false });
 
-  if (hjEvs.length) {
-    hjList.innerHTML = hjEvs.map(ev => `
+  hjList.innerHTML = (hjEvs || []).length
+    ? (hjEvs || []).map(ev => `
       <div class="ev-card ${ev.closed ? 'closed' : ''}" onclick="${!ev.closed ? `resumeHJ('${ev.id}')` : ''}">
         <div class="ev-ico ev-ico-hj">👁️</div>
         <div class="ev-info">
@@ -1271,32 +825,18 @@ window.loadDash = async function () {
           <span class="badge ${ev.closed ? 'br' : 'bg'}">${ev.closed ? 'Закрыто' : 'Активно'}</span>
           ${!ev.closed ? '<span style="color:var(--accent);font-size:1rem">›</span>' : ''}
         </div>
-      </div>`).join('');
-  } else if (hjList.innerHTML.includes('Загрузка')) {
-    hjList.innerHTML = '<div class="empty-state">Вы ещё не проводили событий как главный судья</div>';
-  }
+      </div>`).join('')
+    : '<div class="empty-state">Вы ещё не проводили событий как главный судья</div>';
 
   /* Загружаем события как FJ */
   const fjList = document.getElementById('fj-ev-list');
   fjList.innerHTML = '<div class="empty-state">Загрузка...</div>';
-  let parts = [];
-  try {
-    const res = await withTimeout(
-      _sb.from('event_participations')
-        .select('event_id, joined_at, events(id, name, closed, station_count, created_at)')
-        .eq('user_id', _user.id).eq('role', 'floor_judge')
-        .order('joined_at', { ascending: false }).limit(30),
-      4000, 'события FJ'
-    );
-    parts = res.data || [];
-  } catch (e) {
-    console.warn('[loadDash FJ]', e.message);
-    fjList.innerHTML = '<div class="empty-state">Не удалось загрузить список событий</div>';
-    return;
-  }
+  const { data: parts } = await _sb.from('event_participations')
+    .select('*, events(*)').eq('user_id', _user.id).eq('role', 'floor_judge')
+    .order('joined_at', { ascending: false });
 
   const seen = new Set(), uniq = [];
-  parts.forEach(p => { if (!seen.has(p.event_id)) { seen.add(p.event_id); uniq.push(p); }});
+  (parts || []).forEach(p => { if (!seen.has(p.event_id)) { seen.add(p.event_id); uniq.push(p); }});
 
   fjList.innerHTML = uniq.length
     ? uniq.map(p => {
@@ -1317,17 +857,10 @@ window.loadDash = async function () {
 window.resumeHJ = async function (evId) { _hjEvId = evId; await _openHJ(); };
 window.resumeFJ = async function (evId) {
   _fjEvId = evId;
-  const { data: ev } = await _sb.from('events').select('scoring_mode').eq('id', evId).single();
-  _fjScoringMode = ev?.scoring_mode || 'tap';
   const { data: st } = await _sb.from('stations').select('*')
     .eq('event_id', evId).eq('judge_id', _user.id).single();
-  if (st) {
-    _fjSt = st.station_num;
-    if (_fjScoringMode === 'speed') { await _openSpeedFJScoring(st); }
-    else                            { await _openFJScoring(st); }
-  } else {
-    await _showFJStations();
-  }
+  if (st) { _fjSt = st.station_num; await _openFJScoring(st); }
+  else     { await _showFJStations(); }
 };
 
 /* ══ CODE INPUT ════════════════════════════════════════════ */
@@ -1384,20 +917,13 @@ window.submitCode = async function () {
 
 /* ══ HEAD JUDGE — CREATE ══════════════════════════════════ */
 window.hjCreate = async function () {
-  const name   = document.getElementById('ev-name').value.trim();
+  const name = document.getElementById('ev-name').value.trim();
   if (!name) { toast('Введите название события'); return; }
-  const cnt    = parseInt(document.getElementById('ev-st-cnt').value);
-  const disc   = document.getElementById('ev-discipline').value;
-  const ageCat = document.getElementById('ev-age-cat').value;
-  const fc     = String(Math.floor(1000 + Math.random() * 9000));
+  const cnt = parseInt(document.getElementById('ev-st-cnt').value);
+  const fc  = String(Math.floor(1000 + Math.random() * 9000));
 
   const { data: ev, error } = await _sb.from('events')
-    .insert({
-      name, station_count: cnt, floor_code: fc, closed: false, created_by: _user.id,
-      discipline:    disc   || null,
-      age_category:  ageCat || null,
-      scoring_mode:  _setupMode
-    })
+    .insert({ name, station_count: cnt, floor_code: fc, closed: false, created_by: _user.id })
     .select().single();
   if (error) { toast('Ошибка создания'); console.error(error); return; }
 
@@ -1412,33 +938,9 @@ window.hjCreate = async function () {
 
 /* ══ HEAD JUDGE — DASHBOARD ═══════════════════════════════ */
 async function _openHJ() {
-  let ev;
-  try {
-    const res = await withTimeout(
-      _sb.from('events').select('id, name, floor_code, scoring_mode, discipline, age_category, closed')
-        .eq('id', _hjEvId).maybeSingle(),
-      5000, 'загрузка события'
-    );
-    ev = res.data;
-  } catch (e) {
-    console.error('[openHJ]', e);
-    toast('❌ Не удалось загрузить событие');
-    goDash();
-    return;
-  }
-  if (!ev) { toast('Событие не найдено'); goDash(); return; }
-
-  _hjScoringMode = ev.scoring_mode || 'tap';
+  const { data: ev } = await _sb.from('events').select('*').eq('id', _hjEvId).single();
   document.getElementById('hj-title').textContent = ev.name;
   document.getElementById('hj-fc').textContent    = ev.floor_code;
-  document.getElementById('tv-event-title').textContent =
-    [ev.name, ev.discipline, ev.age_category].filter(Boolean).join(' · ');
-  const hjSub = document.getElementById('hj-sub');
-  if (hjSub) {
-    const parts = [ev.discipline, ev.age_category].filter(Boolean);
-    hjSub.textContent = parts.length ? parts.join(' · ') : 'Главный судья';
-  }
-  _loadRoster(_hjEvId);
   _saveSession('hj', _hjEvId);
   _clearSubs();
   _stopHJPoll();
@@ -1447,16 +949,14 @@ async function _openHJ() {
 
   /*
    * НАДЁЖНОСТЬ: Realtime + polling fallback.
-   * Интервал 800мс (было 300мс) — достаточно для "живого" ощущения,
-   * но в ~3 раза меньше нагрузка на клиент и сервер.
+   * Realtime может не доставить событие при слабом соединении.
+   * Polling каждые 300ms — достаточно быстро чтобы казаться live,
+   * достаточно редко чтобы не создавать нагрузку.
    */
   const ch = _sb.channel('hj-' + _hjEvId)
     .on('postgres_changes', { event: '*', schema: 'public', table: 'stations', filter: `event_id=eq.${_hjEvId}` }, () => {
       _renderHJ();
-      if (_tvMode) {
-        if (_tvCurrentMode === 'live') _renderTV();
-        else _renderTVStandings();
-      }
+      if (_tvMode) _renderTV();
     })
     .subscribe();
   _addSub(ch);
@@ -1466,12 +966,9 @@ async function _openHJ() {
     const tvActive = document.getElementById('screen-tv').classList.contains('active');
     if (hjActive || tvActive) {
       _renderHJ();
-      if (_tvMode) {
-        if (_tvCurrentMode === 'live') _renderTV();
-        else _renderTVStandings();
-      }
+      if (_tvMode) _renderTV();
     }
-  }, 800);
+  }, 300);
 }
 
 /* Render guard: предотвращает UI-мерцание когда realtime + polling срабатывают одновременно */
@@ -1481,31 +978,14 @@ async function _renderHJ() {
   _hjRendering = true;
   try {
     const { data: stns } = await _sb.from('stations')
-      .select('station_num,score,judge_id,judge_name,athlete_name,flag_code,ready,spd_c1,spd_c2,spd_c3')
+      .select('station_num,score,judge_id,judge_name,athlete_name,flag_code,ready')
       .eq('event_id', _hjEvId).order('station_num');
     const grid = document.getElementById('hj-grid');
     if (!stns || !grid) return;
 
-    const isSpeedMode = _hjScoringMode === 'speed';
-
     const newCards = stns.map(st => {
       const has = !!st.judge_name;
       const fbg = st.flag_code ? `style="background-image:url('https://flagcdn.com/w160/${st.flag_code}.png')"` : '';
-
-      /* Speed mode: show individual counts + discrepancy warning */
-      let speedDetail = '';
-      if (isSpeedMode && has && st.spd_c1 !== null) {
-        const maxV = Math.max(st.spd_c1, st.spd_c2, st.spd_c3);
-        const minV = Math.min(st.spd_c1, st.spd_c2, st.spd_c3);
-        const isDisc = (maxV - minV) > 5;
-        speedDetail = `<div class="st-spd-row">
-          <span class="st-spd-chip ${isDisc?'warn':''}">С1:${st.spd_c1}</span>
-          <span class="st-spd-chip ${isDisc?'warn':''}">С2:${st.spd_c2}</span>
-          <span class="st-spd-chip ${isDisc?'warn':''}">С3:${st.spd_c3}</span>
-        </div>
-        ${isDisc ? '<div style="font-size:.6rem;color:var(--amber);font-weight:700;margin-top:2px">⚠️ Расхождение!</div>' : ''}`;
-      }
-
       return `<div class="st-card" data-sn="${st.station_num}">
         ${st.flag_code ? `<div class="st-flag-bg" ${fbg}></div>` : ''}
         <div class="st-hd">
@@ -1515,7 +995,6 @@ async function _renderHJ() {
         <div class="st-body">
           <div class="st-ath">${esc(st.athlete_name || '')}</div>
           <div class="st-score">${has ? st.score : '—'}</div>
-          ${speedDetail}
           <div class="${has ? 'st-judge' : 'st-vacant'}">${has ? esc(st.judge_name) : 'Свободно'}</div>
         </div>
         <div class="st-ft">
@@ -1532,7 +1011,7 @@ async function _renderHJ() {
       </div>`;
     });
 
-    /* Add-station card */
+    /* Add-station card: отображается если меньше 8 площадок */
     const addCard = stns.length < 8
       ? `<div class="st-card st-add-card" onclick="hjAddStation()">
           <div class="st-body">
@@ -1542,6 +1021,10 @@ async function _renderHJ() {
         </div>`
       : '';
 
+    /*
+     * Smart patch: обновляем только station-карточки которые изменились.
+     * Add-card обрабатывается отдельно чтобы не ломать DOM-сравнение.
+     */
     const existing = [...grid.querySelectorAll('.st-card[data-sn]')];
     const existingAdd = grid.querySelector('.st-add-card');
 
@@ -1552,6 +1035,7 @@ async function _renderHJ() {
         const el = existing[i];
         if (el && el.outerHTML !== html) el.outerHTML = html;
       });
+      /* Обновляем add-card независимо */
       const shouldAdd = stns.length < 8;
       if (shouldAdd && !existingAdd)      { grid.insertAdjacentHTML('beforeend', addCard); }
       else if (!shouldAdd && existingAdd) { existingAdd.remove(); }
@@ -1671,17 +1155,8 @@ window.hjExit = function () {
 /* ══ TV MODE ══════════════════════════════════════════════ */
 window.toggleTV = async function () {
   _tvMode = !_tvMode;
-  if (_tvMode) {
-    _tvCurrentMode = 'live';
-    document.getElementById('tv-btn-live').classList.add('on');
-    document.getElementById('tv-btn-standings').classList.remove('on');
-    document.getElementById('tv-grid').classList.remove('hidden');
-    document.getElementById('tv-standings').classList.add('hidden');
-    showScreen('screen-tv');
-    await _renderTV();
-  } else {
-    showScreen('screen-hj');
-  }
+  if (_tvMode) { showScreen('screen-tv'); await _renderTV(); }
+  else           showScreen('screen-hj');
 };
 
 async function _renderTV() {
@@ -1691,25 +1166,22 @@ async function _renderTV() {
   const grid   = document.getElementById('tv-grid');
   const n      = active.length;
   const cols   = n <= 1 ? 1 : n <= 2 ? 2 : n <= 4 ? 2 : n <= 6 ? 3 : 4;
-  const rows   = Math.ceil(n / cols) || 1;
   grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
-  grid.style.gridTemplateRows    = `repeat(${rows}, 1fr)`;
   grid.innerHTML = active.map(st => `
     <div class="tv-cell">
       ${st.flag_code ? `<div class="tv-fbg" style="background-image:url('https://flagcdn.com/w320/${st.flag_code}.png')"></div>` : ''}
-      <div class="tv-sn">С${st.station_num}</div>
+      <div class="tv-sn">Станция ${st.station_num}</div>
       ${st.ready ? '<div class="tv-rdy">✓ Готово</div>' : ''}
       <div class="tv-ath">${esc(st.athlete_name || '')}</div>
       <div class="tv-sc">${st.score}</div>
-      <div class="tv-jn">${esc(st.judge_name)}</div>
-    </div>`).join('') || `<div style="color:rgba(255,255,255,.08);font-family:var(--head);font-size:1.4rem;grid-column:1/-1;display:flex;align-items:center;justify-content:center">Ожидание судей...</div>`;
+      <div class="tv-prelim">⏱ Предварительный счёт</div>
+      <div class="tv-jn">Судья: ${esc(st.judge_name)}</div>
+    </div>`).join('') || '<div class="tv-empty">Ожидание судей...</div>';
 }
 
 /* ══ FLOOR JUDGE ══════════════════════════════════════════ */
 async function _showFJStations() {
-  const { data: ev } = await _sb.from('events')
-    .select('name, scoring_mode').eq('id', _fjEvId).single();
-  _fjScoringMode = ev?.scoring_mode || 'tap';
+  const { data: ev } = await _sb.from('events').select('name').eq('id', _fjEvId).single();
   document.getElementById('fj-sel-ev-name').textContent = ev?.name || '';
   _saveSession('fj', _fjEvId, null);
   _clearSubs();
@@ -1754,12 +1226,7 @@ window.selStation = async function (num) {
     if (error || !st) { toast('Станция уже занята, выберите другую'); return; }
     _fjSt = num;
     _clearSubs();
-    /* Route based on event's scoring mode */
-    if (_fjScoringMode === 'speed') {
-      await _openSpeedFJScoring(st);
-    } else {
-      await _openFJScoring(st);
-    }
+    await _openFJScoring(st);
   } finally {
     _selectingStation = false;
   }
@@ -1774,10 +1241,8 @@ async function _openFJScoring(st) {
   _lastServerScore = st.score || 0;
   _clickBuffer     = 0;
   _bufferSyncing   = false;
-  _selectedAthId   = null;
   document.getElementById('fj-score').textContent = _localScore;
   document.getElementById('fj-ath').value = st.athlete_name || '';
-  document.getElementById('btn-fj-done').disabled = !st.athlete_name;
 
   _selFlag = st.flag_code || null;
   const flagBtn = document.getElementById('fj-flag-btn');
@@ -1785,14 +1250,6 @@ async function _openFJScoring(st) {
 
   _saveSession('fj', _fjEvId, _fjSt);
   showScreen('screen-fj');
-
-  /* Init roster selectors */
-  _initFjRosterSelectors('fj');
-
-  /* Enable Done button when athlete name is typed manually */
-  document.getElementById('fj-ath').addEventListener('input', function () {
-    document.getElementById('btn-fj-done').disabled = !this.value.trim();
-  }, { once: false });
 
   /* Запускаем flush буфера */
   _startFlushInterval();
@@ -2000,544 +1457,6 @@ window.fjClear = async function () {
   }
 };
 
-/* ══ SETUP MODE TOGGLE ════════════════════════════════════ */
-window.setMode = function (m) {
-  _setupMode = m;
-  document.getElementById('mode-tap-btn').classList.toggle('on', m === 'tap');
-  document.getElementById('mode-spd-btn').classList.toggle('on', m === 'speed');
-};
-
-/* ══ SPEED JUDGE MODE ═════════════════════════════════════
- *
- * Три линейных судьи вводят показания с механических счётчиков.
- * Правила (ФРСР / IJRU):
- *   • Средний результат = Math.round((C1 + C2 + C3) / 3) — целое число
- *   • Если max(Ci) - min(Ci) > 5 — предупреждение о пересчёте
- *   • Главный судья принимает окончательное решение
- */
-async function _openSpeedFJScoring(st) {
-  document.getElementById('spd-st-lbl').textContent    = 'Площадка ' + _fjSt;
-  document.getElementById('spd-judge-lbl').textContent = _profile?.full_name || _user.email;
-  document.getElementById('spd-ath').value = st.athlete_name || '';
-
-  /* Восстанавливаем сохранённые показания если есть */
-  document.getElementById('spd-c1').value = st.spd_c1 ?? '';
-  document.getElementById('spd-c2').value = st.spd_c2 ?? '';
-  document.getElementById('spd-c3').value = st.spd_c3 ?? '';
-  calcSpeed();
-
-  _selectedAthId = null;
-  _saveSession('fj', _fjEvId, _fjSt);
-  showScreen('screen-speed-fj');
-
-  /* Init roster selectors */
-  _initFjRosterSelectors('spd');
-
-  /* Realtime: получаем сбросы от HJ */
-  const ch = _sb.channel('spdsc-' + _fjEvId + '-' + _fjSt)
-    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'stations', filter: `event_id=eq.${_fjEvId}` }, payload => {
-      if (payload.new.station_num !== _fjSt) return;
-      if (!payload.new.athlete_name) document.getElementById('spd-ath').value = '';
-      if (payload.new.spd_c1 === null) {
-        ['spd-c1','spd-c2','spd-c3'].forEach(id => { document.getElementById(id).value = ''; });
-        calcSpeed();
-      }
-    }).subscribe();
-  _addSub(ch);
-  _listenJE();
-}
-
-window.calcSpeed = function () {
-  const c1 = document.getElementById('spd-c1').value;
-  const c2 = document.getElementById('spd-c2').value;
-  const c3 = document.getElementById('spd-c3').value;
-  const v1 = parseInt(c1), v2 = parseInt(c2), v3 = parseInt(c3);
-
-  const avgEl     = document.getElementById('spd-avg');
-  const bdownEl   = document.getElementById('spd-bdown');
-  const warnBox   = document.getElementById('spd-warn-box');
-  const submitBtn = document.getElementById('btn-spd-submit');
-
-  /* Сбрасываем стили */
-  ['spd-c1','spd-c2','spd-c3'].forEach(id => {
-    const el = document.getElementById(id);
-    el.classList.remove('ok','bad');
-    if (!isNaN(parseInt(document.getElementById(id).value))) el.classList.add('ok');
-  });
-
-  /* Ждём все три значения */
-  if (isNaN(v1) || isNaN(v2) || isNaN(v3)) {
-    avgEl.textContent = '—';
-    bdownEl.innerHTML = '';
-    warnBox.classList.add('hidden');
-    submitBtn.disabled = true;
-    return;
-  }
-
-  const maxV = Math.max(v1, v2, v3);
-  const minV = Math.min(v1, v2, v3);
-  const disc = maxV - minV;
-  const hasWarn = disc > 5;
-
-  if (hasWarn) {
-    ['spd-c1','spd-c2','spd-c3'].forEach(id => {
-      document.getElementById(id).classList.replace('ok', 'bad');
-    });
-  }
-
-  const avg = Math.round((v1 + v2 + v3) / 3);
-  avgEl.textContent = avg;
-  bdownEl.innerHTML = [[v1,'С1'],[v2,'С2'],[v3,'С3']].map(([v, l]) =>
-    `<span class="spd-chip">${l}: ${v}</span>`
-  ).join('');
-
-  warnBox.classList.toggle('hidden', !hasWarn);
-  submitBtn.disabled = false; /* HJ принимает решение при расхождении */
-};
-
-let _spdAthTimer;
-window.pushSpdAthlete = function () {
-  clearTimeout(_spdAthTimer);
-  _spdAthTimer = setTimeout(async () => {
-    if (!_fjEvId || !_fjSt) return;
-    await _sb.from('stations').update({
-      athlete_name: document.getElementById('spd-ath').value || null
-    }).eq('event_id', _fjEvId).eq('station_num', _fjSt);
-  }, 250);
-};
-
-window.submitSpdScore = async function () {
-  const v1 = parseInt(document.getElementById('spd-c1').value);
-  const v2 = parseInt(document.getElementById('spd-c2').value);
-  const v3 = parseInt(document.getElementById('spd-c3').value);
-  if ([v1,v2,v3].some(isNaN)) { toast('Введите показания всех трёх судей'); return; }
-
-  const avg  = Math.round((v1 + v2 + v3) / 3);
-  const disc = Math.max(v1,v2,v3) - Math.min(v1,v2,v3);
-
-  if (disc > 5) {
-    /* Двойное подтверждение при расхождении */
-    modal('⚠️', 'Расхождение судей!',
-      `Разница ${disc} > 5 очков. Средний результат: ${avg}. Зафиксировать несмотря на расхождение?`,
-      `Зафиксировать ${avg}`,
-      async () => {
-        await _sb.from('stations').update({
-          score: avg, spd_c1: v1, spd_c2: v2, spd_c3: v3, ready: true
-        }).eq('event_id', _fjEvId).eq('station_num', _fjSt);
-        toast(`✓ Результат ${avg} зафиксирован`);
-      }
-    );
-    return;
-  }
-
-  await _sb.from('stations').update({
-    score: avg, spd_c1: v1, spd_c2: v2, spd_c3: v3, ready: true
-  }).eq('event_id', _fjEvId).eq('station_num', _fjSt);
-  toast(`✓ Результат ${avg} зафиксирован`);
-};
-
-window.confirmSpdReset = function () {
-  modal('↺', 'Сбросить результат?', 'Показания всех судей и результат будут очищены.', 'Сбросить', async () => {
-    ['spd-c1','spd-c2','spd-c3'].forEach(id => { document.getElementById(id).value = ''; });
-    calcSpeed();
-    await _sb.from('stations').update({
-      score: 0, spd_c1: null, spd_c2: null, spd_c3: null, ready: false
-    }).eq('event_id', _fjEvId).eq('station_num', _fjSt);
-  });
-};
-
-window.confirmSpdExit = function () {
-  modal('🚪', 'Покинуть площадку?', 'Площадка станет доступна другим судьям.', 'Покинуть', async () => {
-    await _sb.from('stations').update({
-      judge_id: null, judge_name: null,
-      score: 0, spd_c1: null, spd_c2: null, spd_c3: null, ready: false
-    }).eq('event_id', _fjEvId).eq('station_num', _fjSt);
-    _fjSt = null; _clearSubs();
-    _saveSession('fj', _fjEvId, null);
-    await _showFJStations();
-  }, false);
-};
-
-/* ══ ROSTER STATE ══════════════════════════════════════════
- * Хранится в localStorage под ключом `js_roster_{evId}`.
- * Структура: [ { num, name, club, discipline, category }, ... ]
- */
-let _roster = []; // загруженный список для текущего события
-let _rosterParsed = []; // временный — до сохранения
-let _selectedAthId = null; // id выбранного спортсмена (roster index)
-
-function _rosterKey(evId) { return 'js_roster_' + evId; }
-
-function _loadRoster(evId) {
-  try {
-    const raw = localStorage.getItem(_rosterKey(evId));
-    _roster = raw ? JSON.parse(raw) : [];
-  } catch(e) { _roster = []; }
-}
-
-function _saveRosterLocal(evId, data) {
-  localStorage.setItem(_rosterKey(evId), JSON.stringify(data));
-  _roster = data;
-}
-
-/* ══ ROSTER MODAL ══════════════════════════════════════════ */
-window.openRosterModal = function () {
-  _rosterParsed = [];
-  document.getElementById('roster-preview-area').style.display = 'none';
-  document.getElementById('roster-file-inp').value = '';
-  document.getElementById('modal-roster').classList.add('open');
-};
-window.closeRosterModal = function () {
-  document.getElementById('modal-roster').classList.remove('open');
-};
-
-window.onRosterDrop = function (e) {
-  e.preventDefault();
-  document.getElementById('roster-drop').classList.remove('drag');
-  const file = e.dataTransfer.files[0];
-  if (file) _parseRosterFile(file);
-};
-window.onRosterFileSelected = function (inp) {
-  const file = inp.files[0];
-  if (file) _parseRosterFile(file);
-};
-
-async function _parseRosterFile(file) {
-  if (file.size > 5 * 1024 * 1024) { toast('❌ Файл слишком большой (макс. 5 МБ)'); return; }
-
-  const buf = await file.arrayBuffer();
-  let wb;
-  try { wb = XLSX.read(buf, { type: 'array' }); }
-  catch(e) { toast('❌ Не удалось прочитать файл'); return; }
-
-  /* Use first sheet */
-  const ws   = wb.Sheets[wb.SheetNames[0]];
-  const rows = XLSX.utils.sheet_to_json(ws, { defval: '' });
-  if (!rows.length) { toast('❌ Файл пустой или неверный формат'); return; }
-
-  /* Auto-detect column names (case-insensitive, partial match) */
-  const keys = Object.keys(rows[0]);
-  const find = (patterns) => keys.find(k => patterns.some(p => k.toLowerCase().includes(p))) || null;
-
-  const colNum   = find(['№', 'num', 'номер', '№п']);
-  const colName  = find(['фамилия', 'имя', 'фио', 'участник', 'name', 'спортсмен']);
-  const colDisc  = find(['дисципл', 'discipline', 'вид']);
-  const colCat   = find(['категор', 'возраст', 'category', 'группа', 'пол']);
-  const colClub  = find(['клуб', 'организац', 'club', 'команда', 'субъект']);
-
-  _rosterParsed = rows
-    .map((r, i) => ({
-      id:         i,
-      num:        colNum  ? String(r[colNum]  || '').trim() : String(i + 1),
-      name:       colName ? String(r[colName] || '').trim() : '',
-      discipline: colDisc ? String(r[colDisc] || '').trim() : '',
-      category:   colCat  ? String(r[colCat]  || '').trim() : '',
-      club:       colClub ? String(r[colClub]  || '').trim() : '',
-      score:      null, done: false
-    }))
-    .filter(r => r.name);
-
-  if (!_rosterParsed.length) { toast('❌ Не удалось распознать данные. Проверьте заголовки колонок.'); return; }
-
-  /* Stats */
-  const discs = [...new Set(_rosterParsed.map(r => r.discipline).filter(Boolean))];
-  const cats  = [...new Set(_rosterParsed.map(r => r.category).filter(Boolean))];
-
-  document.getElementById('roster-stats').innerHTML =
-    `<span class="roster-stat">👤 ${_rosterParsed.length} участников</span>` +
-    `<span class="roster-stat">🏅 ${discs.length} дисциплин</span>` +
-    `<span class="roster-stat">👥 ${cats.length} категорий</span>`;
-
-  /* Preview first 12 */
-  document.getElementById('roster-preview').innerHTML = _rosterParsed.slice(0, 12).map(r =>
-    `<div class="roster-row">
-      <span class="roster-num">${esc(r.num)}</span>
-      <div style="flex:1;min-width:0">
-        <div class="roster-name">${esc(r.name)}</div>
-        ${r.club ? `<div style="font-size:.67rem;color:var(--tx3)">${esc(r.club)}</div>` : ''}
-      </div>
-      <div class="roster-disc">${esc(r.discipline || '')} ${r.category ? '· ' + esc(r.category) : ''}</div>
-    </div>`
-  ).join('') + (_rosterParsed.length > 12
-    ? `<div style="text-align:center;font-size:.72rem;color:var(--tx2);padding:6px">
-        +${_rosterParsed.length - 12} ещё...
-       </div>` : '');
-
-  document.getElementById('roster-preview-area').style.display = '';
-}
-
-window.saveRoster = function () {
-  if (!_rosterParsed.length || !_hjEvId) return;
-  _saveRosterLocal(_hjEvId, _rosterParsed);
-  closeRosterModal();
-  toast(`✓ Загружено ${_rosterParsed.length} участников`);
-  /* Notify FJ screens that roster is available */
-  _rosterParsed = [];
-};
-window.clearRoster = function () {
-  _rosterParsed = [];
-  document.getElementById('roster-preview-area').style.display = 'none';
-  document.getElementById('roster-file-inp').value = '';
-};
-
-/* ══ FJ ROSTER SELECTORS ══════════════════════════════════ */
-/* Called when FJ scoring screen opens — populate disc dropdown if roster exists */
-function _initFjRosterSelectors(prefix) {
-  /* prefix = 'fj' or 'spd' */
-  const evId = _fjEvId;
-  _loadRoster(evId);
-
-  const rosterSec  = document.getElementById(prefix + '-roster-section');
-  const manualSec  = document.getElementById(prefix + '-manual-section');
-  if (!rosterSec || !manualSec) return;
-
-  if (!_roster.length) {
-    rosterSec.classList.add('hidden');
-    manualSec.style.display = '';
-    return;
-  }
-
-  /* Show roster section, hide manual input */
-  rosterSec.classList.remove('hidden');
-  manualSec.style.display = 'none';
-
-  /* Build discipline options */
-  const discSel = document.getElementById(prefix + '-disc-sel');
-  const discs   = [...new Set(_roster.map(r => r.discipline).filter(Boolean))];
-  discSel.innerHTML = '<option value="">— выберите дисциплину —</option>' +
-    discs.map(d => `<option value="${esc(d)}">${esc(d)}</option>`).join('');
-
-  /* Reset category and athlete list */
-  const catSel = document.getElementById(prefix + '-cat-sel');
-  catSel.innerHTML = '<option value="">— выберите категорию —</option>';
-  const listWrap = document.getElementById(prefix + '-ath-list-wrap');
-  if (listWrap) listWrap.style.display = 'none';
-}
-
-function _onDiscChange(prefix) {
-  const disc    = document.getElementById(prefix + '-disc-sel').value;
-  const catSel  = document.getElementById(prefix + '-cat-sel');
-  const cats    = [...new Set(_roster.filter(r => !disc || r.discipline === disc).map(r => r.category).filter(Boolean))];
-  catSel.innerHTML = '<option value="">— выберите категорию —</option>' +
-    cats.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
-  const listWrap = document.getElementById(prefix + '-ath-list-wrap');
-  if (listWrap) listWrap.style.display = 'none';
-}
-
-function _onCatChange(prefix) {
-  const disc = document.getElementById(prefix + '-disc-sel').value;
-  const cat  = document.getElementById(prefix + '-cat-sel').value;
-  const list = _roster.filter(r =>
-    (!disc || r.discipline === disc) && (!cat || r.category === cat)
-  );
-  const listEl   = document.getElementById(prefix + '-ath-list');
-  const listWrap = document.getElementById(prefix + '-ath-list-wrap');
-  if (!list.length) { if(listWrap) listWrap.style.display='none'; return; }
-  if (listWrap) listWrap.style.display = '';
-  listEl.innerHTML = list.map(r =>
-    `<div class="ath-card ${r.done ? 'done' : ''}" onclick="selectAth_${prefix}(${r.id})">
-      <div class="ath-num">${esc(r.num)}</div>
-      <div style="flex:1;min-width:0">
-        <div class="ath-name">${esc(r.name)}</div>
-        ${r.club ? `<div class="ath-club">${esc(r.club)}</div>` : ''}
-      </div>
-      ${r.done ? `<div class="ath-card-score">${r.score}</div>` : ''}
-    </div>`
-  ).join('');
-}
-
-window.onFjDiscChange  = () => _onDiscChange('fj');
-window.onFjCatChange   = () => _onCatChange('fj');
-window.onSpdDiscChange = () => _onDiscChange('spd');
-window.onSpdCatChange  = () => _onCatChange('spd');
-
-function _selectAth(prefix, id) {
-  _selectedAthId = id;
-  const ath = _roster.find(r => r.id === id);
-  if (!ath) return;
-
-  /* Highlight selected card */
-  document.querySelectorAll(`#${prefix}-ath-list .ath-card`).forEach(c => c.classList.remove('sel'));
-  const card = [...document.querySelectorAll(`#${prefix}-ath-list .ath-card`)]
-    .find(c => c.onclick?.toString().includes(String(id)));
-  if (card) card.classList.add('sel');
-
-  /* Show info strip */
-  const infoEl = document.getElementById(prefix + '-sel-ath-info');
-  if (infoEl) infoEl.classList.remove('hidden');
-  const numEl  = document.getElementById(prefix + '-sel-num');
-  const nameEl = document.getElementById(prefix + '-sel-name');
-  const clubEl = document.getElementById(prefix + '-sel-club');
-  if (numEl)  numEl.textContent  = '#' + ath.num;
-  if (nameEl) nameEl.textContent = ath.name;
-  if (clubEl) clubEl.textContent = ath.club || '';
-
-  /* Push athlete name to station */
-  if (prefix === 'fj') {
-    document.getElementById('fj-ath').value = ath.name;
-    pushAthlete();
-    /* Enable "Done" button */
-    document.getElementById('btn-fj-done').disabled = false;
-  } else {
-    document.getElementById('spd-ath').value = ath.name;
-    pushSpdAthlete();
-  }
-}
-
-/* Create per-prefix onclick handlers */
-window.selectAth_fj  = (id) => _selectAth('fj',  id);
-window.selectAth_spd = (id) => _selectAth('spd', id);
-
-window.clearFjAthSelection = function () {
-  _selectedAthId = null;
-  document.getElementById('fj-sel-ath-info').classList.add('hidden');
-  document.getElementById('fj-ath').value = '';
-  document.getElementById('btn-fj-done').disabled = true;
-  pushAthlete();
-};
-window.clearSpdAthSelection = function () {
-  _selectedAthId = null;
-  document.getElementById('spd-sel-ath-info').classList.add('hidden');
-  document.getElementById('spd-ath').value = '';
-  pushSpdAthlete();
-};
-
-/* ══ SUBMIT FJ RESULT (tap mode) ══════════════════════════ */
-window.submitFjResult = async function () {
-  const score = _localScore;
-  const name  = document.getElementById('fj-ath').value.trim();
-  if (!name) { toast('Введите имя спортсмена'); return; }
-
-  /* Mark ready in DB */
-  await _flushOnExit(); // flush buffer first
-  await _sb.from('stations').update({ score, ready: true, athlete_name: name })
-    .eq('event_id', _fjEvId).eq('station_num', _fjSt);
-
-  /* Mark in local roster */
-  if (_selectedAthId !== null) {
-    const ath = _roster.find(r => r.id === _selectedAthId);
-    if (ath) {
-      ath.done  = true;
-      ath.score = score;
-      _saveRosterLocal(_fjEvId, _roster);
-    }
-  }
-
-  toast(`✓ Результат ${score} зафиксирован для ${name}`);
-  /* Restart buffer for next athlete */
-  _localScore = 0; _clickBuffer = 0; _lastServerScore = 0;
-  document.getElementById('fj-score').textContent = '0';
-  document.getElementById('btn-fj-done').disabled = true;
-  clearFjAthSelection();
-  /* Refresh ath list to show done state */
-  _onCatChange('fj');
-};
-
-/* ══ TV MODE — standings switch ═══════════════════════════ */
-let _tvCurrentMode = 'live';
-let _tvStandingsPoll = null;
-
-window.switchTVMode = function (mode) {
-  _tvCurrentMode = mode;
-  document.getElementById('tv-btn-live').classList.toggle('on',      mode === 'live');
-  document.getElementById('tv-btn-standings').classList.toggle('on', mode === 'standings');
-  document.getElementById('tv-grid').classList.toggle('hidden',       mode === 'standings');
-  document.getElementById('tv-standings').classList.toggle('hidden',  mode === 'live');
-  if (mode === 'standings') _renderTVStandings();
-};
-
-async function _renderTVStandings() {
-  const { data: stns } = await _sb.from('stations')
-    .select('station_num,score,athlete_name,flag_code,ready')
-    .eq('event_id', _hjEvId).order('score', { ascending: false });
-
-  const rows = (stns || [])
-    .filter(s => !!s.athlete_name || s.score > 0)
-    .sort((a, b) => b.score - a.score || a.station_num - b.station_num);
-
-  const el = document.getElementById('tv-standings');
-  if (!rows.length) {
-    el.innerHTML = `<div style="color:rgba(255,255,255,.08);font-family:var(--head);font-size:1.4rem;text-align:center;margin:auto">
-      Ожидаем результатов...</div>`;
-    return;
-  }
-
-  el.innerHTML = rows.map((st, idx) => {
-    const place = idx + 1;
-    const pc = place <= 3 ? `p${place}` : '';
-    const flag = st.flag_code
-      ? `<img src="https://flagcdn.com/w40/${st.flag_code}.png" height="20"
-           style="border-radius:3px;vertical-align:middle;margin-right:8px" alt="${st.flag_code}">`
-      : '';
-    return `<div class="tv-st-row ${pc}">
-      <div class="tv-st-place">${place}</div>
-      <div style="flex:1;min-width:0">
-        <div class="tv-st-name">${flag}${esc(st.athlete_name || '—')}</div>
-      </div>
-      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px">
-        <div class="tv-st-score">${st.score}</div>
-        ${st.ready ? '' : `<div class="tv-st-pending">в процессе</div>`}
-      </div>
-    </div>`;
-  }).join('');
-}
-
-/* Hook standings into existing HJ polling */
-const _origRenderHJ = typeof _renderHJ !== 'undefined' ? _renderHJ : null;
-// Poll for standings refresh when in standings TV mode
-function _maybePollStandings() {
-  if (_tvMode && _tvCurrentMode === 'standings') _renderTVStandings();
-}
-
-/* ══ EXCEL EXPORT ══════════════════════════════════════════
- * Exports results of the current event as .xlsx.
- * Columns: Place · # · Athlete · Club · Score · Status
- */
-window.exportResultsXlsx = async function () {
-  if (!_hjEvId) { toast('Нет активного события'); return; }
-
-  const { data: ev }   = await _sb.from('events').select('*').eq('id', _hjEvId).single();
-  const { data: stns } = await _sb.from('stations')
-    .select('station_num,score,athlete_name,flag_code,ready,spd_c1,spd_c2,spd_c3')
-    .eq('event_id', _hjEvId).order('score', { ascending: false });
-
-  const rows = (stns || [])
-    .filter(s => !!s.athlete_name || s.score > 0)
-    .sort((a, b) => b.score - a.score || a.station_num - b.station_num);
-
-  if (!rows.length) { toast('Нет результатов для экспорта'); return; }
-
-  /* Build sheet data */
-  const sheetData = [
-    /* Header row */
-    ['Место', '№ пл.', 'Спортсмен / Команда', 'Результат', 'С1', 'С2', 'С3', 'Статус']
-  ];
-  rows.forEach((st, idx) => {
-    sheetData.push([
-      idx + 1,
-      st.station_num,
-      st.athlete_name || '',
-      st.score,
-      st.spd_c1 ?? '',
-      st.spd_c2 ?? '',
-      st.spd_c3 ?? '',
-      st.ready ? 'Финал' : 'Предварительно'
-    ]);
-  });
-
-  const ws = XLSX.utils.aoa_to_sheet(sheetData);
-  /* Column widths */
-  ws['!cols'] = [{ wch:7 }, { wch:7 }, { wch:34 }, { wch:12 }, { wch:7 }, { wch:7 }, { wch:7 }, { wch:16 }];
-
-  const wb = XLSX.utils.book_new();
-  const sheetName = ((ev?.discipline || 'Результаты') + ' ' + (ev?.age_category || '')).trim().slice(0, 31);
-  XLSX.utils.book_append_sheet(wb, ws, sheetName);
-
-  const fname = `Результаты_${(ev?.name || 'событие').replace(/[^а-яёА-ЯЁa-zA-Z0-9]/g, '_')}.xlsx`;
-  XLSX.writeFile(wb, fname);
-  toast('📥 Экспорт сохранён: ' + fname);
-};
-
 /* ══ DAILY CODE ════════════════════════════════════════════ */
 async function _getDailyCode() {
   const today = new Date().toISOString().slice(0, 10);
@@ -2652,20 +1571,6 @@ ALTER TABLE profiles ADD COLUMN IF NOT EXISTS is_pro BOOLEAN DEFAULT FALSE;
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS is_blocked BOOLEAN DEFAULT FALSE;
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS avatar_url TEXT;
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS pro_until DATE;
-
--- Новые колонки для дисциплин и режима подсчёта:
-ALTER TABLE events ADD COLUMN IF NOT EXISTS discipline    TEXT;
-ALTER TABLE events ADD COLUMN IF NOT EXISTS age_category  TEXT;
-ALTER TABLE events ADD COLUMN IF NOT EXISTS scoring_mode  TEXT DEFAULT 'tap';
-
--- Показания трёх судей для скоростных дисциплин:
-ALTER TABLE stations ADD COLUMN IF NOT EXISTS spd_c1 INT DEFAULT NULL;
-ALTER TABLE stations ADD COLUMN IF NOT EXISTS spd_c2 INT DEFAULT NULL;
-ALTER TABLE stations ADD COLUMN IF NOT EXISTS spd_c3 INT DEFAULT NULL;
-
--- Публичный доступ на чтение для results.html (анонимные пользователи):
-CREATE POLICY IF NOT EXISTS "public_read_events"   ON events   FOR SELECT TO anon USING (true);
-CREATE POLICY IF NOT EXISTS "public_read_stations" ON stations FOR SELECT TO anon USING (true);
 
 ╚══════════════════════════════════════════════════════════════╝
 -->
