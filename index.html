@@ -1231,6 +1231,60 @@ window.showLoginForm = function () {
 
 let _authBusy = false;
 
+/*
+ * Переводит технические ошибки Supabase/сети в понятные пользователю тексты.
+ * Без этого все ошибки показывались как "Неверный email или пароль" — это сбивало
+ * с толку пользователей с реальными сетевыми проблемами.
+ */
+function translateAuthError(err) {
+  const msg = (err?.message || String(err) || '').toLowerCase();
+
+  /* Сетевые ошибки — самое частое при неудачной загрузке */
+  if (msg.includes('load failed') || msg.includes('failed to fetch') ||
+      msg.includes('network') || msg.includes('networkerror') ||
+      msg.includes('timeout') || msg.includes('таймаут')) {
+    return '🌐 Нет связи с сервером. Проверьте интернет и попробуйте снова.';
+  }
+
+  /* Учётные данные */
+  if (msg.includes('invalid login') || msg.includes('invalid_grant') ||
+      msg.includes('invalid credentials')) {
+    return 'Неверный email или пароль';
+  }
+  if (msg.includes('email not confirmed')) {
+    return 'Email не подтверждён. Проверьте почту.';
+  }
+  if (msg.includes('user not found')) {
+    return 'Аккаунт с таким email не найден';
+  }
+
+  /* Регистрация */
+  if (msg.includes('already registered') || msg.includes('user already') ||
+      msg.includes('already exists')) {
+    return 'Этот email уже зарегистрирован';
+  }
+  if (msg.includes('weak password') || msg.includes('password should')) {
+    return 'Пароль слишком простой (минимум 6 символов)';
+  }
+  if (msg.includes('invalid email')) {
+    return 'Некорректный формат email';
+  }
+
+  /* Rate limit */
+  if (msg.includes('rate limit') || msg.includes('too many')) {
+    return 'Слишком много попыток. Подождите минуту.';
+  }
+
+  /* Supabase сервер проблемы */
+  if (msg.includes('502') || msg.includes('503') || msg.includes('504') ||
+      msg.includes('gateway') || msg.includes('unavailable')) {
+    return '⚠️ Сервер временно недоступен. Попробуйте через минуту.';
+  }
+
+  /* Неизвестная ошибка — показываем реальный текст для диагностики */
+  return 'Ошибка: ' + (err?.message || String(err));
+}
+
 window.doLogin = async function () {
   if (_authBusy) return;
   const email = document.getElementById('li-email').value.trim();
@@ -1243,7 +1297,15 @@ window.doLogin = async function () {
   if (btn) { btn.disabled = true; btn.textContent = '...'; }
   try {
     const { error } = await _sb.auth.signInWithPassword({ email, password: pwd });
-    if (error) { err.textContent = 'Неверный email или пароль'; err.classList.add('show'); }
+    if (error) {
+      console.error('[login]', error);
+      err.textContent = translateAuthError(error);
+      err.classList.add('show');
+    }
+  } catch (e) {
+    console.error('[login exception]', e);
+    err.textContent = translateAuthError(e);
+    err.classList.add('show');
   } finally {
     _authBusy = false;
     if (btn) { btn.disabled = false; btn.textContent = 'Войти →'; }
@@ -1259,15 +1321,32 @@ window.doRegister = async function () {
   const btn = document.querySelector('#form-reg .btn-a');
   err.classList.remove('show');
   if (!name) { err.textContent = 'Введите ваше полное имя'; err.classList.add('show'); return; }
+  if (!email) { err.textContent = 'Введите email'; err.classList.add('show'); return; }
   if (pwd.length < 6) { err.textContent = 'Пароль минимум 6 символов'; err.classList.add('show'); return; }
   _authBusy = true;
   if (btn) { btn.disabled = true; btn.textContent = '...'; }
   try {
-    const { data, error } = await _sb.auth.signUp({ email, password: pwd, options: { data: { full_name: name } } });
-    if (error) { err.textContent = 'Ошибка регистрации: ' + error.message; err.classList.add('show'); return; }
-    if (data.user) {
-      await _sb.from('profiles').upsert({ id: data.user.id, full_name: name });
+    const { data, error } = await _sb.auth.signUp({
+      email, password: pwd, options: { data: { full_name: name } }
+    });
+    if (error) {
+      console.error('[register]', error);
+      err.textContent = translateAuthError(error);
+      err.classList.add('show');
+      return;
     }
+    if (data.user) {
+      /* Профиль создастся автоматически через триггер handle_new_user,
+       * но страхуемся через upsert. Если upsert упадёт (сеть) — не критично,
+       * профиль всё равно создастся при следующем входе */
+      try {
+        await _sb.from('profiles').upsert({ id: data.user.id, full_name: name });
+      } catch (e) { console.warn('[register] profile upsert:', e); }
+    }
+  } catch (e) {
+    console.error('[register exception]', e);
+    err.textContent = translateAuthError(e);
+    err.classList.add('show');
   } finally {
     _authBusy = false;
     if (btn) { btn.disabled = false; btn.textContent = 'Создать аккаунт →'; }
@@ -1292,7 +1371,7 @@ window.doNewPassword = async function () {
   try {
     const { error } = await _sb.auth.updateUser({ password: pwd });
     if (error) {
-      err.textContent = 'Ошибка: ' + error.message;
+      err.textContent = translateAuthError(error);
       err.classList.add('show');
       btn.disabled = false; btn.textContent = 'Сохранить новый пароль →';
     } else {
@@ -1304,7 +1383,10 @@ window.doNewPassword = async function () {
       await checkDevice();
       goDash();
     }
-  } catch(e) {
+  } catch (e) {
+    console.error('[newPassword]', e);
+    err.textContent = translateAuthError(e);
+    err.classList.add('show');
     btn.disabled = false; btn.textContent = 'Сохранить новый пароль →';
   }
 };
@@ -1323,13 +1405,17 @@ window.doReset = async function () {
       redirectTo: window.location.origin + window.location.pathname
     });
     if (error) {
-      err.textContent = 'Ошибка: ' + error.message;
+      err.textContent = translateAuthError(error);
       err.classList.add('show');
     } else {
       ok.style.display = 'block';
       ok.textContent = '✓ Ссылка отправлена на ' + email + '. Проверьте почту (и папку «Спам»).';
       btn.textContent = 'Отправлено';
     }
+  } catch (e) {
+    console.error('[reset]', e);
+    err.textContent = translateAuthError(e);
+    err.classList.add('show');
   } finally {
     if (btn.textContent === '...') { btn.disabled = false; btn.textContent = 'Отправить ссылку →'; }
   }
