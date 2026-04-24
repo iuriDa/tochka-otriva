@@ -7,6 +7,7 @@
 <meta name="description" content="Система реалтайм судейства соревнований по спортивной скакалке. Точка Отрыва.">
 <meta name="author" content="Данильченко Юрий Леонидович">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Mulish:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
@@ -349,6 +350,72 @@ select.inp { cursor: pointer; }
 }
 .mode-btn.on { background: var(--accent); border-color: var(--accent); color: #fff; }
 
+/* ══ ROSTER UPLOAD ══════════════════════════════════════════ */
+.roster-modal { max-width: 500px; max-height: 90dvh; overflow-y: auto; }
+.roster-drop {
+  border: 2px dashed var(--bor2); border-radius: var(--r-lg); padding: 28px 18px;
+  text-align: center; cursor: pointer; transition: all .18s; background: var(--sur2);
+  position: relative;
+}
+.roster-drop:hover, .roster-drop.drag { border-color: var(--accent); background: var(--accent-s); }
+.roster-drop-ico { font-size: 2rem; margin-bottom: 6px; }
+.roster-drop-lbl { font-size: .85rem; font-weight: 700; color: var(--tx2); }
+.roster-drop-hint { font-size: .72rem; color: var(--tx3); margin-top: 4px; }
+.roster-file-inp { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.roster-preview { display: flex; flex-direction: column; gap: 5px; max-height: 260px; overflow-y: auto; margin: 10px 0; }
+.roster-row { display: flex; align-items: center; gap: 8px; background: var(--sur2); border: 1px solid var(--bor); border-radius: 8px; padding: 7px 11px; font-size: .78rem; }
+.roster-num { font-family: var(--mono); font-weight: 700; color: var(--accent); min-width: 30px; }
+.roster-name { flex: 1; font-weight: 700; }
+.roster-disc { font-size: .65rem; color: var(--tx2); font-weight: 600; }
+.roster-cols-help { background: var(--sur2); border: 1px solid var(--bor); border-radius: var(--r); padding: 10px 12px; font-size: .74rem; color: var(--tx2); line-height: 1.7; }
+.roster-cols-help b { color: var(--tx); }
+.roster-stats { display: flex; gap: 8px; flex-wrap: wrap; margin: 6px 0; }
+.roster-stat { background: var(--accent-s); border: 1px solid rgba(255,107,43,.25); border-radius: var(--r-pill); padding: 3px 11px; font-size: .72rem; font-weight: 700; color: var(--accent); }
+
+/* ══ ATHLETE SELECT IN FJ SCREEN ════════════════════════════ */
+.ath-sel-section { display: flex; flex-direction: column; gap: 8px; }
+.ath-sel-grid    { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.ath-card-list   { display: flex; flex-direction: column; gap: 5px; max-height: 200px; overflow-y: auto; }
+.ath-card {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--sur2); border: 1.5px solid var(--bor);
+  border-radius: var(--r); padding: 8px 11px;
+  cursor: pointer; transition: all .15s;
+}
+.ath-card:hover        { border-color: var(--accent); }
+.ath-card.sel          { border-color: var(--green); background: rgba(34,197,94,.08); }
+.ath-card.done         { opacity: .5; }
+.ath-card.done .ath-card-score { color: var(--green); font-weight: 800; }
+.ath-num  { font-family: var(--mono); font-size: .82rem; font-weight: 700; color: var(--accent); min-width: 28px; }
+.ath-name { flex: 1; font-size: .84rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ath-club { font-size: .67rem; color: var(--tx2); }
+.ath-card-score { font-family: var(--mono); font-size: .82rem; color: var(--tx2); flex-shrink: 0; }
+.ath-sel-info { background: var(--sur2); border: 1px solid var(--bor); border-radius: var(--r); padding: 9px 12px; display: flex; align-items: center; gap: 9px; }
+.ath-sel-num  { font-family: var(--mono); font-size: 1.1rem; font-weight: 800; color: var(--accent); }
+.ath-sel-name { font-size: .88rem; font-weight: 800; flex: 1; }
+.ath-sel-club { font-size: .7rem; color: var(--tx2); }
+
+/* ══ TV STANDINGS PANEL ═════════════════════════════════════ */
+.tv-topbar { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; flex-shrink: 0; background: rgba(0,0,0,.5); }
+.tv-topbar-title { font-family: var(--head); font-size: .82rem; color: rgba(255,255,255,.6); }
+.tv-topbar-btns  { display: flex; gap: 6px; }
+.tv-mode-btn { background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.15); color: rgba(255,255,255,.6); border-radius: 7px; padding: 4px 12px; font-family: var(--font); font-size: .72rem; font-weight: 700; cursor: pointer; transition: all .15s; }
+.tv-mode-btn.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+.tv-standings { flex: 1; overflow-y: auto; padding: 10px 14px; display: flex; flex-direction: column; gap: 5px; }
+.tv-st-row { display: flex; align-items: center; gap: 14px; padding: 12px 16px; border-radius: 12px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.06); }
+.tv-st-row.p1 { background: linear-gradient(135deg, rgba(245,158,11,.2), rgba(245,158,11,.06)); border-color: rgba(245,158,11,.35); }
+.tv-st-row.p2 { background: linear-gradient(135deg, rgba(148,163,184,.14), rgba(148,163,184,.04)); border-color: rgba(148,163,184,.2); }
+.tv-st-row.p3 { background: linear-gradient(135deg, rgba(205,127,50,.14), rgba(205,127,50,.04)); border-color: rgba(205,127,50,.2); }
+.tv-st-place { font-family: var(--mono); font-size: clamp(1.2rem, 3vw, 2.4rem); font-weight: 800; min-width: 50px; color: rgba(255,255,255,.25); }
+.tv-st-row.p1 .tv-st-place { color: #F59E0B; }
+.tv-st-row.p2 .tv-st-place { color: #94A3B8; }
+.tv-st-row.p3 .tv-st-place { color: #CD7F32; }
+.tv-st-name  { font-family: var(--head); font-size: clamp(.82rem, 2.2vw, 1.8rem); color: rgba(255,255,255,.82); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tv-st-club  { font-size: clamp(.62rem, 1.2vw, .9rem); color: rgba(255,255,255,.3); }
+.tv-st-score { font-family: var(--mono); font-size: clamp(1.4rem, 4vw, 3.2rem); font-weight: 800; color: #fff; flex-shrink: 0; }
+.tv-st-row.p1 .tv-st-score { color: #F59E0B; }
+.tv-st-pending { font-size: .72rem; color: rgba(255,255,255,.25); font-style: italic; }
+
 /* ══ BLOCKED ════════════════════════════════════════════════ */
 #screen-blocked { background: var(--bg); }
 .blocked-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 24px; text-align: center; }
@@ -523,14 +590,16 @@ select.inp { cursor: pointer; }
   <div class="topbar">
     <div class="tb-l">
       <div class="tb-title" id="hj-title">Событие</div>
-      <div class="tb-sub">Главный судья</div>
+      <div class="tb-sub" id="hj-sub">Главный судья</div>
     </div>
     <div class="tb-r">
       <div class="hj-topbar-fc">
         <div class="hj-fc-lbl">Код</div>
         <div class="hj-fc-val" id="hj-fc">——</div>
       </div>
+      <button class="btn btn-s btn-icon" onclick="openRosterModal()" title="Загрузить список участников">📋</button>
       <button class="btn btn-s btn-icon" onclick="toggleTV()" title="TV режим">📺</button>
+      <button class="btn btn-s btn-icon" onclick="exportResultsXlsx()" title="Экспорт результатов в Excel">📥</button>
       <button class="btn btn-s btn-icon" onclick="confirmResetAll()" title="Сбросить">↺</button>
       <div class="pill" id="tp-hj">
         <button onclick="setTheme('dark')">🌙</button>
@@ -545,9 +614,22 @@ select.inp { cursor: pointer; }
 </div>
 
 <!-- ══ TV ════════════════════════════════════════════════ -->
-<div id="screen-tv" class="screen">
-  <div id="tv-grid" class="tv-grid"></div>
-  <button class="btn btn-g btn-sm tv-exit" onclick="toggleTV()">← Выйти из TV</button>
+<div id="screen-tv" class="screen" style="background:#060709;flex-direction:column">
+  <!-- Top panel: event info + mode toggle + exit -->
+  <div class="tv-topbar">
+    <div>
+      <div class="tv-topbar-title" id="tv-event-title">Событие</div>
+    </div>
+    <div class="tv-topbar-btns">
+      <button class="tv-mode-btn on" id="tv-btn-live"       onclick="switchTVMode('live')">📡 Живой счёт</button>
+      <button class="tv-mode-btn"    id="tv-btn-standings"  onclick="switchTVMode('standings')">🏆 Таблица</button>
+      <button class="tv-mode-btn"    onclick="toggleTV()">✕ Выход</button>
+    </div>
+  </div>
+  <!-- Live score grid (default) -->
+  <div id="tv-grid" class="tv-grid" style="flex:1"></div>
+  <!-- Standings table (hidden by default) -->
+  <div id="tv-standings" class="tv-standings hidden"></div>
 </div>
 
 <!-- ══ FJ STATION SELECT ══════════════════════════════════ -->
@@ -586,26 +668,58 @@ select.inp { cursor: pointer; }
     </div>
   </div>
   <div class="fj-body scroll">
-    <div class="ath-row">
-      <div class="field f1">
-        <label class="lbl">Имя спортсмена</label>
-        <input id="fj-ath" class="inp" type="text" placeholder="Имя спортсмена..." oninput="pushAthlete()">
+
+    <!-- Roster-based athlete selection (visible when roster loaded for this event) -->
+    <div id="fj-roster-section" class="ath-sel-section hidden">
+      <div class="ath-sel-grid">
+        <div class="field">
+          <label class="lbl">Дисциплина</label>
+          <select id="fj-disc-sel" class="inp" onchange="onFjDiscChange()">
+            <option value="">— выберите —</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="lbl">Категория</label>
+          <select id="fj-cat-sel" class="inp" onchange="onFjCatChange()">
+            <option value="">— выберите —</option>
+          </select>
+        </div>
       </div>
-      <div class="col gap2">
-        <label class="lbl">Флаг</label>
-        <div class="flag-btn" id="fj-flag-btn" onclick="toggleFlags()">🏳️</div>
+      <div class="field" id="fj-ath-list-wrap" style="display:none">
+        <label class="lbl">Список спортсменов</label>
+        <div class="ath-card-list" id="fj-ath-list"></div>
+      </div>
+      <div id="fj-sel-ath-info" class="ath-sel-info hidden">
+        <div class="ath-sel-num" id="fj-sel-num">#—</div>
+        <div style="flex:1;min-width:0">
+          <div class="ath-sel-name" id="fj-sel-name">—</div>
+          <div class="ath-sel-club" id="fj-sel-club"></div>
+        </div>
+        <button class="btn btn-s btn-sm" onclick="clearFjAthSelection()">✕</button>
       </div>
     </div>
+
+    <!-- Manual name + flag (fallback when no roster) -->
+    <div id="fj-manual-section">
+      <div class="ath-row">
+        <div class="field f1">
+          <label class="lbl">Имя спортсмена</label>
+          <input id="fj-ath" class="inp" type="text" placeholder="Имя спортсмена..." oninput="pushAthlete()">
+        </div>
+        <div class="col gap2">
+          <label class="lbl">Флаг</label>
+          <div class="flag-btn" id="fj-flag-btn" onclick="toggleFlags()">🏳️</div>
+        </div>
+      </div>
+    </div>
+
     <div id="flag-search-box" class="flag-search-box hidden">
       <input id="flag-search" class="inp" type="text" placeholder="Поиск страны..."
         oninput="filterFlags(this.value)" style="height:38px;font-size:.84rem">
       <div id="flag-list" class="flag-list"></div>
     </div>
+
     <div class="score-area">
-      <!--
-        score-ring: touch-action:none → pointerdown срабатывает немедленно без 300ms задержки
-        Визуальный отклик через класс .tapped (без transition = нет лага)
-      -->
       <div class="score-ring" id="score-ring">
         <span class="score-num" id="fj-score">0</span>
         <span class="score-hint">нажмите для счёта</span>
@@ -613,13 +727,16 @@ select.inp { cursor: pointer; }
       <button class="btn btn-s btn-sm" id="btn-sub-score" style="min-width:80px;height:38px">−1</button>
     </div>
     <div class="fj-bottom">
-      <button class="btn btn-s" onclick="confirmFjReset()">↺ Сбросить счёт</button>
+      <button class="btn btn-s" onclick="confirmFjReset()">↺ Сбросить</button>
       <button class="btn btn-s" onclick="fjClear()">✕ Очистить</button>
     </div>
+    <button class="btn btn-a btn-full" id="btn-fj-done" onclick="submitFjResult()" style="margin-top:4px" disabled>
+      ✓ Готово — зафиксировать результат
+    </button>
   </div>
 </div>
 
-<!-- ══ SPEED FJ SCORING ═══════════════════════════════════ -->
+<!-- ══ SPEED FJ SCORING — also roster-aware ═══════════════ -->
 <div id="screen-speed-fj" class="screen">
   <div class="topbar">
     <div class="tb-l">
@@ -635,46 +752,107 @@ select.inp { cursor: pointer; }
     </div>
   </div>
   <div class="fj-body scroll">
-    <div class="field">
-      <label class="lbl">Имя спортсмена</label>
-      <input id="spd-ath" class="inp" type="text" placeholder="Имя спортсмена..."
-        oninput="pushSpdAthlete()">
+    <!-- Roster selection (same logic as FJ tap) -->
+    <div id="spd-roster-section" class="ath-sel-section hidden">
+      <div class="ath-sel-grid">
+        <div class="field">
+          <label class="lbl">Дисциплина</label>
+          <select id="spd-disc-sel" class="inp" onchange="onSpdDiscChange()">
+            <option value="">— выберите —</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="lbl">Категория</label>
+          <select id="spd-cat-sel" class="inp" onchange="onSpdCatChange()">
+            <option value="">— выберите —</option>
+          </select>
+        </div>
+      </div>
+      <div class="field" id="spd-ath-list-wrap" style="display:none">
+        <label class="lbl">Список спортсменов</label>
+        <div class="ath-card-list" id="spd-ath-list"></div>
+      </div>
+      <div id="spd-sel-ath-info" class="ath-sel-info hidden">
+        <div class="ath-sel-num" id="spd-sel-num">#—</div>
+        <div style="flex:1;min-width:0">
+          <div class="ath-sel-name" id="spd-sel-name">—</div>
+          <div class="ath-sel-club" id="spd-sel-club"></div>
+        </div>
+        <button class="btn btn-s btn-sm" onclick="clearSpdAthSelection()">✕</button>
+      </div>
     </div>
-
-    <!-- Три поля для ввода показаний с механических счётчиков -->
+    <!-- Manual fallback -->
+    <div id="spd-manual-section">
+      <div class="field">
+        <label class="lbl">Имя спортсмена</label>
+        <input id="spd-ath" class="inp" type="text" placeholder="Имя спортсмена..." oninput="pushSpdAthlete()">
+      </div>
+    </div>
     <div class="speed-grid">
       <div class="spd-judge-box">
         <div class="spd-lbl">Судья 1</div>
-        <input id="spd-c1" class="spd-inp" type="number" min="0" max="9999"
-          inputmode="numeric" placeholder="—" oninput="calcSpeed()">
+        <input id="spd-c1" class="spd-inp" type="number" min="0" max="9999" inputmode="numeric" placeholder="—" oninput="calcSpeed()">
       </div>
       <div class="spd-judge-box">
         <div class="spd-lbl">Судья 2</div>
-        <input id="spd-c2" class="spd-inp" type="number" min="0" max="9999"
-          inputmode="numeric" placeholder="—" oninput="calcSpeed()">
+        <input id="spd-c2" class="spd-inp" type="number" min="0" max="9999" inputmode="numeric" placeholder="—" oninput="calcSpeed()">
       </div>
       <div class="spd-judge-box">
         <div class="spd-lbl">Судья 3</div>
-        <input id="spd-c3" class="spd-inp" type="number" min="0" max="9999"
-          inputmode="numeric" placeholder="—" oninput="calcSpeed()">
+        <input id="spd-c3" class="spd-inp" type="number" min="0" max="9999" inputmode="numeric" placeholder="—" oninput="calcSpeed()">
       </div>
     </div>
-
-    <div id="spd-warn-box" class="spd-warn-box hidden">
-      ⚠️ Расхождение &gt; 5 очков — требуется пересчёт судей
-    </div>
-
+    <div id="spd-warn-box" class="spd-warn-box hidden">⚠️ Расхождение &gt; 5 очков — требуется пересчёт судей</div>
     <div class="spd-result">
       <div class="spd-result-lbl">Средний результат (целое)</div>
       <div class="spd-result-num" id="spd-avg">—</div>
       <div class="spd-breakdown" id="spd-bdown"></div>
     </div>
-
     <div class="fj-bottom">
       <button class="btn btn-s" onclick="confirmSpdReset()">↺ Сбросить</button>
-      <button class="btn btn-a" id="btn-spd-submit" onclick="submitSpdScore()" disabled>
-        ✓ Зафиксировать
-      </button>
+      <button class="btn btn-a" id="btn-spd-submit" onclick="submitSpdScore()" disabled>✓ Зафиксировать</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ ROSTER UPLOAD MODAL ═════════════════════════════════ -->
+<div id="modal-roster" class="modal-ov">
+  <div class="modal anim roster-modal">
+    <div class="modal-ttl" style="display:flex;align-items:center;justify-content:space-between">
+      <span>📋 Список участников</span>
+      <button class="btn btn-s btn-sm" onclick="closeRosterModal()">✕</button>
+    </div>
+    <div style="font-size:.78rem;color:var(--tx2);margin:6px 0 12px;line-height:1.55">
+      Загрузите Excel-файл (.xlsx / .xls) со списком участников. Система автоматически
+      распознает дисциплины, категории и ФИО спортсменов.
+    </div>
+
+    <!-- Drop zone -->
+    <div class="roster-drop" id="roster-drop"
+      ondragover="event.preventDefault();this.classList.add('drag')"
+      ondragleave="this.classList.remove('drag')"
+      ondrop="onRosterDrop(event)">
+      <div class="roster-drop-ico">📂</div>
+      <div class="roster-drop-lbl">Нажмите или перетащите файл</div>
+      <div class="roster-drop-hint">.xlsx · .xls · до 5 МБ</div>
+      <input type="file" accept=".xlsx,.xls" class="roster-file-inp" id="roster-file-inp"
+        onchange="onRosterFileSelected(this)">
+    </div>
+
+    <!-- Column mapping help -->
+    <div class="roster-cols-help" style="margin-top:10px">
+      <b>Ожидаемые колонки (любой порядок, названия распознаются автоматически):</b><br>
+      № · Фамилия / Имя (или ФИО) · Дисциплина · Категория / Возраст · Клуб / Организация
+    </div>
+
+    <!-- Preview -->
+    <div id="roster-preview-area" style="display:none">
+      <div class="roster-stats" id="roster-stats"></div>
+      <div class="roster-preview" id="roster-preview"></div>
+      <div class="modal-act" style="margin-top:12px">
+        <button class="btn btn-g btn-sm" onclick="clearRoster()">✕ Очистить</button>
+        <button class="btn btn-a btn-sm" onclick="saveRoster()">✓ Сохранить список</button>
+      </div>
     </div>
   </div>
 </div>
@@ -1104,12 +1282,16 @@ async function _openHJ() {
   _hjScoringMode = ev?.scoring_mode || 'tap';
   document.getElementById('hj-title').textContent = ev.name;
   document.getElementById('hj-fc').textContent    = ev.floor_code;
+  document.getElementById('tv-event-title').textContent =
+    [ev.name, ev.discipline, ev.age_category].filter(Boolean).join(' · ');
   /* Show discipline · category in topbar subtitle */
-  const hjSub = document.querySelector('#screen-hj .tb-sub');
+  const hjSub = document.getElementById('hj-sub');
   if (hjSub) {
     const parts = [ev.discipline, ev.age_category].filter(Boolean);
     hjSub.textContent = parts.length ? parts.join(' · ') : 'Главный судья';
   }
+  /* Load roster if it was previously saved for this event */
+  _loadRoster(_hjEvId);
   _saveSession('hj', _hjEvId);
   _clearSubs();
   _stopHJPoll();
@@ -1135,7 +1317,10 @@ async function _openHJ() {
     const tvActive = document.getElementById('screen-tv').classList.contains('active');
     if (hjActive || tvActive) {
       _renderHJ();
-      if (_tvMode) _renderTV();
+      if (_tvMode) {
+        if (_tvCurrentMode === 'live') _renderTV();
+        else _renderTVStandings();
+      }
     }
   }, 300);
 }
@@ -1337,8 +1522,17 @@ window.hjExit = function () {
 /* ══ TV MODE ══════════════════════════════════════════════ */
 window.toggleTV = async function () {
   _tvMode = !_tvMode;
-  if (_tvMode) { showScreen('screen-tv'); await _renderTV(); }
-  else           showScreen('screen-hj');
+  if (_tvMode) {
+    _tvCurrentMode = 'live';
+    document.getElementById('tv-btn-live').classList.add('on');
+    document.getElementById('tv-btn-standings').classList.remove('on');
+    document.getElementById('tv-grid').classList.remove('hidden');
+    document.getElementById('tv-standings').classList.add('hidden');
+    showScreen('screen-tv');
+    await _renderTV();
+  } else {
+    showScreen('screen-hj');
+  }
 };
 
 async function _renderTV() {
@@ -1429,8 +1623,10 @@ async function _openFJScoring(st) {
   _lastServerScore = st.score || 0;
   _clickBuffer     = 0;
   _bufferSyncing   = false;
+  _selectedAthId   = null;
   document.getElementById('fj-score').textContent = _localScore;
   document.getElementById('fj-ath').value = st.athlete_name || '';
+  document.getElementById('btn-fj-done').disabled = !st.athlete_name;
 
   _selFlag = st.flag_code || null;
   const flagBtn = document.getElementById('fj-flag-btn');
@@ -1438,6 +1634,14 @@ async function _openFJScoring(st) {
 
   _saveSession('fj', _fjEvId, _fjSt);
   showScreen('screen-fj');
+
+  /* Init roster selectors */
+  _initFjRosterSelectors('fj');
+
+  /* Enable Done button when athlete name is typed manually */
+  document.getElementById('fj-ath').addEventListener('input', function () {
+    document.getElementById('btn-fj-done').disabled = !this.value.trim();
+  }, { once: false });
 
   /* Запускаем flush буфера */
   _startFlushInterval();
@@ -1671,8 +1875,12 @@ async function _openSpeedFJScoring(st) {
   document.getElementById('spd-c3').value = st.spd_c3 ?? '';
   calcSpeed();
 
+  _selectedAthId = null;
   _saveSession('fj', _fjEvId, _fjSt);
   showScreen('screen-speed-fj');
+
+  /* Init roster selectors */
+  _initFjRosterSelectors('spd');
 
   /* Realtime: получаем сбросы от HJ */
   const ch = _sb.channel('spdsc-' + _fjEvId + '-' + _fjSt)
@@ -1799,6 +2007,386 @@ window.confirmSpdExit = function () {
   }, false);
 };
 
+/* ══ ROSTER STATE ══════════════════════════════════════════
+ * Хранится в localStorage под ключом `js_roster_{evId}`.
+ * Структура: [ { num, name, club, discipline, category }, ... ]
+ */
+let _roster = []; // загруженный список для текущего события
+let _rosterParsed = []; // временный — до сохранения
+let _selectedAthId = null; // id выбранного спортсмена (roster index)
+
+function _rosterKey(evId) { return 'js_roster_' + evId; }
+
+function _loadRoster(evId) {
+  try {
+    const raw = localStorage.getItem(_rosterKey(evId));
+    _roster = raw ? JSON.parse(raw) : [];
+  } catch(e) { _roster = []; }
+}
+
+function _saveRosterLocal(evId, data) {
+  localStorage.setItem(_rosterKey(evId), JSON.stringify(data));
+  _roster = data;
+}
+
+/* ══ ROSTER MODAL ══════════════════════════════════════════ */
+window.openRosterModal = function () {
+  _rosterParsed = [];
+  document.getElementById('roster-preview-area').style.display = 'none';
+  document.getElementById('roster-file-inp').value = '';
+  document.getElementById('modal-roster').classList.add('open');
+};
+window.closeRosterModal = function () {
+  document.getElementById('modal-roster').classList.remove('open');
+};
+
+window.onRosterDrop = function (e) {
+  e.preventDefault();
+  document.getElementById('roster-drop').classList.remove('drag');
+  const file = e.dataTransfer.files[0];
+  if (file) _parseRosterFile(file);
+};
+window.onRosterFileSelected = function (inp) {
+  const file = inp.files[0];
+  if (file) _parseRosterFile(file);
+};
+
+async function _parseRosterFile(file) {
+  if (file.size > 5 * 1024 * 1024) { toast('❌ Файл слишком большой (макс. 5 МБ)'); return; }
+
+  const buf = await file.arrayBuffer();
+  let wb;
+  try { wb = XLSX.read(buf, { type: 'array' }); }
+  catch(e) { toast('❌ Не удалось прочитать файл'); return; }
+
+  /* Use first sheet */
+  const ws   = wb.Sheets[wb.SheetNames[0]];
+  const rows = XLSX.utils.sheet_to_json(ws, { defval: '' });
+  if (!rows.length) { toast('❌ Файл пустой или неверный формат'); return; }
+
+  /* Auto-detect column names (case-insensitive, partial match) */
+  const keys = Object.keys(rows[0]);
+  const find = (patterns) => keys.find(k => patterns.some(p => k.toLowerCase().includes(p))) || null;
+
+  const colNum   = find(['№', 'num', 'номер', '№п']);
+  const colName  = find(['фамилия', 'имя', 'фио', 'участник', 'name', 'спортсмен']);
+  const colDisc  = find(['дисципл', 'discipline', 'вид']);
+  const colCat   = find(['категор', 'возраст', 'category', 'группа', 'пол']);
+  const colClub  = find(['клуб', 'организац', 'club', 'команда', 'субъект']);
+
+  _rosterParsed = rows
+    .map((r, i) => ({
+      id:         i,
+      num:        colNum  ? String(r[colNum]  || '').trim() : String(i + 1),
+      name:       colName ? String(r[colName] || '').trim() : '',
+      discipline: colDisc ? String(r[colDisc] || '').trim() : '',
+      category:   colCat  ? String(r[colCat]  || '').trim() : '',
+      club:       colClub ? String(r[colClub]  || '').trim() : '',
+      score:      null, done: false
+    }))
+    .filter(r => r.name);
+
+  if (!_rosterParsed.length) { toast('❌ Не удалось распознать данные. Проверьте заголовки колонок.'); return; }
+
+  /* Stats */
+  const discs = [...new Set(_rosterParsed.map(r => r.discipline).filter(Boolean))];
+  const cats  = [...new Set(_rosterParsed.map(r => r.category).filter(Boolean))];
+
+  document.getElementById('roster-stats').innerHTML =
+    `<span class="roster-stat">👤 ${_rosterParsed.length} участников</span>` +
+    `<span class="roster-stat">🏅 ${discs.length} дисциплин</span>` +
+    `<span class="roster-stat">👥 ${cats.length} категорий</span>`;
+
+  /* Preview first 12 */
+  document.getElementById('roster-preview').innerHTML = _rosterParsed.slice(0, 12).map(r =>
+    `<div class="roster-row">
+      <span class="roster-num">${esc(r.num)}</span>
+      <div style="flex:1;min-width:0">
+        <div class="roster-name">${esc(r.name)}</div>
+        ${r.club ? `<div style="font-size:.67rem;color:var(--tx3)">${esc(r.club)}</div>` : ''}
+      </div>
+      <div class="roster-disc">${esc(r.discipline || '')} ${r.category ? '· ' + esc(r.category) : ''}</div>
+    </div>`
+  ).join('') + (_rosterParsed.length > 12
+    ? `<div style="text-align:center;font-size:.72rem;color:var(--tx2);padding:6px">
+        +${_rosterParsed.length - 12} ещё...
+       </div>` : '');
+
+  document.getElementById('roster-preview-area').style.display = '';
+}
+
+window.saveRoster = function () {
+  if (!_rosterParsed.length || !_hjEvId) return;
+  _saveRosterLocal(_hjEvId, _rosterParsed);
+  closeRosterModal();
+  toast(`✓ Загружено ${_rosterParsed.length} участников`);
+  /* Notify FJ screens that roster is available */
+  _rosterParsed = [];
+};
+window.clearRoster = function () {
+  _rosterParsed = [];
+  document.getElementById('roster-preview-area').style.display = 'none';
+  document.getElementById('roster-file-inp').value = '';
+};
+
+/* ══ FJ ROSTER SELECTORS ══════════════════════════════════ */
+/* Called when FJ scoring screen opens — populate disc dropdown if roster exists */
+function _initFjRosterSelectors(prefix) {
+  /* prefix = 'fj' or 'spd' */
+  const evId = _fjEvId;
+  _loadRoster(evId);
+
+  const rosterSec  = document.getElementById(prefix + '-roster-section');
+  const manualSec  = document.getElementById(prefix + '-manual-section');
+  if (!rosterSec || !manualSec) return;
+
+  if (!_roster.length) {
+    rosterSec.classList.add('hidden');
+    manualSec.style.display = '';
+    return;
+  }
+
+  /* Show roster section, hide manual input */
+  rosterSec.classList.remove('hidden');
+  manualSec.style.display = 'none';
+
+  /* Build discipline options */
+  const discSel = document.getElementById(prefix + '-disc-sel');
+  const discs   = [...new Set(_roster.map(r => r.discipline).filter(Boolean))];
+  discSel.innerHTML = '<option value="">— выберите дисциплину —</option>' +
+    discs.map(d => `<option value="${esc(d)}">${esc(d)}</option>`).join('');
+
+  /* Reset category and athlete list */
+  const catSel = document.getElementById(prefix + '-cat-sel');
+  catSel.innerHTML = '<option value="">— выберите категорию —</option>';
+  const listWrap = document.getElementById(prefix + '-ath-list-wrap');
+  if (listWrap) listWrap.style.display = 'none';
+}
+
+function _onDiscChange(prefix) {
+  const disc    = document.getElementById(prefix + '-disc-sel').value;
+  const catSel  = document.getElementById(prefix + '-cat-sel');
+  const cats    = [...new Set(_roster.filter(r => !disc || r.discipline === disc).map(r => r.category).filter(Boolean))];
+  catSel.innerHTML = '<option value="">— выберите категорию —</option>' +
+    cats.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
+  const listWrap = document.getElementById(prefix + '-ath-list-wrap');
+  if (listWrap) listWrap.style.display = 'none';
+}
+
+function _onCatChange(prefix) {
+  const disc = document.getElementById(prefix + '-disc-sel').value;
+  const cat  = document.getElementById(prefix + '-cat-sel').value;
+  const list = _roster.filter(r =>
+    (!disc || r.discipline === disc) && (!cat || r.category === cat)
+  );
+  const listEl   = document.getElementById(prefix + '-ath-list');
+  const listWrap = document.getElementById(prefix + '-ath-list-wrap');
+  if (!list.length) { if(listWrap) listWrap.style.display='none'; return; }
+  if (listWrap) listWrap.style.display = '';
+  listEl.innerHTML = list.map(r =>
+    `<div class="ath-card ${r.done ? 'done' : ''}" onclick="selectAth_${prefix}(${r.id})">
+      <div class="ath-num">${esc(r.num)}</div>
+      <div style="flex:1;min-width:0">
+        <div class="ath-name">${esc(r.name)}</div>
+        ${r.club ? `<div class="ath-club">${esc(r.club)}</div>` : ''}
+      </div>
+      ${r.done ? `<div class="ath-card-score">${r.score}</div>` : ''}
+    </div>`
+  ).join('');
+}
+
+window.onFjDiscChange  = () => _onDiscChange('fj');
+window.onFjCatChange   = () => _onCatChange('fj');
+window.onSpdDiscChange = () => _onDiscChange('spd');
+window.onSpdCatChange  = () => _onCatChange('spd');
+
+function _selectAth(prefix, id) {
+  _selectedAthId = id;
+  const ath = _roster.find(r => r.id === id);
+  if (!ath) return;
+
+  /* Highlight selected card */
+  document.querySelectorAll(`#${prefix}-ath-list .ath-card`).forEach(c => c.classList.remove('sel'));
+  const card = [...document.querySelectorAll(`#${prefix}-ath-list .ath-card`)]
+    .find(c => c.onclick?.toString().includes(String(id)));
+  if (card) card.classList.add('sel');
+
+  /* Show info strip */
+  const infoEl = document.getElementById(prefix + '-sel-ath-info');
+  if (infoEl) infoEl.classList.remove('hidden');
+  const numEl  = document.getElementById(prefix + '-sel-num');
+  const nameEl = document.getElementById(prefix + '-sel-name');
+  const clubEl = document.getElementById(prefix + '-sel-club');
+  if (numEl)  numEl.textContent  = '#' + ath.num;
+  if (nameEl) nameEl.textContent = ath.name;
+  if (clubEl) clubEl.textContent = ath.club || '';
+
+  /* Push athlete name to station */
+  if (prefix === 'fj') {
+    document.getElementById('fj-ath').value = ath.name;
+    pushAthlete();
+    /* Enable "Done" button */
+    document.getElementById('btn-fj-done').disabled = false;
+  } else {
+    document.getElementById('spd-ath').value = ath.name;
+    pushSpdAthlete();
+  }
+}
+
+/* Create per-prefix onclick handlers */
+window.selectAth_fj  = (id) => _selectAth('fj',  id);
+window.selectAth_spd = (id) => _selectAth('spd', id);
+
+window.clearFjAthSelection = function () {
+  _selectedAthId = null;
+  document.getElementById('fj-sel-ath-info').classList.add('hidden');
+  document.getElementById('fj-ath').value = '';
+  document.getElementById('btn-fj-done').disabled = true;
+  pushAthlete();
+};
+window.clearSpdAthSelection = function () {
+  _selectedAthId = null;
+  document.getElementById('spd-sel-ath-info').classList.add('hidden');
+  document.getElementById('spd-ath').value = '';
+  pushSpdAthlete();
+};
+
+/* ══ SUBMIT FJ RESULT (tap mode) ══════════════════════════ */
+window.submitFjResult = async function () {
+  const score = _localScore;
+  const name  = document.getElementById('fj-ath').value.trim();
+  if (!name) { toast('Введите имя спортсмена'); return; }
+
+  /* Mark ready in DB */
+  await _flushOnExit(); // flush buffer first
+  await _sb.from('stations').update({ score, ready: true, athlete_name: name })
+    .eq('event_id', _fjEvId).eq('station_num', _fjSt);
+
+  /* Mark in local roster */
+  if (_selectedAthId !== null) {
+    const ath = _roster.find(r => r.id === _selectedAthId);
+    if (ath) {
+      ath.done  = true;
+      ath.score = score;
+      _saveRosterLocal(_fjEvId, _roster);
+    }
+  }
+
+  toast(`✓ Результат ${score} зафиксирован для ${name}`);
+  /* Restart buffer for next athlete */
+  _localScore = 0; _clickBuffer = 0; _lastServerScore = 0;
+  document.getElementById('fj-score').textContent = '0';
+  document.getElementById('btn-fj-done').disabled = true;
+  clearFjAthSelection();
+  /* Refresh ath list to show done state */
+  _onCatChange('fj');
+};
+
+/* ══ TV MODE — standings switch ═══════════════════════════ */
+let _tvCurrentMode = 'live';
+let _tvStandingsPoll = null;
+
+window.switchTVMode = function (mode) {
+  _tvCurrentMode = mode;
+  document.getElementById('tv-btn-live').classList.toggle('on',      mode === 'live');
+  document.getElementById('tv-btn-standings').classList.toggle('on', mode === 'standings');
+  document.getElementById('tv-grid').classList.toggle('hidden',       mode === 'standings');
+  document.getElementById('tv-standings').classList.toggle('hidden',  mode === 'live');
+  if (mode === 'standings') _renderTVStandings();
+};
+
+async function _renderTVStandings() {
+  const { data: stns } = await _sb.from('stations')
+    .select('station_num,score,athlete_name,flag_code,ready')
+    .eq('event_id', _hjEvId).order('score', { ascending: false });
+
+  const rows = (stns || [])
+    .filter(s => !!s.athlete_name || s.score > 0)
+    .sort((a, b) => b.score - a.score || a.station_num - b.station_num);
+
+  const el = document.getElementById('tv-standings');
+  if (!rows.length) {
+    el.innerHTML = `<div style="color:rgba(255,255,255,.08);font-family:var(--head);font-size:1.4rem;text-align:center;margin:auto">
+      Ожидаем результатов...</div>`;
+    return;
+  }
+
+  el.innerHTML = rows.map((st, idx) => {
+    const place = idx + 1;
+    const pc = place <= 3 ? `p${place}` : '';
+    const flag = st.flag_code
+      ? `<img src="https://flagcdn.com/w40/${st.flag_code}.png" height="20"
+           style="border-radius:3px;vertical-align:middle;margin-right:8px" alt="${st.flag_code}">`
+      : '';
+    return `<div class="tv-st-row ${pc}">
+      <div class="tv-st-place">${place}</div>
+      <div style="flex:1;min-width:0">
+        <div class="tv-st-name">${flag}${esc(st.athlete_name || '—')}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px">
+        <div class="tv-st-score">${st.score}</div>
+        ${st.ready ? '' : `<div class="tv-st-pending">в процессе</div>`}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* Hook standings into existing HJ polling */
+const _origRenderHJ = typeof _renderHJ !== 'undefined' ? _renderHJ : null;
+// Poll for standings refresh when in standings TV mode
+function _maybePollStandings() {
+  if (_tvMode && _tvCurrentMode === 'standings') _renderTVStandings();
+}
+
+/* ══ EXCEL EXPORT ══════════════════════════════════════════
+ * Exports results of the current event as .xlsx.
+ * Columns: Place · # · Athlete · Club · Score · Status
+ */
+window.exportResultsXlsx = async function () {
+  if (!_hjEvId) { toast('Нет активного события'); return; }
+
+  const { data: ev }   = await _sb.from('events').select('*').eq('id', _hjEvId).single();
+  const { data: stns } = await _sb.from('stations')
+    .select('station_num,score,athlete_name,flag_code,ready,spd_c1,spd_c2,spd_c3')
+    .eq('event_id', _hjEvId).order('score', { ascending: false });
+
+  const rows = (stns || [])
+    .filter(s => !!s.athlete_name || s.score > 0)
+    .sort((a, b) => b.score - a.score || a.station_num - b.station_num);
+
+  if (!rows.length) { toast('Нет результатов для экспорта'); return; }
+
+  /* Build sheet data */
+  const sheetData = [
+    /* Header row */
+    ['Место', '№ пл.', 'Спортсмен / Команда', 'Результат', 'С1', 'С2', 'С3', 'Статус']
+  ];
+  rows.forEach((st, idx) => {
+    sheetData.push([
+      idx + 1,
+      st.station_num,
+      st.athlete_name || '',
+      st.score,
+      st.spd_c1 ?? '',
+      st.spd_c2 ?? '',
+      st.spd_c3 ?? '',
+      st.ready ? 'Финал' : 'Предварительно'
+    ]);
+  });
+
+  const ws = XLSX.utils.aoa_to_sheet(sheetData);
+  /* Column widths */
+  ws['!cols'] = [{ wch:7 }, { wch:7 }, { wch:34 }, { wch:12 }, { wch:7 }, { wch:7 }, { wch:7 }, { wch:16 }];
+
+  const wb = XLSX.utils.book_new();
+  const sheetName = ((ev?.discipline || 'Результаты') + ' ' + (ev?.age_category || '')).trim().slice(0, 31);
+  XLSX.utils.book_append_sheet(wb, ws, sheetName);
+
+  const fname = `Результаты_${(ev?.name || 'событие').replace(/[^а-яёА-ЯЁa-zA-Z0-9]/g, '_')}.xlsx`;
+  XLSX.writeFile(wb, fname);
+  toast('📥 Экспорт сохранён: ' + fname);
+};
+
 /* ══ DAILY CODE ════════════════════════════════════════════ */
 async function _getDailyCode() {
   const today = new Date().toISOString().slice(0, 10);
@@ -1878,6 +2466,5 @@ document.addEventListener('click', e => {
   }
 });
 </script>
-
 </body>
 </html>
