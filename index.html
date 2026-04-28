@@ -873,6 +873,7 @@ const APP_URLS = {
 };
 
 let _sb, _user = null, _profile = null;
+let _authInitDone = false; /* guard от двойного срабатывания onAuthStateChange */
 let _theme = localStorage.getItem('to_theme') || 'dark';
 let _allUsers = [], _userFilter = 'all', _userSearch = '';
 let _proUserId = null, _proDays = 30;
@@ -966,6 +967,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const { data: { session } } = await _sb.auth.getSession();
   if (session) {
     _user = session.user;
+    _authInitDone = true; /* помечаем что инициализация уже идёт */
     await loadProfile();
     await checkDevice();
     goDash();
@@ -980,12 +982,17 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
     if (ev === 'SIGNED_IN' && session) {
+      /* Защита от дубля: если уже инициализировались через getSession — пропускаем
+         (этот event срабатывает ещё раз сразу после getSession) */
+      if (_authInitDone && _user?.id === session.user.id) return;
+      _authInitDone = true;
       _user = session.user;
       await loadProfile();
       await checkDevice();
       goDash();
     }
     if (ev === 'SIGNED_OUT') {
+      _authInitDone = false;
       _user = null; _profile = null;
       showScreen('screen-auth');
     }
@@ -993,16 +1000,26 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 async function loadProfile() {
-  const { data, error } = await _sb.from('profiles').select('*').eq('id', _user.id).single();
-  if (error || !data) {
-    const name = _user.user_metadata?.full_name || _user.email.split('@')[0];
-    await _sb.from('profiles').upsert({ id: _user.id, full_name: name });
-    const { data: fresh } = await _sb.from('profiles').select('*').eq('id', _user.id).single();
-    _profile = fresh;
-    return;
-  }
-  _profile = data;
+  /* Reentry-защита: если запрос уже идёт — переиспользуем существующий промис */
+  if (_loadProfilePromise) return _loadProfilePromise;
+  _loadProfilePromise = (async () => {
+    try {
+      const { data, error } = await _sb.from('profiles').select('*').eq('id', _user.id).single();
+      if (error || !data) {
+        const name = _user.user_metadata?.full_name || _user.email.split('@')[0];
+        await _sb.from('profiles').upsert({ id: _user.id, full_name: name });
+        const { data: fresh } = await _sb.from('profiles').select('*').eq('id', _user.id).single();
+        _profile = fresh;
+        return;
+      }
+      _profile = data;
+    } finally {
+      _loadProfilePromise = null;
+    }
+  })();
+  return _loadProfilePromise;
 }
+let _loadProfilePromise = null;
 
 /* ПРОВЕРКА УСТРОЙСТВА */
 async function checkDevice() {
@@ -1016,6 +1033,9 @@ async function checkDevice() {
       device_count: 1,
       last_seen: new Date().toISOString()
     }).eq('id', _user.id);
+    /* Обновляем локально — без повторного SELECT (избегаем pending request) */
+    _profile.device_fingerprint = fp;
+    _profile.device_count = 1;
     return;
   }
 
@@ -1030,15 +1050,21 @@ async function checkDevice() {
       last_seen: new Date().toISOString()
     }).eq('id', _user.id);
 
+    /* Обновляем локально */
+    _profile.device_fingerprint = fp;
+    _profile.device_count = newCount;
+    _profile.suspicious = suspicious || _profile.suspicious;
+
     /* Предупреждение для пользователя */
     if (newCount === 2) {
       toast('⚠️ Вход с нового устройства зафиксирован');
     }
   } else {
-    await _sb.from('profiles').update({ last_seen: new Date().toISOString() }).eq('id', _user.id);
+    /* last_seen — не блокирующее, отправляем без await */
+    _sb.from('profiles').update({ last_seen: new Date().toISOString() }).eq('id', _user.id);
   }
 
-  await loadProfile();
+  /* Убран лишний `await loadProfile()` — он создавал зависающий PENDING запрос */
 }
 
 /* АВТОРИЗАЦИЯ */
