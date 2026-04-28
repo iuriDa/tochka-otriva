@@ -408,6 +408,29 @@ select.inp { cursor: pointer; }
 .ev-judge-name { font-size: .82rem; font-weight: 700; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ev-judge-stn { font-size: .67rem; color: var(--tx2); flex-shrink: 0; }
 .ev-detail-loading { text-align: center; color: var(--tx2); padding: 18px; font-size: .82rem; }
+
+/* ── Sub-tabs внутри статистики ── */
+.sub-tabs { display: flex; gap: 6px; background: var(--sur2); border: 1px solid var(--bor); border-radius: var(--r-pill); padding: 4px; margin-top: 4px; }
+.stab { flex: 1; padding: 7px 10px; border: none; background: transparent; border-radius: var(--r-pill); font-family: var(--font); font-size: .78rem; font-weight: 700; color: var(--tx2); cursor: pointer; transition: all .15s; }
+.stab.on { background: var(--accent); color: #fff; }
+.spanel { display: none; flex-direction: column; gap: 8px; margin-top: 12px; }
+.spanel.on { display: flex; }
+.rank-cell { width: 28px; text-align: center; font-size: 1.05rem; flex-shrink: 0; }
+.rank-num { display: inline-block; font-family: var(--mono); font-weight: 700; color: var(--tx2); font-size: .82rem; }
+
+/* ── Judge Detail Modal ── */
+.judge-detail-modal { max-width: 460px; max-height: 90dvh; overflow-y: auto; }
+.jd-head { display: flex; gap: 12px; align-items: center; margin-bottom: 14px; }
+.jd-ava { width: 56px; height: 56px; border-radius: 14px; background: var(--accent); display: flex; align-items: center; justify-content: center; font-family: var(--head); font-size: .9rem; color: #fff; flex-shrink: 0; overflow: hidden; }
+.jd-ava img { width: 100%; height: 100%; object-fit: cover; border-radius: 14px; }
+.jd-head-info { flex: 1; min-width: 0; }
+.jd-name { font-family: var(--head); font-size: 1rem; margin-bottom: 6px; word-break: break-word; }
+.jd-badges { display: flex; gap: 5px; flex-wrap: wrap; }
+.jd-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 14px; }
+.jd-fields { display: flex; flex-direction: column; gap: 8px; }
+.jd-row { display: flex; justify-content: space-between; gap: 10px; padding: 8px 11px; background: var(--sur2); border: 1px solid var(--bor); border-radius: var(--r); align-items: center; }
+.jd-k { font-size: .72rem; font-weight: 700; color: var(--tx2); text-transform: uppercase; letter-spacing: .04em; flex-shrink: 0; }
+.jd-v { font-size: .82rem; color: var(--tx); text-align: right; word-break: break-word; min-width: 0; }
 </style>
 </head>
 <body>
@@ -508,7 +531,11 @@ select.inp { cursor: pointer; }
         </div>
         <div class="field">
           <label class="lbl">Пароль</label>
-          <input id="re-pwd" class="inp" type="password" placeholder="Минимум 6 символов" autocomplete="new-password" onkeydown="if(event.key==='Enter')doRegister()">
+          <input id="re-pwd" class="inp" type="password" placeholder="Минимум 6 символов" autocomplete="new-password">
+        </div>
+        <div class="field">
+          <label class="lbl">Повторите пароль</label>
+          <input id="re-pwd2" class="inp" type="password" placeholder="Повторите пароль" autocomplete="new-password" onkeydown="if(event.key==='Enter')doRegister()">
         </div>
         <div id="re-err" class="auth-err"></div>
         <button class="btn btn-a btn-full btn-lg" onclick="doRegister()">Создать аккаунт →</button>
@@ -525,36 +552,24 @@ select.inp { cursor: pointer; }
   <div class="topbar">
     <div class="tb-l">
       <div class="tb-title" id="dash-tb-name">Кабинет</div>
-      <div class="tb-sub">Точка Отрыва</div>
+      <div class="tb-sub" id="dash-tb-sub">Точка Отрыва</div>
     </div>
     <div class="tb-r">
       <div class="pill" id="tp-dash">
         <button onclick="setTheme('dark')">🌙</button>
         <button onclick="setTheme('light')">☀️</button>
       </div>
-      <button id="btn-admin" class="btn btn-s btn-sm hidden" onclick="goAdmin()">🛡️ <span class="hide-xs">Админ</span></button>
-      <button class="btn btn-g btn-sm" onclick="confirmLogout()">Выход</button>
+      <button id="btn-edit-prof" class="btn btn-s btn-sm" onclick="openProfileEdit()" title="Профиль" style="padding:6px 10px;font-size:.95rem">✏️</button>
+      <button id="btn-admin" class="btn btn-s btn-sm hidden" onclick="goAdmin()" title="Админ-панель" style="padding:6px 10px;font-size:.95rem">🛡️</button>
+      <button class="btn btn-g btn-sm" onclick="confirmLogout()" title="Выйти" style="padding:6px 10px">🚪</button>
     </div>
   </div>
 
   <div class="dash-body scroll">
-    <!-- Профиль -->
-    <div class="profile-card">
-      <div class="profile-banner">
-        <div class="profile-banner-glow"></div>
-        <div class="profile-avatar" id="prof-ava">ЮД</div>
-        <div class="profile-name" id="prof-name">—</div>
-        <div class="profile-email" id="prof-email">—</div>
-        <div class="profile-badges">
-          <div class="profile-badge" id="prof-plan">Free</div>
-          <div class="profile-badge" id="prof-admin-badge" style="display:none">🛡️ Администратор</div>
-        </div>
-      </div>
-      <div class="profile-foot">
-        <div class="profile-since" id="prof-since">—</div>
-        <span id="prof-blocked-badge" class="badge br hidden">Заблокирован</span>
-        <button class="btn-edit-profile" onclick="openProfileEdit()">✏️ Редактировать профиль</button>
-      </div>
+    <!-- Status-strip (показывается только если заблокирован) -->
+    <div id="prof-blocked-strip" class="info-strip hidden" style="background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.25);color:var(--red)">
+      <div class="info-strip-ico">🔒</div>
+      <div class="info-strip-txt"><strong>Аккаунт заблокирован.</strong> Доступ к приложениям ограничен. Свяжитесь с администратором.</div>
     </div>
 
     <!-- Приложения -->
@@ -701,9 +716,25 @@ select.inp { cursor: pointer; }
           <div class="stat-box"><div class="stat-val" id="adm-st-events">—</div><div class="stat-lbl">Событий</div></div>
           <div class="stat-box"><div class="stat-val" id="adm-st-pro">—</div><div class="stat-lbl">Pro аккаунтов</div></div>
         </div>
-        <div class="card" style="padding:14px">
-          <div class="sec-ttl" style="margin-bottom:10px">Последние регистрации</div>
-          <div id="recent-users" class="user-list"></div>
+
+        <!-- Под-вкладки -->
+        <div class="sub-tabs">
+          <button class="stab on" onclick="switchStatsTab('judges', this)">👥 Судьи</button>
+          <button class="stab" onclick="switchStatsTab('events', this)">🏆 События</button>
+        </div>
+
+        <!-- Под-панель: рейтинг судей -->
+        <div id="spanel-judges" class="spanel on">
+          <div class="info-strip" style="margin-bottom:10px">
+            <div class="info-strip-ico">💡</div>
+            <div class="info-strip-txt">Рейтинг по количеству отсуженных событий. <strong>10 баллов за каждое событие</strong>.</div>
+          </div>
+          <div id="judges-stats-list" class="user-list"><div class="empty">Загрузка...</div></div>
+        </div>
+
+        <!-- Под-панель: статистика событий -->
+        <div id="spanel-events" class="spanel">
+          <div id="events-stats-list" class="ev-list"><div class="empty">Загрузка...</div></div>
         </div>
       </div>
 
@@ -807,6 +838,19 @@ select.inp { cursor: pointer; }
     <div class="modal-act" style="margin-top:14px">
       <button class="btn btn-g btn-sm" onclick="closeProModal()">Отмена</button>
       <button class="btn btn-a btn-sm" onclick="grantPro()">✓ Открыть Pro</button>
+    </div>
+  </div>
+</div>
+
+<!-- МОДАЛКА ДЕТАЛИ СУДЬИ (Админ) -->
+<div id="modal-judge-detail" class="modal-ov">
+  <div class="modal anim judge-detail-modal">
+    <div class="modal-ttl" style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+      <span>👤 Информация о судье</span>
+      <button class="btn btn-s btn-sm" onclick="closeJudgeDetail()">✕</button>
+    </div>
+    <div id="jd-body">
+      <div class="ev-detail-loading">Загрузка...</div>
     </div>
   </div>
 </div>
@@ -1117,11 +1161,13 @@ window.doRegister = async function () {
   const name = document.getElementById('re-name').value.trim();
   const email = document.getElementById('re-email').value.trim();
   const pwd = document.getElementById('re-pwd').value;
+  const pwd2 = document.getElementById('re-pwd2').value;
   const err = document.getElementById('re-err');
   const btn = document.querySelector('#form-reg .btn-a');
   err.classList.remove('show');
   if (!name) { err.textContent = 'Введите ваше полное имя'; err.classList.add('show'); return; }
   if (pwd.length < 6) { err.textContent = 'Пароль минимум 6 символов'; err.classList.add('show'); return; }
+  if (pwd !== pwd2) { err.textContent = 'Пароли не совпадают'; err.classList.add('show'); return; }
   _authBusy = true;
   if (btn) { btn.disabled = true; btn.textContent = '...'; }
   try {
@@ -1205,62 +1251,40 @@ window.confirmLogout = function () {
 window.goDash = function () {
   if (!_user) { showScreen('screen-auth'); return; }
   clearInterval(_codeTimer);
-
-  /* Заблокированный пользователь видит только сообщение о блокировке */
-  if (_profile?.is_blocked) {
-    showScreen('screen-dash');
-    document.getElementById('prof-ava').textContent = initials(_profile?.full_name || _user.email);
-    document.getElementById('prof-name').textContent = _profile?.full_name || _user.email;
-    document.getElementById('prof-email').textContent = _user.email;
-    document.getElementById('prof-since').textContent = '';
-    document.getElementById('prof-plan').textContent = 'Заблокирован';
-    document.getElementById('prof-blocked-badge').classList.remove('hidden');
-    document.getElementById('prof-admin-badge').style.display = 'none';
-    document.getElementById('btn-admin').classList.add('hidden');
-    /* Скрыть приложения и план */
-    document.querySelectorAll('.app-grid, .plan-card').forEach(el => el.style.display = 'none');
-    return;
-  }
-
-  /* Восстановить видимость если был заблокирован ранее */
-  document.querySelectorAll('.app-grid, .plan-card').forEach(el => el.style.display = '');
   showScreen('screen-dash');
 
-  const name = _profile?.full_name || _user.email;
-  const email = _user.email;
-  const since = _user.created_at ? fmtDate(_user.created_at) : '—';
-  const isPro = _profile?.is_pro;
+  const name    = _profile?.full_name || _user.email;
+  const email   = _user.email;
+  const isPro   = _profile?.is_pro;
   const isAdmin = _profile?.is_admin;
   const isBlocked = _profile?.is_blocked;
   const proUntil = _profile?.pro_until;
 
-  /* Имя в заголовке топбара */
-  const dashTbName = document.getElementById('dash-tb-name');
-  if (dashTbName) dashTbName.textContent = name.split(' ')[0] || 'Кабинет';
+  /* Имя в заголовке топбара (короткое) */
+  const tbName = document.getElementById('dash-tb-name');
+  if (tbName) tbName.textContent = (name || '').split(' ')[0] || 'Кабинет';
 
-  document.getElementById('prof-ava').textContent = initials(name);
-  document.getElementById('prof-name').textContent = name;
-  document.getElementById('prof-email').textContent = email;
-  document.getElementById('prof-since').textContent = 'С нами с ' + since;
-
-  /* Аватар — фото или инициалы */
-  const profAva = document.getElementById('prof-ava');
-  if (_profile?.avatar_url) {
-    profAva.innerHTML = `<img src="${_profile.avatar_url}" alt="фото" style="width:100%;height:100%;object-fit:cover;border-radius:13px">`;
-  } else {
-    profAva.textContent = initials(name);
+  /* Подзаголовок: email + план + admin-метка */
+  const tbSub = document.getElementById('dash-tb-sub');
+  if (tbSub) {
+    let planLabel;
+    if (isBlocked) planLabel = 'Заблокирован';
+    else if (isPro) planLabel = (proUntil && proUntil !== '9999-12-31') ? `Pro · до ${fmtDate(proUntil)}` : 'Pro';
+    else planLabel = 'Free';
+    tbSub.textContent = (isAdmin ? '🛡️ Админ · ' : '') + planLabel;
   }
 
-  const planBadge = document.getElementById('prof-plan');
-  if (isPro) { planBadge.textContent = proUntil && proUntil !== '9999-12-31' ? `Pro · до ${fmtDate(proUntil)}` : 'Pro'; }
-  else planBadge.textContent = 'Free';
-
-  document.getElementById('prof-admin-badge').style.display = isAdmin ? '' : 'none';
   document.getElementById('btn-admin').classList.toggle('hidden', !isAdmin);
 
-  const blockedBadge = document.getElementById('prof-blocked-badge');
-  if (isBlocked) blockedBadge.classList.remove('hidden');
-  else blockedBadge.classList.add('hidden');
+  /* Заблокированный пользователь: скрыть приложения и план, показать предупреждение */
+  const blockedStrip = document.getElementById('prof-blocked-strip');
+  if (isBlocked) {
+    blockedStrip?.classList.remove('hidden');
+    document.querySelectorAll('.app-grid, .plan-card').forEach(el => el.style.display = 'none');
+    return;
+  }
+  blockedStrip?.classList.add('hidden');
+  document.querySelectorAll('.app-grid, .plan-card').forEach(el => el.style.display = '');
 
   /* Тарифный план */
   document.getElementById('plan-name').textContent = isPro ? 'Pro' : 'Free';
@@ -1293,6 +1317,10 @@ function switchAdminTab(id, btn) {
   document.querySelectorAll('.apanel').forEach(p => p.classList.remove('on'));
   btn.classList.add('on');
   document.getElementById('apanel-' + id).classList.add('on');
+
+  /* Останавливаем таймер кода если ушли с вкладки кодов */
+  if (id !== 'codes') clearInterval(_codeTimer);
+
   if (id === 'events') loadAdminEvents();
   if (id === 'stats') loadAdminStats();
   if (id === 'codes') { loadAdminCode(); startCodeCountdown(); }
@@ -1342,24 +1370,32 @@ function renderUsers() {
     const devCount = u.device_count || 0;
     const rowClass = isBlocked ? 'user-row blocked' : isSusp ? 'user-row suspicious' : 'user-row';
 
-    return `<div class="${rowClass}">
-      <div class="user-ava">${esc(av)}</div>
+    return `<div class="${rowClass}" style="cursor:pointer" onclick="showJudgeDetail('${u.id}')">
+      <div class="user-ava">${u.avatar_url ? `<img src="${esc(u.avatar_url)}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:10px">` : esc(av)}</div>
       <div class="user-info">
-        <div class="user-name">${esc(name)}${isSusp ? ' <span class="badge bam">⚠️ Подозр.</span>' : ''}${isBlocked ? ' <span class="badge br">🔒</span>' : ''}</div>
+        <div class="user-name">${esc(name)}${isSusp ? ' <span class="badge bam">⚠️</span>' : ''}${isBlocked ? ' <span class="badge br">🔒</span>' : ''}</div>
         <div class="user-meta">Был: ${lastSeen} · Устройств: ${devCount}</div>
       </div>
       <div style="flex-shrink:0;margin-right:4px"><span class="badge ${isPro ? 'ba' : 'bgy'}">${proLabel}</span></div>
-      <div class="user-acts">
-        ${!isBlocked ? `<button class="btn btn-a btn-sm" onclick="openProModal('${u.id}','${esc(name)}')">⭐</button>` : ''}
+      <div class="user-acts" onclick="event.stopPropagation()">
+        ${isSusp ? `<button class="btn btn-s btn-sm" onclick="unsuspectUser('${u.id}','${esc(name)}')" title="Убрать из подозрительных">✓</button>` : ''}
+        ${!isBlocked ? `<button class="btn btn-a btn-sm" onclick="openProModal('${u.id}','${esc(name)}')" title="Pro доступ">⭐</button>` : ''}
         ${!isBlocked
-          ? `<button class="btn btn-d btn-sm" onclick="blockUser('${u.id}','${esc(name)}')">🔒</button>`
-          : `<button class="btn btn-s btn-sm" onclick="unblockUser('${u.id}','${esc(name)}')">🔓</button>`}
+          ? `<button class="btn btn-d btn-sm" onclick="blockUser('${u.id}','${esc(name)}')" title="Заблокировать">🔒</button>`
+          : `<button class="btn btn-s btn-sm" onclick="unblockUser('${u.id}','${esc(name)}')" title="Разблокировать">🔓</button>`}
       </div>
     </div>`;
   }).join('');
 }
 
-window.filterUsers = function (val) { _userSearch = val; renderUsers(); };
+window.filterUsers = function (val) {
+  _userSearch = val;
+  /* Дебаунс: ререндер не на каждом нажатии, а через 120ms тишины */
+  clearTimeout(_searchDebounce);
+  _searchDebounce = setTimeout(renderUsers, 120);
+};
+let _searchDebounce = null;
+
 window.setUserFilter = function (f, btn) {
   _userFilter = f;
   document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('on'));
@@ -1367,20 +1403,109 @@ window.setUserFilter = function (f, btn) {
   renderUsers();
 };
 
+/* ДЕТАЛИ СУДЬИ — модалка с полной инфой */
+window.showJudgeDetail = async function (uid) {
+  const u = _allUsers.find(x => x.id === uid);
+  if (!u) return;
+
+  /* Считаем сколько событий судил (как floor_judge) */
+  const { count: evCount } = await _sb.from('event_participations')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', uid).eq('role', 'floor_judge');
+
+  const ev = evCount || 0;
+  const points = ev * 10;
+  const isPro = u.is_pro;
+  const isBlocked = u.is_blocked;
+  const isSusp = u.suspicious && !isBlocked;
+  const proLabel = isPro ? (u.pro_until && u.pro_until !== '9999-12-31' ? `Pro до ${fmtDate(u.pro_until)}` : 'Pro · бессрочно') : 'Free';
+  const lastSeen = u.last_seen ? fmtDateTime(u.last_seen) : '—';
+  const since = u.created_at ? fmtDate(u.created_at) : '—';
+
+  const body = document.getElementById('jd-body');
+  body.innerHTML = `
+    <div class="jd-head">
+      <div class="jd-ava">${u.avatar_url ? `<img src="${esc(u.avatar_url)}" alt="">` : esc(initials(u.full_name||'?'))}</div>
+      <div class="jd-head-info">
+        <div class="jd-name">${esc(u.full_name||'—')}</div>
+        <div class="jd-badges">
+          <span class="badge ${isPro ? 'ba' : 'bgy'}">${proLabel}</span>
+          ${u.is_admin ? '<span class="badge bb">🛡️ Админ</span>' : ''}
+          ${isSusp ? '<span class="badge bam">⚠️ Подозрительный</span>' : ''}
+          ${isBlocked ? '<span class="badge br">🔒 Заблокирован</span>' : ''}
+        </div>
+      </div>
+    </div>
+
+    <div class="jd-stats">
+      <div class="stat-box"><div class="stat-val">${ev}</div><div class="stat-lbl">Событий судил</div></div>
+      <div class="stat-box"><div class="stat-val">${points}</div><div class="stat-lbl">Баллов</div></div>
+      <div class="stat-box"><div class="stat-val">${u.device_count || 0}</div><div class="stat-lbl">Устройств</div></div>
+    </div>
+
+    <div class="jd-fields">
+      <div class="jd-row"><span class="jd-k">ID</span><span class="jd-v mono" style="font-size:.7rem">${esc(u.id)}</span></div>
+      <div class="jd-row"><span class="jd-k">Дата рождения</span><span class="jd-v">${u.birth_date ? fmtDate(u.birth_date) : '—'}</span></div>
+      <div class="jd-row"><span class="jd-k">Город</span><span class="jd-v">${esc(u.city || '—')}</span></div>
+      <div class="jd-row"><span class="jd-k">Клуб</span><span class="jd-v">${esc(u.club || '—')}</span></div>
+      <div class="jd-row"><span class="jd-k">Спорт. разряд</span><span class="jd-v">${esc(u.athlete_rank || '—')}</span></div>
+      <div class="jd-row"><span class="jd-k">Категория судьи</span><span class="jd-v">${esc(u.judge_category || '—')}</span></div>
+      <div class="jd-row"><span class="jd-k">Тренерский стаж</span><span class="jd-v">${esc(u.coach_experience || '—')}</span></div>
+      <div class="jd-row"><span class="jd-k">Регистрация</span><span class="jd-v">${since}</span></div>
+      <div class="jd-row"><span class="jd-k">Последний вход</span><span class="jd-v">${lastSeen}</span></div>
+    </div>
+
+    <div class="modal-act" style="margin-top:16px;flex-wrap:wrap">
+      ${isSusp ? `<button class="btn btn-s btn-sm" onclick="unsuspectUser('${u.id}','${esc(u.full_name||'')}')">✓ Убрать из подозрительных</button>` : ''}
+      ${!isBlocked ? `<button class="btn btn-a btn-sm" onclick="closeJudgeDetail();openProModal('${u.id}','${esc(u.full_name||'')}')">⭐ Pro</button>` : ''}
+      ${!isBlocked
+        ? `<button class="btn btn-d btn-sm" onclick="blockUser('${u.id}','${esc(u.full_name||'')}')">🔒 Заблокировать</button>`
+        : `<button class="btn btn-s btn-sm" onclick="unblockUser('${u.id}','${esc(u.full_name||'')}')">🔓 Разблокировать</button>`}
+      <button class="btn btn-g btn-sm" onclick="closeJudgeDetail()">Закрыть</button>
+    </div>`;
+
+  document.getElementById('modal-judge-detail').classList.add('open');
+};
+
+window.closeJudgeDetail = function () {
+  document.getElementById('modal-judge-detail').classList.remove('open');
+};
+
+/* УБРАТЬ ИЗ ПОДОЗРИТЕЛЬНЫХ */
+window.unsuspectUser = function (id, name) {
+  modal('✓', 'Убрать из подозрительных?', `«${name}» больше не будет в этом списке.`,
+    'Убрать', async () => {
+      await _sb.from('profiles').update({ suspicious: false, device_count: 1 }).eq('id', id);
+      /* Обновляем локально, без полной перезагрузки списка */
+      const u = _allUsers.find(x => x.id === id);
+      if (u) { u.suspicious = false; u.device_count = 1; }
+      toast('✓ Убрано из подозрительных');
+      renderUserStats(); renderUsers();
+      closeJudgeDetail();
+    }, false);
+};
+
 /* УПРАВЛЕНИЕ ПОЛЬЗОВАТЕЛЯМИ */
 window.blockUser = function (id, name) {
   modal('🔒', 'Заблокировать аккаунт?', `«${name}» потеряет доступ ко всем приложениям.`, 'Заблокировать', async () => {
     await _sb.from('profiles').update({ is_blocked: true, is_pro: false, pro_until: null }).eq('id', id);
+    /* Обновляем локально вместо полного reload */
+    const u = _allUsers.find(x => x.id === id);
+    if (u) { u.is_blocked = true; u.is_pro = false; u.pro_until = null; }
     toast('🔒 Аккаунт заблокирован');
-    await loadAdminUsers();
+    renderUserStats(); renderUsers();
+    closeJudgeDetail();
   });
 };
 
 window.unblockUser = function (id, name) {
   modal('🔓', 'Разблокировать аккаунт?', `«${name}» снова получит доступ.`, 'Разблокировать', async () => {
     await _sb.from('profiles').update({ is_blocked: false, suspicious: false, device_count: 0 }).eq('id', id);
+    const u = _allUsers.find(x => x.id === id);
+    if (u) { u.is_blocked = false; u.suspicious = false; u.device_count = 0; }
     toast('✓ Аккаунт разблокирован');
-    await loadAdminUsers();
+    renderUserStats(); renderUsers();
+    closeJudgeDetail();
   }, false);
 };
 
@@ -1413,9 +1538,12 @@ window.grantPro = async function () {
     proUntil = d.toISOString().slice(0, 10);
   }
   await _sb.from('profiles').update({ is_pro: true, pro_until: proUntil }).eq('id', _proUserId);
+  /* Обновляем локально */
+  const u = _allUsers.find(x => x.id === _proUserId);
+  if (u) { u.is_pro = true; u.pro_until = proUntil; }
   closeProModal();
   toast('⭐ Pro доступ открыт');
-  await loadAdminUsers();
+  renderUserStats(); renderUsers();
 };
 
 /* СОБЫТИЯ */
@@ -1554,26 +1682,146 @@ function startCodeCountdown() {
 }
 
 /* СТАТИСТИКА */
+let _statsLoaded = { judges: false, events: false };
+let _statsCurrentTab = 'judges';
+let _judgeStatsCache = null;
+let _eventStatsCache = null;
+
 async function loadAdminStats() {
-  const { data: users } = await _sb.from('profiles').select('id, full_name, is_pro, created_at').order('created_at', { ascending: false });
-  const { data: events } = await _sb.from('events').select('id');
-  const total = (users || []).length;
-  const pro = (users || []).filter(u => u.is_pro).length;
-  document.getElementById('adm-st-users').textContent = total;
-  document.getElementById('adm-st-events').textContent = (events || []).length;
-  document.getElementById('adm-st-pro').textContent = pro;
-  const recent = document.getElementById('recent-users');
-  recent.innerHTML = (users || []).slice(0, 5).map(u => `
-    <div class="user-row">
-      <div class="user-ava">${esc(initials(u.full_name || ''))}</div>
-      <div class="user-info">
-        <div class="user-name">${esc(u.full_name || '—')}</div>
-        <div class="user-meta">Регистрация: ${fmtDate(u.created_at)}</div>
-      </div>
-      <span class="badge ${u.is_pro ? 'ba' : 'bgy'}">${u.is_pro ? 'Pro' : 'Free'}</span>
-    </div>`).join('') || '<div class="empty">Нет данных</div>';
+  /* Используем уже загруженный _allUsers вместо повторного запроса */
+  const users = _allUsers.length ? _allUsers : (await _sb.from('profiles').select('id, full_name, avatar_url, is_pro, created_at').order('created_at', { ascending: false })).data || [];
+  if (!_allUsers.length) _allUsers = users;
+
+  /* События — лёгкий count-only запрос */
+  const { count: evCount } = await _sb.from('events').select('*', { count: 'exact', head: true });
+
+  document.getElementById('adm-st-users').textContent = users.length;
+  document.getElementById('adm-st-events').textContent = evCount || 0;
+  document.getElementById('adm-st-pro').textContent = users.filter(u => u.is_pro).length;
+
+  /* Загружаем активную под-вкладку */
+  if (_statsCurrentTab === 'judges' && !_statsLoaded.judges) loadJudgesStats();
+  if (_statsCurrentTab === 'events' && !_statsLoaded.events) loadEventsStats();
 }
 window.loadAdminStats = loadAdminStats;
+
+window.switchStatsTab = function (tab, btn) {
+  _statsCurrentTab = tab;
+  document.querySelectorAll('.stab').forEach(b => b.classList.remove('on'));
+  document.querySelectorAll('.spanel').forEach(p => p.classList.remove('on'));
+  btn.classList.add('on');
+  document.getElementById('spanel-' + tab).classList.add('on');
+  if (tab === 'judges' && !_statsLoaded.judges) loadJudgesStats();
+  if (tab === 'events' && !_statsLoaded.events) loadEventsStats();
+};
+
+/* Рейтинг судей: сколько событий судил × 10 баллов */
+async function loadJudgesStats() {
+  const el = document.getElementById('judges-stats-list');
+  el.innerHTML = '<div class="empty">Загрузка...</div>';
+
+  /* Один запрос: все участия как floor_judge */
+  const { data: parts } = await _sb.from('event_participations')
+    .select('user_id, event_id').eq('role', 'floor_judge');
+
+  /* Агрегируем: уникальные event_id на каждого user_id */
+  const byUser = {};
+  (parts || []).forEach(p => {
+    if (!byUser[p.user_id]) byUser[p.user_id] = new Set();
+    byUser[p.user_id].add(p.event_id);
+  });
+
+  /* Сопоставляем с _allUsers (без дополнительного запроса!) */
+  const list = _allUsers
+    .map(u => ({
+      id: u.id,
+      name: u.full_name || '—',
+      avatar: u.avatar_url,
+      events: (byUser[u.id]?.size) || 0,
+      points: ((byUser[u.id]?.size) || 0) * 10,
+      isPro: u.is_pro,
+      isAdmin: u.is_admin,
+    }))
+    .filter(x => x.events > 0)
+    .sort((a, b) => b.events - a.events);
+
+  _judgeStatsCache = list;
+  _statsLoaded.judges = true;
+
+  if (!list.length) { el.innerHTML = '<div class="empty">Никто пока не судил событий</div>'; return; }
+
+  el.innerHTML = list.map((j, i) => {
+    const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `<span class="rank-num">${i+1}</span>`;
+    return `<div class="user-row" style="cursor:pointer" onclick="showJudgeDetail('${j.id}')">
+      <div class="rank-cell">${medal}</div>
+      <div class="user-ava">${j.avatar ? `<img src="${esc(j.avatar)}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:10px">` : esc(initials(j.name))}</div>
+      <div class="user-info">
+        <div class="user-name">${esc(j.name)}${j.isAdmin ? ' <span class="badge bb">🛡️</span>' : ''}</div>
+        <div class="user-meta">${j.events} ${j.events===1?'событие':j.events<5?'события':'событий'} · <span class="ca w7">${j.points} баллов</span></div>
+      </div>
+      <span class="badge ${j.isPro ? 'ba' : 'bgy'}">${j.isPro ? 'Pro' : 'Free'}</span>
+    </div>`;
+  }).join('');
+}
+window.loadJudgesStats = loadJudgesStats;
+
+/* Статистика по событиям: судьи входившие, прыжки, спортсмены */
+async function loadEventsStats() {
+  const el = document.getElementById('events-stats-list');
+  el.innerHTML = '<div class="empty">Загрузка...</div>';
+
+  /* Параллельно: события + все станции + все участия */
+  const [evRes, stRes, partsRes] = await Promise.all([
+    _sb.from('events').select('id, name, floor_code, closed, created_at').order('created_at', { ascending: false }),
+    _sb.from('stations').select('event_id, score, athlete_name'),
+    _sb.from('event_participations').select('event_id, user_id').eq('role', 'floor_judge'),
+  ]);
+
+  const events = evRes.data || [];
+  const stations = stRes.data || [];
+  const parts = partsRes.data || [];
+
+  /* Агрегаты по event_id */
+  const agg = {};
+  events.forEach(ev => { agg[ev.id] = { jumps: 0, athletes: new Set(), judges: new Set() }; });
+
+  stations.forEach(s => {
+    if (!agg[s.event_id]) return;
+    agg[s.event_id].jumps += (s.score || 0);
+    if (s.athlete_name) agg[s.event_id].athletes.add(s.athlete_name);
+  });
+
+  parts.forEach(p => {
+    if (!agg[p.event_id]) return;
+    agg[p.event_id].judges.add(p.user_id);
+  });
+
+  _eventStatsCache = { events, agg };
+  _statsLoaded.events = true;
+
+  if (!events.length) { el.innerHTML = '<div class="empty">Событий нет</div>'; return; }
+
+  el.innerHTML = events.map(ev => {
+    const a = agg[ev.id];
+    return `<div class="ev-row" style="cursor:pointer" onclick="showEventDetail('${ev.id}')">
+      <div class="ev-ico">${ev.closed ? '🔒' : '🏆'}</div>
+      <div class="ev-info">
+        <div class="ev-name">${esc(ev.name)}</div>
+        <div class="ev-meta">
+          👥 ${a.judges.size} ${a.judges.size===1?'судья':a.judges.size<5?'судьи':'судей'} ·
+          🪢 ${a.jumps} ${a.jumps===1?'прыжок':a.jumps<5?'прыжка':'прыжков'} ·
+          🏃 ${a.athletes.size} ${a.athletes.size===1?'спортсмен':a.athletes.size<5?'спортсмена':'спортсменов'}
+        </div>
+        <div class="user-meta" style="color:var(--tx3);margin-top:2px">${fmtDate(ev.created_at)} · Код: <span class="mono">${ev.floor_code}</span></div>
+      </div>
+      <span class="badge ${ev.closed ? 'br' : 'bg'}" style="flex-shrink:0">${ev.closed ? 'Закрыто' : 'Активно'}</span>
+    </div>`;
+  }).join('');
+}
+window.loadEventsStats = loadEventsStats;
+
+/* Сброс кэша статистики (для будущих обновлений) */
+function invalidateStatsCache() { _statsLoaded.judges = false; _statsLoaded.events = false; }
 
 /* ══ РЕДАКТИРОВАНИЕ ПРОФИЛЯ ══════════════════════════════ */
 
@@ -1670,18 +1918,20 @@ window.saveProfile = async function () {
     }
   }
 
+  /* Собираем изменения */
+  const updates = {
+    full_name:         document.getElementById('pf-name').value.trim(),
+    birth_date:        document.getElementById('pf-birth').value || null,
+    city:              document.getElementById('pf-city').value.trim() || null,
+    club:              document.getElementById('pf-club').value.trim() || null,
+    athlete_rank:      document.getElementById('pf-athlete-rank').value.trim() || null,
+    judge_category:    document.getElementById('pf-judge-cat').value.trim() || null,
+    coach_experience:  document.getElementById('pf-coach-exp').value.trim() || null,
+  };
+
   btn.disabled = true; btn.textContent = '...';
   try {
-    /* Обновляем профиль */
-    await _sb.from('profiles').update({
-      full_name:         document.getElementById('pf-name').value.trim(),
-      birth_date:        document.getElementById('pf-birth').value || null,
-      city:              document.getElementById('pf-city').value.trim() || null,
-      club:              document.getElementById('pf-club').value.trim() || null,
-      athlete_rank:      document.getElementById('pf-athlete-rank').value.trim() || null,
-      judge_category:    document.getElementById('pf-judge-cat').value.trim() || null,
-      coach_experience:  document.getElementById('pf-coach-exp').value.trim() || null,
-    }).eq('id', _user.id);
+    await _sb.from('profiles').update(updates).eq('id', _user.id);
 
     /* Меняем пароль если заполнен */
     if (pwdNew) {
@@ -1698,7 +1948,9 @@ window.saveProfile = async function () {
     document.getElementById('pf-pwd-new').value = '';
     document.getElementById('pf-pwd-rep').value = '';
 
-    await loadProfile();
+    /* Обновляем локально — НИКАКОГО лишнего SELECT */
+    _profile = { ..._profile, ...updates };
+
     closeProfileEdit();
     goDash();
     toast(pwdNew ? '✓ Профиль и пароль обновлены' : '✓ Профиль обновлён');
